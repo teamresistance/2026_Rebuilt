@@ -1,3 +1,5 @@
-# Drive Template
+# 2026 Rebuilt
 
-Team Resistance #86's base drive template for FRC (FIRST Robotics Competition) robots. It's a Java-based WPILib project using AdvantageKit for logging and Phoenix 6 for motor control, specifically designed for Swerve drive systems.
+Team Resistance #86's robot code for the 2025 game, Rebuilt.
+
+![Rebuilt](/rebuilt.png)
