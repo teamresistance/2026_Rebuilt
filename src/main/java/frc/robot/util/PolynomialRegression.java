@@ -1,8 +1,8 @@
 package frc.robot.util;
 
 /**
- * Polynomial regression without JAMA dependency.
- * Fits a polynomial y = β0 + β1 x + β2 x^2 + ... using least squares.
+ * Polynomial regression without JAMA dependency. Fits a polynomial y = β0 + β1 x + β2 x^2 + ...
+ * using least squares.
  */
 public class PolynomialRegression implements Comparable<PolynomialRegression> {
 
@@ -159,12 +159,9 @@ public class PolynomialRegression implements Comparable<PolynomialRegression> {
     while (j >= 0 && Math.abs(beta(j)) < 1E-5) j--;
 
     while (j >= 0) {
-      if (j == 0)
-        s.append(String.format("%.7f ", beta(j)));
-      else if (j == 1)
-        s.append(String.format("%.7f %s + ", beta(j), variableName));
-      else
-        s.append(String.format("%.7f %s^%d + ", beta(j), variableName, j));
+      if (j == 0) s.append(String.format("%.7f ", beta(j)));
+      else if (j == 1) s.append(String.format("%.7f %s + ", beta(j), variableName));
+      else s.append(String.format("%.7f %s^%d + ", beta(j), variableName, j));
       j--;
     }
 
