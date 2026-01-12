@@ -1,192 +1,174 @@
 package frc.robot.util;
 
-import Jama.Matrix;
-import Jama.QRDecomposition;
-
-// NOTE: This file is available at
-// http://algs4.cs.princeton.edu/14analysis/PolynomialRegression.java.html
-
 /**
- * The {@code PolynomialRegression} class performs a polynomial regression on an set of <em>N</em>
- * data points (<em>y<sub>i</sub></em>, <em>x<sub>i</sub></em>). That is, it fits a polynomial
- * <em>y</em> = &beta;<sub>0</sub> + &beta;<sub>1</sub> <em>x</em> + &beta;<sub>2</sub>
- * <em>x</em><sup>2</sup> + ... + &beta;<sub><em>d</em></sub> <em>x</em><sup><em>d</em></sup> (where
- * <em>y</em> is the response variable, <em>x</em> is the predictor variable, and the
- * &beta;<sub><em>i</em></sub> are the regression coefficients) that minimizes the sum of squared
- * residuals of the multiple regression model. It also computes associated the coefficient of
- * determination <em>R</em><sup>2</sup>.
- *
- * <p>This implementation performs a QR-decomposition of the underlying Vandermonde matrix, so it is
- * neither the fastest nor the most numerically stable way to perform the polynomial regression.
- *
- * @author Robert Sedgewick
- * @author Kevin Wayne
+ * Polynomial regression without JAMA dependency.
+ * Fits a polynomial y = β0 + β1 x + β2 x^2 + ... using least squares.
  */
 public class PolynomialRegression implements Comparable<PolynomialRegression> {
-  private final String variableName; // name of the predictor variable
-  private final Matrix beta; // the polynomial regression coefficients
-  private final double sse; // sum of squares due to error
-  private int degree; // degree of the polynomial regression
-  private double sst; // total sum of squares
 
-  /**
-   * Performs a polynomial regression on the data points {@code (y[i], x[i])}. Uses n as the name of
-   * the predictor variable.
-   *
-   * @param x the values of the predictor variable
-   * @param y the corresponding values of the response variable
-   * @param degree the degree of the polynomial to fit
-   * @throws IllegalArgumentException if the lengths of the two arrays are not equal
-   */
+  private final String variableName;
+  private final double[] beta;
+  private final double sse;
+  private final int degree;
+  private final double sst;
+
   public PolynomialRegression(double[] x, double[] y, int degree) {
     this(x, y, degree, "n");
   }
 
-  /**
-   * Performs a polynomial regression on the data points {@code (y[i], x[i])}.
-   *
-   * @param x the values of the predictor variable
-   * @param y the corresponding values of the response variable
-   * @param degree the degree of the polynomial to fit
-   * @param variableName the name of the predictor variable
-   * @throws IllegalArgumentException if the lengths of the two arrays are not equal
-   */
   public PolynomialRegression(double[] x, double[] y, int degree, String variableName) {
-    this.degree = degree;
+    if (x.length != y.length) {
+      throw new IllegalArgumentException("x and y arrays must have same length");
+    }
+
     this.variableName = variableName;
-
     int n = x.length;
-    QRDecomposition qr = null;
-    Matrix matrixX = null;
 
-    // in case Vandermonde matrix does not have full rank, reduce degree until it
-    // does
-    while (true) {
+    // Build Vandermonde matrix A and vector B
+    double[][] A = new double[n][degree + 1];
+    double[] B = new double[n];
 
-      // build Vandermonde matrix
-      double[][] vandermonde = new double[n][this.degree + 1];
-      for (int i = 0; i < n; i++) {
-        for (int j = 0; j <= this.degree; j++) {
-          vandermonde[i][j] = Math.pow(x[i], j);
+    for (int i = 0; i < n; i++) {
+      B[i] = y[i];
+      double v = 1.0;
+      for (int j = 0; j <= degree; j++) {
+        A[i][j] = v;
+        v *= x[i];
+      }
+    }
+
+    // Solve normal equation (A^T A) β = (A^T B)
+    double[][] ATA = new double[degree + 1][degree + 1];
+    double[] ATB = new double[degree + 1];
+
+    // Compute A^T * A and A^T * B
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j <= degree; j++) {
+        ATB[j] += A[i][j] * B[i];
+        for (int k = 0; k <= degree; k++) {
+          ATA[j][k] += A[i][j] * A[i][k];
         }
       }
-      matrixX = new Matrix(vandermonde);
-
-      // find least squares solution
-      qr = new QRDecomposition(matrixX);
-      if (qr.isFullRank()) break;
-
-      // decrease degree and try again
-      this.degree--;
     }
 
-    // create matrix from vector
-    Matrix matrixY = new Matrix(y, n);
+    // Solve linear system using Gaussian elimination
+    beta = gaussianSolve(ATA, ATB);
 
-    // linear regression coefficients
-    beta = qr.solve(matrixY);
-
-    // mean of y[] values
-    double sum = 0.0;
-    for (int i = 0; i < n; i++) sum += y[i];
-    double mean = sum / n;
-
-    // total variation to be accounted for
+    // Compute SST and SSE
+    double mean = 0;
+    for (double value : y) mean += value;
+    mean /= n;
+    double sstTmp = 0;
+    double sseTmp = 0;
     for (int i = 0; i < n; i++) {
-      double dev = y[i] - mean;
-      sst += dev * dev;
+      double diff = y[i] - mean;
+      sstTmp += diff * diff;
+      double residual = predict(x[i]) - y[i];
+      sseTmp += residual * residual;
+    }
+    sst = sstTmp;
+    sse = sseTmp;
+
+    this.degree = degree;
+  }
+
+  /** Solve linear system using Gaussian elimination */
+  private static double[] gaussianSolve(double[][] A, double[] B) {
+    int n = B.length;
+
+    for (int p = 0; p < n; p++) {
+      // Pivot
+      int max = p;
+      for (int i = p + 1; i < n; i++) {
+        if (Math.abs(A[i][p]) > Math.abs(A[max][p])) max = i;
+      }
+
+      double[] temp = A[p];
+      A[p] = A[max];
+      A[max] = temp;
+
+      double t = B[p];
+      B[p] = B[max];
+      B[max] = t;
+
+      // Eliminate
+      for (int i = p + 1; i < n; i++) {
+        double alpha = A[i][p] / A[p][p];
+        B[i] -= alpha * B[p];
+        for (int j = p; j < n; j++) {
+          A[i][j] -= alpha * A[p][j];
+        }
+      }
     }
 
-    // variation not accounted for
-    Matrix residuals = matrixX.times(beta).minus(matrixY);
-    sse = residuals.norm2() * residuals.norm2();
+    // Back substitution
+    double[] x = new double[n];
+    for (int i = n - 1; i >= 0; i--) {
+      double sum = B[i];
+      for (int j = i + 1; j < n; j++) {
+        sum -= A[i][j] * x[j];
+      }
+      x[i] = sum / A[i][i];
+    }
+
+    return x;
   }
 
-  /**
-   * Returns the {@code j}th regression coefficient.
-   *
-   * @param j the index
-   * @return the {@code j}th regression coefficient
-   */
   public double beta(int j) {
-    // to make -0.0 print as 0.0
-    if (Math.abs(beta.get(j, 0)) < 1E-4) return 0.0;
-    return beta.get(j, 0);
+    if (Math.abs(beta[j]) < 1E-4) return 0.0;
+    return beta[j];
   }
 
-  /**
-   * Returns the degree of the polynomial to fit.
-   *
-   * @return the degree of the polynomial to fit
-   */
   public int degree() {
     return degree;
   }
 
-  /**
-   * Returns the coefficient of determination <em>R</em><sup>2</sup>.
-   *
-   * @return the coefficient of determination <em>R</em><sup>2</sup>, which is a real number between
-   *     0 and 1
-   */
   public double r2() {
-    if (sst == 0.0) return 1.0; // constant function
-    return 1.0 - sse / sst;
+    if (sst == 0) return 1.0;
+    return 1.0 - (sse / sst);
   }
 
-  /**
-   * Returns the expected response {@code y} given the value of the predictor variable {@code x}.
-   *
-   * @param x the value of the predictor variable
-   * @return the expected response {@code y} given the value of the predictor variable {@code x}
-   */
   public double predict(double x) {
-    // horner's method
-    double y = 0.0;
-    for (int j = degree; j >= 0; j--) y = beta(j) + (x * y);
+    double y = 0;
+    for (int j = degree; j >= 0; j--) {
+      y = beta[j] + x * y;
+    }
     return y;
   }
 
-  /**
-   * Returns a string representation of the polynomial regression model.
-   *
-   * @return a string representation of the polynomial regression model, including the best-fit
-   *     polynomial and the coefficient of determination <em>R</em><sup>2</sup>
-   */
+  @Override
+  public int compareTo(PolynomialRegression that) {
+    double eps = 1E-5;
+    int maxDegree = Math.max(this.degree, that.degree);
+    for (int j = maxDegree; j >= 0; j--) {
+      double t1 = j <= this.degree ? this.beta(j) : 0;
+      double t2 = j <= that.degree ? that.beta(j) : 0;
+      if (Math.abs(t1) < eps) t1 = 0;
+      if (Math.abs(t2) < eps) t2 = 0;
+      if (t1 < t2) return -1;
+      if (t1 > t2) return 1;
+    }
+    return 0;
+  }
+
+  @Override
   public String toString() {
     StringBuilder s = new StringBuilder();
     int j = degree;
 
-    // ignoring leading zero coefficients
     while (j >= 0 && Math.abs(beta(j)) < 1E-5) j--;
 
-    // create remaining terms
     while (j >= 0) {
-      if (j == 0) s.append(String.format("%.10f ", beta(j)));
-      else if (j == 1) s.append(String.format("%.10f %s + ", beta(j), variableName));
-      else s.append(String.format("%.10f %s^%d + ", beta(j), variableName, j));
+      if (j == 0)
+        s.append(String.format("%.7f ", beta(j)));
+      else if (j == 1)
+        s.append(String.format("%.7f %s + ", beta(j), variableName));
+      else
+        s.append(String.format("%.7f %s^%d + ", beta(j), variableName, j));
       j--;
     }
-    s = s.append("  (R^2 = " + String.format("%.3f", r2()) + ")");
 
-    // replace "+ -2n" with "- 2n"
+    s.append("(R^2 = ").append(String.format("%.3f", r2())).append(")");
     return s.toString().replace("+ -", "- ");
-  }
-
-  /** Compare lexicographically. */
-  public int compareTo(PolynomialRegression that) {
-    double epsilon = 1E-5;
-    int maxDegree = Math.max(this.degree(), that.degree());
-    for (int j = maxDegree; j >= 0; j--) {
-      double term1 = 0.0;
-      double term2 = 0.0;
-      if (this.degree() >= j) term1 = this.beta(j);
-      if (that.degree() >= j) term2 = that.beta(j);
-      if (Math.abs(term1) < epsilon) term1 = 0.0;
-      if (Math.abs(term2) < epsilon) term2 = 0.0;
-      if (term1 < term2) return -1;
-      else if (term1 > term2) return +1;
-    }
-    return 0;
   }
 }
