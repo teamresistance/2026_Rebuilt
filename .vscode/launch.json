@@ -2,12 +2,6 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "java",
-      "name": "Launch Java Program",
-      "request": "launch",
-      "mainClass": ""
-    },
-    {
       "type": "wpilib",
       "name": "WPILib Desktop Debug",
       "request": "launch",
@@ -18,16 +12,6 @@
       "name": "WPILib roboRIO Debug",
       "request": "launch",
       "desktop": false
-    },
-    {
-      "type": "java",
-      "name": "Gradle Deploy",
-      "request": "launch",
-      "projectDir": "${workspaceFolder}",
-      "tasks": "deploy",
-      "args": [],
-      "vmArgs": "",
-      "environment": []
     }
   ]
 }

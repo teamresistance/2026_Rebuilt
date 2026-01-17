@@ -77,9 +77,8 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void robotInit() {
-    PathfindingCommand.warmupCommand()
-        .schedule(); // run warmup command to significantly reduce the delay in movement when auto
-    // starts
+    CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
+    // run warmup command to significantly reduce the delay in movement when auto starts
   }
 
   /** This function is called periodically during all modes. */
@@ -117,7 +116,7 @@ public class Robot extends LoggedRobot {
     autonomousCommand = robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
-    if (autonomousCommand != null) autonomousCommand.schedule();
+    if (autonomousCommand != null) CommandScheduler.getInstance().schedule(autonomousCommand);
   }
 
   /** This function is called periodically during autonomous. */
