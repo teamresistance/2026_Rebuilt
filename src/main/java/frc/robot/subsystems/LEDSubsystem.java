@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.controls.RainbowAnimation;
 import com.ctre.phoenix6.hardware.CANdle;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -34,7 +35,9 @@ public class LEDSubsystem extends SubsystemBase {
 
     // auto set led
     switch (mode) {
-        // do stuff
+      case RAINBOW:
+        candle.setControl(new RainbowAnimation(LED_START_INDEX, LED_END_INDEX).withFrameRate(60));
+        break;
     }
   }
 }
