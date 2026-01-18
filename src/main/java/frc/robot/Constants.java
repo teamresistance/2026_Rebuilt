@@ -37,5 +37,4 @@ public final class Constants {
   public enum LEDMode {
     RAINBOW,
   }
-
 }

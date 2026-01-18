@@ -1,11 +1,6 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.controls.RainbowAnimation;
-import com.ctre.phoenix6.controls.SingleFadeAnimation;
-import com.ctre.phoenix6.controls.SolidColor;
-import com.ctre.phoenix6.controls.StrobeAnimation;
 import com.ctre.phoenix6.hardware.CANdle;
-import com.ctre.phoenix6.signals.RGBWColor;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.LEDMode;
@@ -39,7 +34,7 @@ public class LEDSubsystem extends SubsystemBase {
 
     // auto set led
     switch (mode) {
-      // do stuff
+        // do stuff
     }
   }
 }
