@@ -96,7 +96,7 @@ public class VisionSubsystem extends SubsystemBase {
     this.cameras = cameras;
     try {
       aprilTagFieldLayout =
-          AprilTagFieldLayout.loadFromResource(AprilTagFields.k2025ReefscapeWelded.m_resourceFile);
+          AprilTagFieldLayout.loadFromResource(AprilTagFields.k2026RebuiltWelded.m_resourceFile);
     } catch (IOException e) {
       Logger.recordOutput("Vision/FieldLayoutLoadError", e.getMessage());
     }
