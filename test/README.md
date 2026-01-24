@@ -17,6 +17,10 @@ JUnit Jupiter unit tests.
   - 2D and 3D geometry transformations
   - Twist multiplication
 
+- **ShootingUtilTest.java*** - Tests the shooting utilities (2 tests)
+  - Angle calculations
+  - Factor in velocity to calculations
+
 - **PolynomialRegressionTest.java** - Tests for polynomial regression (14 tests)
   - Linear, quadratic, and cubic regression
   - R² coefficient calculation
