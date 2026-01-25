@@ -6,9 +6,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 // Use this file as an example file that allows for referencing positions on a field
 public final class FieldConstants {
 
-  public static final Pose2d BLUE_GOAL_CENTER = new Pose2d(4.65, 4.02, Rotation2d.kZero);
-  public static final Pose2d RED_GOAL_CENTER = new Pose2d(-1, -1, Rotation2d.kZero); // TODO: this
+  public static final Pose2d BLUE_GOAL_CENTER = new Pose2d(4.62, 4.02, Rotation2d.kZero);
+  public static final Pose2d RED_GOAL_CENTER = new Pose2d(11.91, 4.02, Rotation2d.kZero);
 
+  // Red
   public static final Pose2d APRILTAG_1  = new Pose2d(11.878056, 7.424674, Rotation2d.fromDegrees(180));
   public static final Pose2d APRILTAG_2  = new Pose2d(11.915394, 4.638040, Rotation2d.fromDegrees(90));
   public static final Pose2d APRILTAG_3  = new Pose2d(11.311890, 4.390136, Rotation2d.fromDegrees(180));
@@ -25,6 +26,8 @@ public final class FieldConstants {
   public static final Pose2d APRILTAG_14 = new Pose2d(16.533368, 6.971538, Rotation2d.fromDegrees(90));
   public static final Pose2d APRILTAG_15 = new Pose2d(16.532860, 4.323588, Rotation2d.fromDegrees(180));
   public static final Pose2d APRILTAG_16 = new Pose2d(16.532860, 3.891788, Rotation2d.fromDegrees(180));
+
+  // Blue
   public static final Pose2d APRILTAG_17 = new Pose2d(4.663186, 0.644398, Rotation2d.fromDegrees(0));
   public static final Pose2d APRILTAG_18 = new Pose2d(4.625594, 3.431286, Rotation2d.fromDegrees(270));
   public static final Pose2d APRILTAG_19 = new Pose2d(5.229098, 3.678936, Rotation2d.fromDegrees(0));
