@@ -3,9 +3,42 @@ package frc.robot.util;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import frc.robot.Constants;
 import frc.robot.FieldConstants;
 
 public class ShootingUtil {
+
+  /**
+   * Returns the motor revolutions converted to an equal angle. There are {@code
+   * Constants.SHOOTER_HOOD_REVS_PER_DEG} motor shaft revolutions per one degree of pitch.
+   */
+  public static double toHoodDegrees(double motorRevs) {
+    return motorRevs / Constants.SHOOTER_HOOD_REVS_PER_DEG;
+  }
+
+  /**
+   * Returns the motor revolutions converted to an equal angle. There are {@code
+   * Constants.SHOOTER_HOOD_REVS_PER_DEG} motor shaft revolutions per one degree of pitch.
+   */
+  public static double toHoodRevs(double degrees) {
+    return degrees * Constants.SHOOTER_HOOD_REVS_PER_DEG;
+  }
+
+  /**
+   * Returns the motor revolutions converted to an equal angle. There are {@code
+   * Constants.SHOOTER_TURRET_REVS_PER_DEG} motor shaft revolutions per one degree of pitch.
+   */
+  public static double toTurretDegrees(double motorRevs) {
+    return motorRevs / Constants.SHOOTER_TURRET_REVS_PER_DEG;
+  }
+
+  /**
+   * Returns the motor revolutions converted to an equal angle. There are {@code
+   * Constants.SHOOTER_TURRET_REVS_PER_DEG} motor shaft revolutions per one degree of pitch.
+   */
+  public static double toTurretRevs(double degrees) {
+    return degrees * Constants.SHOOTER_TURRET_REVS_PER_DEG;
+  }
 
   /**
    * Returns the angle from the predicted shooting position to the goal center.

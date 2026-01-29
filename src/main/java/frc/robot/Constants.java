@@ -13,6 +13,7 @@ import frc.robot.generated.TunerConstants;
  * (log replay from a file).
  */
 public final class Constants {
+
   public static boolean TEST_MODE = false;
   public static final Mode CURRENT_MODE = RobotBase.isReal() ? Mode.REAL : Mode.SIM;
   public static final boolean TUNING_MODE = false;
@@ -23,6 +24,21 @@ public final class Constants {
           Units.degreesToRadians(540),
           Units.degreesToRadians(400));
 
+  public static final int SHOOTER_HOOD_ID = 12;
+  public static final int SHOOTER_TURRET_ID = 13;
+  public static final int SHOOTER_FLYWHEEL_ID = 14;
+  public static final int SHOOTER_TURRET_ENCODER_ID = 15;
+
+  // TODO: correct numbers with real hardware
+  public static final double SHOOTER_HOOD_REVS_PER_DEG = 1;
+  public static final double SHOOTER_TURRET_REVS_PER_DEG = 1;
+  public static final double SHOOTER_HOOD_REVS_TOLERANCE = 0;
+  public static final double SHOOTER_TURRET_REVS_TOLERANCE = 0;
+
+  public enum LEDMode {
+    RAINBOW,
+  }
+
   public enum Mode {
     /** Running on a real robot. */
     REAL,
@@ -32,9 +48,5 @@ public final class Constants {
 
     /** Replaying from a log file. */
     REPLAY
-  }
-
-  public enum LEDMode {
-    RAINBOW,
   }
 }
