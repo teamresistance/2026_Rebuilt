@@ -7,8 +7,6 @@ public interface ShooterIO extends Subsystem {
   @Override
   void periodic();
 
-  void configure();
-
   boolean atShootingSetpoints();
 
   void runFlywheelAtRPS(double rps);

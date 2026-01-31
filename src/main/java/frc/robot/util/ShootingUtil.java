@@ -17,7 +17,7 @@ public class ShootingUtil {
   }
 
   /**
-   * Returns the motor revolutions converted to an equal angle. There are {@code
+   * Returns the angle converted to an equal amount of motor revolutions. There are {@code
    * Constants.SHOOTER_HOOD_REVS_PER_DEG} motor shaft revolutions per one degree of pitch.
    */
   public static double toHoodRevs(double degrees) {
@@ -26,15 +26,15 @@ public class ShootingUtil {
 
   /**
    * Returns the motor revolutions converted to an equal angle. There are {@code
-   * Constants.SHOOTER_TURRET_REVS_PER_DEG} motor shaft revolutions per one degree of pitch.
+   * Constants.SHOOTER_TURRET_REVS_PER_DEG} motor shaft revolutions per one degree of yaw.
    */
   public static double toTurretDegrees(double motorRevs) {
     return motorRevs / Constants.SHOOTER_TURRET_REVS_PER_DEG;
   }
 
   /**
-   * Returns the motor revolutions converted to an equal angle. There are {@code
-   * Constants.SHOOTER_TURRET_REVS_PER_DEG} motor shaft revolutions per one degree of pitch.
+   * Returns the angle converted to an equal amount of motor revolutions. There are {@code
+   * Constants.SHOOTER_TURRET_REVS_PER_DEG} motor shaft revolutions per one degree of yaw.
    */
   public static double toTurretRevs(double degrees) {
     return degrees * Constants.SHOOTER_TURRET_REVS_PER_DEG;
