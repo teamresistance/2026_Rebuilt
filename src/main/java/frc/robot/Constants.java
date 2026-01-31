@@ -38,8 +38,8 @@ public final class Constants {
   // TODO: correct numbers with real hardware
   public static final double SHOOTER_HOOD_MAX_PITCH = 47;
   public static final double SHOOTER_HOOD_MIN_PITCH = 13;
-  public static final double SHOOTER_TURRET_MAX_YAW = 350;
-  public static final double SHOOTER_TURRET_MIN_YAW = 10;
+  public static final double SHOOTER_TURRET_MAX_YAW = 170;
+  public static final double SHOOTER_TURRET_MIN_YAW = -170;
 
   public enum LEDMode {
     RAINBOW,
