@@ -1,7 +1,9 @@
 package frc.robot.util;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.Constants;
 import frc.robot.FieldConstants;
@@ -44,13 +46,14 @@ public class ShootingUtil {
    * Returns the angle from the predicted shooting position to the goal center.
    *
    * @param robotPose current robot pose
-   * @param robotVelocity robot velocity represented
+   * @param robotSpeeds robot velocity, field-relative
    * @param estimatedAirtime estimated airtime of the projectile (seconds)
    * @return angle to point at in order to look at the goal
    */
   public static double getAngleToAim(
-      Pose2d robotPose, Transform2d robotVelocity, double estimatedAirtime) {
-    Pose2d shootingFrom = robotPose.plus(robotVelocity.times(estimatedAirtime));
+      Pose2d robotPose, ChassisSpeeds robotSpeeds, double estimatedAirtime) {
+
+    // Determine goal pose based on alliance
     Pose2d goalPose = new Pose2d();
     if (DriverStation.getAlliance().isPresent()) {
       goalPose =
@@ -60,32 +63,29 @@ public class ShootingUtil {
           };
     }
 
-    double dx = goalPose.getX() - shootingFrom.getX();
-    double dy = goalPose.getY() - shootingFrom.getY();
-    return Math.toDegrees(Math.atan2(dy, dx));
-  }
+    double robotVelX = robotSpeeds.vxMetersPerSecond;
+    double robotVelY = robotSpeeds.vyMetersPerSecond;
+    double robotAngularVelocity = robotSpeeds.omegaRadiansPerSecond;
 
-  /**
-   * Returns the angle from the predicted shooting position to the goal center, assuming airtime is
-   * reasonably close to 1s
-   *
-   * @param robotPose current robot pose
-   * @param robotVelocity robot velocity represented
-   * @return angle to point at in order to look at the goal
-   */
-  public static double getAngleToAim(Pose2d robotPose, Transform2d robotVelocity) {
-    Pose2d shootingFrom = robotPose.plus(robotVelocity);
-    Pose2d goalPose = new Pose2d();
-    if (DriverStation.getAlliance().isPresent()) {
-      goalPose =
-          switch (DriverStation.getAlliance().get()) {
-            case Blue -> FieldConstants.BLUE_GOAL_CENTER;
-            case Red -> FieldConstants.RED_GOAL_CENTER;
-          };
-    }
+    Pose2d turretPose = robotPose.plus(Constants.ROBOT_TO_TURRET);
+    Translation2d offsetField =
+        Constants.ROBOT_TO_TURRET.getTranslation().rotateBy(robotPose.getRotation());
 
-    double dx = goalPose.getX() - shootingFrom.getX();
-    double dy = goalPose.getY() - shootingFrom.getY();
-    return Math.toDegrees(Math.atan2(dy, dx));
+    double vx_rot = -offsetField.getY() * robotAngularVelocity;
+    double vy_rot = offsetField.getX() * robotAngularVelocity;
+    double vx_total = robotVelX + vx_rot;
+    double vy_total = robotVelY + vy_rot;
+
+    Translation2d turretFuturePos =
+        turretPose
+            .getTranslation()
+            .plus(new Translation2d(vx_total * estimatedAirtime, vy_total * estimatedAirtime));
+    Translation2d toTarget = goalPose.getTranslation().minus(turretFuturePos);
+
+    double turretAngleField = Math.atan2(toTarget.getY(), toTarget.getX());
+    double turretAngleRobotRelative = turretAngleField - robotPose.getRotation().getRadians();
+    turretAngleRobotRelative = MathUtil.angleModulus(turretAngleRobotRelative);
+
+    return Math.toDegrees(turretAngleRobotRelative);
   }
 }
