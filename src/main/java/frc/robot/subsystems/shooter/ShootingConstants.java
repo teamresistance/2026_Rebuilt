@@ -2,6 +2,8 @@ package frc.robot.subsystems.shooter;
 
 public class ShootingConstants {
 
+  private ShootingConstants() {}
+
   /**
    * This contains information on what angle and RPS to shoot at in a two-dimensional array. Data is
    * stored in the format of {@code [rotations per sec, hood angle]}. <br>

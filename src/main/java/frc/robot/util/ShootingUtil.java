@@ -11,6 +11,8 @@ import frc.robot.subsystems.shooter.ShootingConstants;
 
 public class ShootingUtil {
 
+  private ShootingUtil() {}
+
   /**
    * Returns the motor revolutions converted to an equal angle. There are {@code
    * Constants.SHOOTER_HOOD_REVS_PER_DEG} motor shaft revolutions per one degree of pitch.
