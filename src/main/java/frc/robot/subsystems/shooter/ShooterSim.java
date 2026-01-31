@@ -64,7 +64,9 @@ public class ShooterSim implements ShooterIO {
   }
 
   @Override
-  public void runFlywheelAtRPS(double rps) {}
+  public void runFlywheelAtRPS(double rps) {
+    // not relevant in sim
+  }
 
   @Override
   public void setTurretTarget(double turretTargetAngle) {
@@ -77,5 +79,7 @@ public class ShooterSim implements ShooterIO {
   }
 
   @Override
-  public void zeroHood(double newValue) {}
+  public void zeroHood(double newValue) {
+    // not relevant in sim
+  }
 }
