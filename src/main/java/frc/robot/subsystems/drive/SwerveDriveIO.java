@@ -120,6 +120,8 @@ public interface SwerveDriveIO extends Subsystem {
 
   ChassisSpeeds getChassisSpeeds();
 
+  ChassisSpeeds getChassisSpeedsFieldRelative();
+
   Transform2d getVelocity();
 
   @Override

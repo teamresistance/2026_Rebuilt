@@ -11,6 +11,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -57,6 +58,16 @@ public class SwerveDriveSim implements SwerveDriveIO {
   @Override
   public ChassisSpeeds getChassisSpeeds() {
     return SwerveDriveIO.kinematics.toChassisSpeeds(driveSimulation.getMeasuredStates());
+  }
+
+  @Override
+  public ChassisSpeeds getChassisSpeedsFieldRelative() {
+    boolean isFlipped =
+        DriverStation.getAlliance().isPresent()
+            && DriverStation.getAlliance().get() == DriverStation.Alliance.Red;
+    return ChassisSpeeds.fromFieldRelativeSpeeds(
+        getChassisSpeeds(),
+        isFlipped ? getRotation().plus(new Rotation2d(Math.PI)) : getRotation());
   }
 
   @Override
