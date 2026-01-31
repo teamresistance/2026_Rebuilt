@@ -12,6 +12,8 @@ import org.littletonrobotics.junction.Logger;
 
 public class ShooterReal implements ShooterIO {
 
+  // TODO: Will the thing that feeds balls go in here or in another subsystem?
+
   private final TalonFX hoodMotor = new TalonFX(Constants.SHOOTER_HOOD_ID, CANBus.roboRIO());
   private final TalonFX turretMotor = new TalonFX(Constants.SHOOTER_TURRET_ID, CANBus.roboRIO());
   private final TalonFX flywheelMotor =

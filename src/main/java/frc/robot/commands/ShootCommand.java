@@ -24,5 +24,6 @@ public class ShootCommand extends Command {
     shooter.setTurretTarget(shootingParams[0]);
     shooter.setHoodTarget(ShootingParameters.params[roundedScaledDistance][1]);
     shooter.runFlywheelAtRPS(ShootingParameters.params[roundedScaledDistance][0]);
+    // TODO: Control the feeder based on the RPS being good/bad and the turret and hood being ready
   }
 }

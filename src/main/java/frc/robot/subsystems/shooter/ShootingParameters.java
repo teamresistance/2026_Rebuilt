@@ -9,5 +9,6 @@ public class ShootingParameters {
    * Usage: {@code shootingParameters[distance*10]}. <br>
    * For example, shootingParameters[67] would correlate to 6.7 meters away from the hub.
    */
-  public static final double[][] params = new double[][] {new double[] {0, 13}}; // TODO: this is a placeholder, get actual values...
+  public static final double[][] params =
+      new double[][] {new double[] {0, 13}}; // TODO: this is a placeholder, get actual values...
 }
