@@ -48,9 +48,9 @@ public class ShootingUtil {
    * @param robotPose current robot pose
    * @param robotSpeeds robot velocity, field-relative
    * @param estimatedAirtime estimated airtime of the projectile (seconds)
-   * @return angle to point at in order to look at the goal
+   * @return an array in the format of [shot angle, distance to hub]
    */
-  public static double getAngleToAim(
+  public static double[] getAngleToAim(
       Pose2d robotPose, ChassisSpeeds robotSpeeds, double estimatedAirtime) {
 
     // Determine goal pose based on alliance
@@ -86,6 +86,9 @@ public class ShootingUtil {
     double turretAngleRobotRelative = turretAngleField - robotPose.getRotation().getRadians();
     turretAngleRobotRelative = MathUtil.angleModulus(turretAngleRobotRelative);
 
-    return Math.toDegrees(turretAngleRobotRelative);
+    return new double[] {
+      Math.toDegrees(turretAngleRobotRelative),
+      turretFuturePos.getDistance(goalPose.getTranslation())
+    };
   }
 }

@@ -3,6 +3,8 @@ package frc.robot;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import com.pathplanner.lib.path.PathConstraints;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.generated.TunerConstants;
@@ -40,6 +42,9 @@ public final class Constants {
   public static final double SHOOTER_HOOD_MIN_PITCH = 13;
   public static final double SHOOTER_TURRET_MAX_YAW = 170;
   public static final double SHOOTER_TURRET_MIN_YAW = -170;
+
+  // TODO: correct numbers with real hardware
+  public static final Transform2d ROBOT_TO_TURRET = new Transform2d(0, 0, Rotation2d.kZero);
 
   public enum LEDMode {
     RAINBOW,
