@@ -137,7 +137,14 @@ public class ShootingUtil {
         .getDistance(goalPose.getTranslation());
   }
 
-  /** Gets the distance to hub based on an average time-of-flight, ignoring rotation. */
+  /**
+   * Gets the distance to hub based on an average time-of-flight, ignoring rotation. This makes it
+   * possible to take a "recursive" approach to calculating a perfect shot. Calculating a perfect
+   * moving shot requires distance, which requires time of flight, which requires distance. This
+   * skips the step of requiring an accurate time-of-flight and uses {@code
+   * Constants.SHOOTING_APPROXIMATE_TOF} to get a mostly-there number, which is good enough - any
+   * minor inaccuracy can be disregarded as the goal is very wide.
+   */
   public static double getApproximateVirtualDistanceToHub(
       Pose2d robotPose, Translation2d velocity) {
     Pose2d goalPose = new Pose2d();
@@ -151,6 +158,7 @@ public class ShootingUtil {
 
     return goalPose
         .getTranslation()
-        .getDistance(robotPose.getTranslation().plus(velocity.times(0.8)));
+        .getDistance(
+            robotPose.getTranslation().plus(velocity.times(Constants.SHOOTING_APPROXIMATE_TOF)));
   }
 }

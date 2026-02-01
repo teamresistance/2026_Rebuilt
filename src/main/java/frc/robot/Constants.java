@@ -45,6 +45,7 @@ public final class Constants {
 
   // TODO: correct numbers with real hardware
   public static final Transform2d ROBOT_TO_TURRET = new Transform2d(0, 0, Rotation2d.kZero);
+  public static final double SHOOTING_APPROXIMATE_TOF = 0.8;
 
   public enum LEDMode {
     RAINBOW,
