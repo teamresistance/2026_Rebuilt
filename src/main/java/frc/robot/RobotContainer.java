@@ -9,8 +9,13 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.IdleShooterCommand;
+import frc.robot.commands.ShootCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.*;
+import frc.robot.subsystems.shooter.ShooterIO;
+import frc.robot.subsystems.shooter.ShooterReal;
+import frc.robot.subsystems.shooter.ShooterSim;
 import frc.robot.subsystems.vision.*;
 import java.io.IOException;
 import org.littletonrobotics.junction.Logger;
@@ -30,19 +35,34 @@ public class RobotContainer {
   public final PhotonCamera backRightCamera = new PhotonCamera("back_right");
   public final PhotonCamera frontCenterCamera = new PhotonCamera("front-center");
   private final Alert cameraFailureAlert;
+
   // Subsystems
   private final SwerveDriveIO drive;
+  private VisionSubsystem vision;
+  private final ShooterIO shooter;
+
   // Controller
   private final CommandXboxController driver = new CommandXboxController(0);
+
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
-  private VisionSubsystem vision;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     drive = configureDrive();
     vision = configureAprilTagVision();
     configureNamedCommands();
+
+    switch (Constants.CURRENT_MODE) {
+      case REAL:
+        shooter = new ShooterReal();
+        break;
+      case SIM:
+        shooter = new ShooterSim();
+        break;
+      default:
+        shooter = new ShooterReal();
+    }
 
     autoChooser = configureAutos();
     configureButtonBindings();
@@ -142,8 +162,13 @@ public class RobotContainer {
         DriveCommands.joystickDrive(
             drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
 
+    // auto-aim hood and turret always
+    shooter.setDefaultCommand(new IdleShooterCommand(drive, shooter));
+
     // Switch to X pattern when X button is pressed
     driver.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+
+    driver.rightTrigger().whileTrue(new ShootCommand(drive, shooter));
   }
 
   /**
