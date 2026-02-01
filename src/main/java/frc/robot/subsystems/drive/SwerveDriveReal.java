@@ -241,16 +241,6 @@ public class SwerveDriveReal implements SwerveDriveIO {
     return kinematics.toChassisSpeeds(getModuleStates());
   }
 
-  @Override
-  public ChassisSpeeds getChassisSpeedsFieldRelative() {
-    boolean isFlipped =
-        DriverStation.getAlliance().isPresent()
-            && DriverStation.getAlliance().get() == DriverStation.Alliance.Red;
-    return ChassisSpeeds.fromFieldRelativeSpeeds(
-        getChassisSpeeds(),
-        isFlipped ? getRotation().plus(new Rotation2d(Math.PI)) : getRotation());
-  }
-
   /** Returns the position of each module in radians. */
   public double[] getWheelRadiusCharacterizationPositions() {
     double[] values = new double[4];
