@@ -33,6 +33,14 @@ public class ShootCommand extends Command {
 
     Logger.recordOutput("Shooter/Virtual Distance to Hub", distance);
 
-    // TODO: Control the feeder based on the RPS being good/bad and the turret and hood being ready
+    // TODO: all of these
+    // Control the feeder based on the RPS being good/bad and the turret and hood being ready
+    //
+    // if the virtual pose is FAR out of the alliance zone (aka the balls will NOT make it
+    // in under any circumstances), some way to stop shooting.
+    //
+    // Differentiate between "might go in", "will go in", and "will not go in". Above would
+    // qualify as a "might go in" if it is less than X meters (small) out of the zone. Could be
+    // something like red, light green, green.
   }
 }
