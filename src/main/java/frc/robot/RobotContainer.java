@@ -7,7 +7,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.IdleShooterCommand;
@@ -38,9 +37,6 @@ public class RobotContainer {
   public final PhotonCamera backRightCamera = new PhotonCamera("back_right");
   public final PhotonCamera frontCenterCamera = new PhotonCamera("front-center");
   private final Alert cameraFailureAlert;
-
-  // utility
-  private final Trigger trueTrigger = new Trigger(() -> true);
 
   // Subsystems
   private final SwerveDriveIO drive;
@@ -174,7 +170,7 @@ public class RobotContainer {
             drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
 
     // auto-aim hood and turret always
-    trueTrigger.whileTrue(new IdleShooterCommand(drive, shooter));
+    shooter.setDefaultCommand(new IdleShooterCommand(drive, shooter));
 
     // Switch to X pattern when X button is pressed
     driver.x().onTrue(Commands.runOnce(drive::stopWithX, drive));

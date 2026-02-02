@@ -15,19 +15,17 @@ public class IdleShooterCommand extends Command {
   public IdleShooterCommand(SwerveDriveIO _drive, ShooterIO _shooter) {
     drive = _drive;
     shooter = _shooter;
+    addRequirements(shooter);
   }
 
   @Override
   public void execute() {
 
     double distance =
-        ShootingUtil.getVirtualDistanceToHub(
-            drive.getPose(), drive.getChassisSpeedsFieldRelative());
+        ShootingUtil.getVirtualDistanceToHub(drive.getPose(), drive.getChassisSpeeds());
     double turretAngle =
         ShootingUtil.getAngleToAim(
-            drive.getPose(),
-            drive.getChassisSpeedsFieldRelative(),
-            ShootingConstants.getTimeOfFlight(distance));
+            drive.getPose(), drive.getChassisSpeeds(), ShootingConstants.getTimeOfFlight(distance));
     double hoodAngle = ShootingConstants.getHoodAngle(distance);
 
     shooter.setTurretTarget(turretAngle);
