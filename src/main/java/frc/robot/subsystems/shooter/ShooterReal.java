@@ -100,9 +100,9 @@ public class ShooterReal implements ShooterIO {
    */
   @Override
   public void setHoodTarget(double angle) {
-    if (angle > Constants.SHOOTER_HOOD_MAX_PITCH || angle < Constants.SHOOTER_HOOD_MIN_PITCH) {
+    if (angle < Constants.SHOOTER_HOOD_MAX_PITCH && angle > Constants.SHOOTER_HOOD_MIN_PITCH) {
       hoodTargetAngle = angle;
-      flywheelMotor.setControl(new PositionDutyCycle(ShootingUtil.toHoodRevs(angle)));
+      hoodMotor.setControl(new PositionDutyCycle(ShootingUtil.toHoodRevs(angle)));
     }
   }
 
@@ -112,7 +112,7 @@ public class ShooterReal implements ShooterIO {
    */
   @Override
   public void setTurretTarget(double angle) {
-    if (angle > Constants.SHOOTER_TURRET_MAX_YAW || angle < Constants.SHOOTER_TURRET_MIN_YAW) {
+    if (angle < Constants.SHOOTER_TURRET_MAX_YAW && angle > Constants.SHOOTER_TURRET_MIN_YAW) {
       turretTargetAngle = angle;
       turretMotor.setControl(new PositionDutyCycle(ShootingUtil.toTurretRevs(angle)));
     }
@@ -138,8 +138,7 @@ public class ShooterReal implements ShooterIO {
     Logger.recordOutput("Shooter/Turret Target Angle", turretTargetAngle);
     Logger.recordOutput(
         "Shooter/Turret Real Angle",
-        ShootingUtil.toTurretDegrees(
-            ShootingUtil.toTurretDegrees(turretEncoder.getPosition().getValueAsDouble())));
+        ShootingUtil.toTurretDegrees(turretEncoder.getPosition().getValueAsDouble()));
     Logger.recordOutput("Shooter/Hood Target Angle", hoodTargetAngle);
     Logger.recordOutput(
         "Shooter/Hood Real Angle",
