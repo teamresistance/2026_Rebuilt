@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.IdleShooterCommand;
@@ -16,8 +17,10 @@ import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterReal;
 import frc.robot.subsystems.shooter.ShooterSim;
+import frc.robot.subsystems.shooter.ShootingConstants;
 import frc.robot.subsystems.vision.*;
 import java.io.IOException;
+import java.util.Arrays;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.photonvision.PhotonCamera;
@@ -36,6 +39,9 @@ public class RobotContainer {
   public final PhotonCamera frontCenterCamera = new PhotonCamera("front-center");
   private final Alert cameraFailureAlert;
 
+  // utility
+  private final Trigger trueTrigger = new Trigger(() -> true);
+
   // Subsystems
   private final SwerveDriveIO drive;
   private VisionSubsystem vision;
@@ -49,6 +55,11 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+
+    // TODO: REMOVE THIS WHEN ACTUAL VALUES EXIST (makes sim possible)
+    Arrays.fill(ShootingConstants.params, new double[] {0, 0});
+    Arrays.fill(ShootingConstants.tofParams, 1);
+
     drive = configureDrive();
     vision = configureAprilTagVision();
     configureNamedCommands();
@@ -163,7 +174,7 @@ public class RobotContainer {
             drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
 
     // auto-aim hood and turret always
-    shooter.setDefaultCommand(new IdleShooterCommand(drive, shooter));
+    trueTrigger.whileTrue(new IdleShooterCommand(drive, shooter));
 
     // Switch to X pattern when X button is pressed
     driver.x().onTrue(Commands.runOnce(drive::stopWithX, drive));

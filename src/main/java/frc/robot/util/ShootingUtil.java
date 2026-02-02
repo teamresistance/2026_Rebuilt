@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.Constants;
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.shooter.ShootingConstants;
+import org.littletonrobotics.junction.Logger;
 
 public class ShootingUtil {
 
@@ -88,6 +89,8 @@ public class ShootingUtil {
     double turretAngleField = Math.atan2(toTarget.getY(), toTarget.getX());
     double turretAngleRobotRelative = turretAngleField - robotPose.getRotation().getRadians();
     turretAngleRobotRelative = MathUtil.angleModulus(turretAngleRobotRelative);
+
+    Logger.recordOutput("Shooter/Calculated Virtual Pose", turretFuturePos);
 
     return Math.toDegrees(turretAngleRobotRelative);
   }
