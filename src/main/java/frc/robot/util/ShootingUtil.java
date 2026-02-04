@@ -2,12 +2,14 @@ package frc.robot.util;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.Constants;
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.shooter.ShootingConstants;
+import org.littletonrobotics.junction.Logger;
 
 public class ShootingUtil {
 
@@ -49,14 +51,13 @@ public class ShootingUtil {
    * Returns the angle from the predicted shooting position to the goal center.
    *
    * @param robotPose current robot pose
-   * @param robotSpeeds robot velocity, field-relative
+   * @param robotSpeeds robot velocity
    * @param estimatedAirtime estimated airtime of the projectile (seconds)
    * @return the angle to aim to the turret at, in degrees
    */
   public static double getAngleToAim(
       Pose2d robotPose, ChassisSpeeds robotSpeeds, double estimatedAirtime) {
 
-    // Determine goal pose based on alliance
     Pose2d goalPose = new Pose2d();
     if (DriverStation.getAlliance().isPresent()) {
       goalPose =
@@ -66,28 +67,27 @@ public class ShootingUtil {
           };
     }
 
-    double robotVelX = robotSpeeds.vxMetersPerSecond;
-    double robotVelY = robotSpeeds.vyMetersPerSecond;
-    double robotAngularVelocity = robotSpeeds.omegaRadiansPerSecond;
+    Translation2d fieldVelocity =
+        new Translation2d(robotSpeeds.vxMetersPerSecond, robotSpeeds.vyMetersPerSecond)
+            .rotateBy(robotPose.getRotation());
 
-    Pose2d turretPose = robotPose.plus(Constants.ROBOT_TO_TURRET);
-    Translation2d offsetField =
+    Translation2d turretOffsetField =
         Constants.ROBOT_TO_TURRET.getTranslation().rotateBy(robotPose.getRotation());
-
-    double vx_rot = -offsetField.getY() * robotAngularVelocity;
-    double vy_rot = offsetField.getX() * robotAngularVelocity;
-    double vx_total = robotVelX + vx_rot;
-    double vy_total = robotVelY + vy_rot;
-
-    Translation2d turretFuturePos =
-        turretPose
+    Translation2d futureTurretPos =
+        robotPose
             .getTranslation()
-            .plus(new Translation2d(vx_total * estimatedAirtime, vy_total * estimatedAirtime));
-    Translation2d toTarget = goalPose.getTranslation().minus(turretFuturePos);
+            .plus(turretOffsetField)
+            .plus(fieldVelocity.times(estimatedAirtime));
+
+    Translation2d toTarget = goalPose.getTranslation().minus(futureTurretPos);
 
     double turretAngleField = Math.atan2(toTarget.getY(), toTarget.getX());
-    double turretAngleRobotRelative = turretAngleField - robotPose.getRotation().getRadians();
-    turretAngleRobotRelative = MathUtil.angleModulus(turretAngleRobotRelative);
+    double turretAngleRobotRelative =
+        MathUtil.angleModulus(turretAngleField - robotPose.getRotation().getRadians());
+
+    Logger.recordOutput(
+        "Shooter/Calculated Virtual Pose",
+        new Pose2d(futureTurretPos.getX(), futureTurretPos.getY(), Rotation2d.kZero));
 
     return Math.toDegrees(turretAngleRobotRelative);
   }
@@ -110,31 +110,25 @@ public class ShootingUtil {
           };
     }
 
-    // can be lower-accuracy, as getting this "virtual distance" requires time of flight, which also
-    // requires distance. uses a mostly-there value instead.
     double estimatedAirtime =
         ShootingConstants.getTimeOfFlight(
             ShootingUtil.getApproximateVirtualDistanceToHub(
                 robotPose,
                 new Translation2d(robotSpeeds.vxMetersPerSecond, robotSpeeds.vyMetersPerSecond)));
 
-    double robotVelX = robotSpeeds.vxMetersPerSecond;
-    double robotVelY = robotSpeeds.vyMetersPerSecond;
-    double robotAngularVelocity = robotSpeeds.omegaRadiansPerSecond;
+    Translation2d fieldVelocity =
+        new Translation2d(robotSpeeds.vxMetersPerSecond, robotSpeeds.vyMetersPerSecond)
+            .rotateBy(robotPose.getRotation());
 
-    Pose2d turretPose = robotPose.plus(Constants.ROBOT_TO_TURRET);
-    Translation2d offsetField =
+    Translation2d turretOffsetField =
         Constants.ROBOT_TO_TURRET.getTranslation().rotateBy(robotPose.getRotation());
+    Translation2d futureTurretPos =
+        robotPose
+            .getTranslation()
+            .plus(turretOffsetField)
+            .plus(fieldVelocity.times(estimatedAirtime));
 
-    double vx_rot = -offsetField.getY() * robotAngularVelocity;
-    double vy_rot = offsetField.getX() * robotAngularVelocity;
-    double vx_total = robotVelX + vx_rot;
-    double vy_total = robotVelY + vy_rot;
-
-    return turretPose
-        .getTranslation()
-        .plus(new Translation2d(vx_total * estimatedAirtime, vy_total * estimatedAirtime))
-        .getDistance(goalPose.getTranslation());
+    return futureTurretPos.getDistance(goalPose.getTranslation());
   }
 
   /**

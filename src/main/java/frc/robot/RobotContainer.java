@@ -16,8 +16,10 @@ import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterReal;
 import frc.robot.subsystems.shooter.ShooterSim;
+import frc.robot.subsystems.shooter.ShootingConstants;
 import frc.robot.subsystems.vision.*;
 import java.io.IOException;
+import java.util.Arrays;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.photonvision.PhotonCamera;
@@ -49,6 +51,11 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+
+    // TODO: REMOVE THIS WHEN ACTUAL VALUES EXIST (makes sim possible)
+    Arrays.fill(ShootingConstants.params, new double[] {0, 0});
+    Arrays.fill(ShootingConstants.tofParams, 1);
+
     drive = configureDrive();
     vision = configureAprilTagVision();
     configureNamedCommands();
