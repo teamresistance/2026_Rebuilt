@@ -22,7 +22,7 @@ public class IdleShooterCommand extends Command {
   public void execute() {
 
     double distance =
-        ShootingUtil.getVirtualDistanceToHub(drive.getPose(), drive.getChassisSpeeds());
+        ShootingUtil.getVirtualDistanceToTarget(drive.getPose(), drive.getChassisSpeeds());
     double turretAngle =
         ShootingUtil.getAngleToAim(
             drive.getPose(), drive.getChassisSpeeds(), ShootingConstants.getTimeOfFlight(distance));

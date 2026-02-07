@@ -21,7 +21,7 @@ public class ShootCommand extends Command {
   public void execute() {
 
     double distance =
-        ShootingUtil.getVirtualDistanceToHub(drive.getPose(), drive.getChassisSpeeds());
+        ShootingUtil.getVirtualDistanceToTarget(drive.getPose(), drive.getChassisSpeeds());
     shooter.runFlywheelAtRPS(ShootingConstants.getRPS(distance));
 
     Logger.recordOutput("Shooter/Virtual Distance to Hub", distance);

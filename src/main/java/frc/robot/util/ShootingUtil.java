@@ -48,7 +48,8 @@ public class ShootingUtil {
   }
 
   /**
-   * Returns the angle from the predicted shooting position to the goal center.
+   * Returns the angle from the predicted shooting position to the goal center. Goal is determined
+   * by {@code FieldConstants.getShootingTarget()}
    *
    * @param robotPose current robot pose
    * @param robotSpeeds robot velocity
@@ -58,14 +59,8 @@ public class ShootingUtil {
   public static double getAngleToAim(
       Pose2d robotPose, ChassisSpeeds robotSpeeds, double estimatedAirtime) {
 
-    Pose2d goalPose = new Pose2d();
-    if (DriverStation.getAlliance().isPresent()) {
-      goalPose =
-          switch (DriverStation.getAlliance().get()) {
-            case Blue -> FieldConstants.BLUE_GOAL_CENTER;
-            case Red -> FieldConstants.RED_GOAL_CENTER;
-          };
-    }
+    Pose2d goalPose = FieldConstants.getShootingTarget(robotPose);
+    Logger.recordOutput("Shooter/GoalPose", goalPose);
 
     Translation2d fieldVelocity =
         new Translation2d(robotSpeeds.vxMetersPerSecond, robotSpeeds.vyMetersPerSecond)
@@ -93,22 +88,17 @@ public class ShootingUtil {
   }
 
   /**
-   * Gets the distance from the "virtual turret pose" to the hub.
+   * Gets the distance from the "virtual turret pose" to the goal. Goal is determined by {@code
+   * FieldConstants.getShootingTarget()}
    *
    * @param robotPose current robot pose
    * @param robotSpeeds robot chassis speeds, field-relative
    * @return the distance between the hub and the virtual turret pose
    */
-  public static double getVirtualDistanceToHub(Pose2d robotPose, ChassisSpeeds robotSpeeds) {
+  public static double getVirtualDistanceToTarget(Pose2d robotPose, ChassisSpeeds robotSpeeds) {
 
-    Pose2d goalPose = new Pose2d();
-    if (DriverStation.getAlliance().isPresent()) {
-      goalPose =
-          switch (DriverStation.getAlliance().get()) {
-            case Blue -> FieldConstants.BLUE_GOAL_CENTER;
-            case Red -> FieldConstants.RED_GOAL_CENTER;
-          };
-    }
+    Pose2d goalPose = FieldConstants.getShootingTarget(robotPose);
+    Logger.recordOutput("Shooter/GoalPose", goalPose);
 
     double estimatedAirtime =
         ShootingConstants.getTimeOfFlight(
