@@ -47,12 +47,6 @@ public final class Constants {
   public static final Transform2d ROBOT_TO_TURRET = new Transform2d(0, 0, Rotation2d.kZero);
   public static final double SHOOTING_APPROXIMATE_TOF = 0.8;
 
-  public enum ShootingTarget {
-    HUB,
-    TOP_ZONE,
-    BOTTOM_ZONE,
-  }
-
   public enum LEDMode {
     RAINBOW,
   }

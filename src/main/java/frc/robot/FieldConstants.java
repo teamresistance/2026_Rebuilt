@@ -75,6 +75,15 @@ public final class FieldConstants {
   public static final Pose2d BLUE_GOAL_CENTER = new Pose2d(4.65, 4.02, Rotation2d.kZero);
   public static final Pose2d RED_GOAL_CENTER = new Pose2d(11.91, 4.02, Rotation2d.kZero);
 
+  public static final Pose2d BLUE_TOP_FERRY_TARGET =
+      new Pose2d(APRILTAG_32.getX(), 6.02, Rotation2d.kZero);
+  public static final Pose2d BLUE_BOTTOM_FERRY_TARGET =
+      new Pose2d(APRILTAG_32.getX(), 2.02, Rotation2d.kZero);
+  public static final Pose2d RED_TOP_FERRY_TARGET =
+      new Pose2d(APRILTAG_16.getX(), 6.02, Rotation2d.kZero);
+  public static final Pose2d RED_BOTTOM_FERRY_TARGET =
+      new Pose2d(APRILTAG_16.getX(), 2.02, Rotation2d.kZero);
+
   public static final double BLUE_SHOOTING_ZONE_END = APRILTAG_20.getX() + 0.5;
   public static final double NEUTRAL_ZONE_BLUESIDE = APRILTAG_20.getX() + 0.5;
   public static final double NEUTRAL_ZONE_REDSIDE = APRILTAG_4.getX() - 0.5;
@@ -82,22 +91,22 @@ public final class FieldConstants {
   public static final double TOP_BOTTOM_SPLIT_Y = APRILTAG_20.getY();
 
   /** gets the shooting target based on the robot pose */
-  public static Constants.ShootingTarget getShootingTarget(Pose2d pose) {
+  public static Pose2d getShootingTarget(Pose2d pose) {
     if (DriverStation.getAlliance().isPresent()) {
       if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
-        if (pose.getX() <= BLUE_SHOOTING_ZONE_END) return Constants.ShootingTarget.HUB;
+        if (pose.getX() <= BLUE_SHOOTING_ZONE_END) return BLUE_GOAL_CENTER;
         if (pose.getX() > NEUTRAL_ZONE_BLUESIDE) {
-          if (pose.getY() >= TOP_BOTTOM_SPLIT_Y) return Constants.ShootingTarget.TOP_ZONE;
-          return Constants.ShootingTarget.BOTTOM_ZONE;
+          if (pose.getY() >= TOP_BOTTOM_SPLIT_Y) return BLUE_TOP_FERRY_TARGET;
+          return BLUE_BOTTOM_FERRY_TARGET;
         }
       } else {
-        if (pose.getX() >= RED_SHOOTING_ZONE_START) return Constants.ShootingTarget.HUB;
+        if (pose.getX() >= RED_SHOOTING_ZONE_START) return RED_GOAL_CENTER;
         if (pose.getX() < NEUTRAL_ZONE_REDSIDE) {
-          if (pose.getY() >= TOP_BOTTOM_SPLIT_Y) return Constants.ShootingTarget.TOP_ZONE;
-          return Constants.ShootingTarget.BOTTOM_ZONE;
+          if (pose.getY() >= TOP_BOTTOM_SPLIT_Y) return RED_TOP_FERRY_TARGET;
+          return RED_BOTTOM_FERRY_TARGET;
         }
       }
     }
-    return Constants.ShootingTarget.HUB; // just in-case
+    return Pose2d.kZero;
   }
 }
