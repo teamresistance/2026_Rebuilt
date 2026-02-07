@@ -92,21 +92,29 @@ public final class FieldConstants {
 
   /** gets the shooting target based on the robot pose */
   public static Pose2d getShootingTarget(Pose2d pose) {
-    if (DriverStation.getAlliance().isPresent()) {
-      if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
-        if (pose.getX() <= BLUE_SHOOTING_ZONE_END) return BLUE_GOAL_CENTER;
-        if (pose.getX() > NEUTRAL_ZONE_BLUESIDE) {
-          if (pose.getY() >= TOP_BOTTOM_SPLIT_Y) return BLUE_TOP_FERRY_TARGET;
-          return BLUE_BOTTOM_FERRY_TARGET;
-        }
-      } else {
-        if (pose.getX() >= RED_SHOOTING_ZONE_START) return RED_GOAL_CENTER;
-        if (pose.getX() < NEUTRAL_ZONE_REDSIDE) {
-          if (pose.getY() >= TOP_BOTTOM_SPLIT_Y) return RED_TOP_FERRY_TARGET;
-          return RED_BOTTOM_FERRY_TARGET;
-        }
+    var allianceOpt = DriverStation.getAlliance();
+    if (allianceOpt.isEmpty()) {
+      return Pose2d.kZero;
+    }
+
+    boolean isTop = pose.getY() >= TOP_BOTTOM_SPLIT_Y;
+
+    if (allianceOpt.get() == DriverStation.Alliance.Blue) {
+      if (pose.getX() <= BLUE_SHOOTING_ZONE_END) {
+        return BLUE_GOAL_CENTER;
+      }
+      if (pose.getX() > NEUTRAL_ZONE_BLUESIDE) {
+        return isTop ? BLUE_TOP_FERRY_TARGET : BLUE_BOTTOM_FERRY_TARGET;
+      }
+    } else {
+      if (pose.getX() >= RED_SHOOTING_ZONE_START) {
+        return RED_GOAL_CENTER;
+      }
+      if (pose.getX() < NEUTRAL_ZONE_REDSIDE) {
+        return isTop ? RED_TOP_FERRY_TARGET : RED_BOTTOM_FERRY_TARGET;
       }
     }
+
     return Pose2d.kZero;
   }
 }
