@@ -6,9 +6,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 // Use this file as an example file that allows for referencing positions on a field
 public final class FieldConstants {
 
-  public static final Pose2d BLUE_GOAL_CENTER = new Pose2d(4.65, 4.02, Rotation2d.kZero);
-  public static final Pose2d RED_GOAL_CENTER = new Pose2d(11.91, 4.02, Rotation2d.kZero);
-
   public static final Pose2d APRILTAG_1  = new Pose2d(11.878056, 7.424674, Rotation2d.fromDegrees(180));
   public static final Pose2d APRILTAG_2  = new Pose2d(11.915394, 4.638040, Rotation2d.fromDegrees(90));
   public static final Pose2d APRILTAG_3  = new Pose2d(11.311890, 4.390136, Rotation2d.fromDegrees(180));
@@ -41,5 +38,16 @@ public final class FieldConstants {
   public static final Pose2d APRILTAG_30 = new Pose2d(0.007620, 1.097788, Rotation2d.fromDegrees(0));
   public static final Pose2d APRILTAG_31 = new Pose2d(0.008128, 3.745738, Rotation2d.fromDegrees(0));
   public static final Pose2d APRILTAG_32 = new Pose2d(0.008128, 4.177538, Rotation2d.fromDegrees(0));
+
+  public static final Pose2d BLUE_GOAL_CENTER = new Pose2d(4.65, 4.02, Rotation2d.kZero);
+  public static final Pose2d RED_GOAL_CENTER = new Pose2d(11.91, 4.02, Rotation2d.kZero);
+
+  public static final double BLUE_SHOOTING_ZONE_START = 0;
+  public static final double BLUE_SHOOTING_ZONE_END = APRILTAG_20.getX()+0.5;
+  public static final double NEUTRAL_ZONE_START = APRILTAG_20.getX()+0.5;
+  public static final double NEUTRAL_ZONE_END = APRILTAG_4.getX()-0.5;
+  public static final double RED_SHOOTING_ZONE_START = APRILTAG_4.getX()-0.5;
+  public static final double RED_SHOOTING_ZONE_END = 999;
+  public static final double TOP_BOTTOM_SPLIT_Y = APRILTAG_20.getY();
 
 }
