@@ -12,13 +12,13 @@ public class ShootingConstants {
    * For example, shootingParameters[67] would correlate to 6.7 meters away from the hub.
    */
   public static final double[][] params =
-      new double[150][]; // TODO: this is a placeholder, get actual values...
+      new double[250][]; // TODO: this is a placeholder, get actual values...
 
   /**
    * Contains Time of Flight values for rounded distances (to 0.5m). [2] correlates to 1m, [3] to
    * 1.5m, so on.
    */
-  public static final double[] tofParams = new double[30]; // TODO: get values...
+  public static final double[] tofParams = new double[60]; // TODO: get values...
 
   /** Gets the time of flight of a shot based on distance from the time of flight array. */
   public static double getTimeOfFlight(double distance) {

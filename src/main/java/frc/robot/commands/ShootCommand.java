@@ -21,14 +21,7 @@ public class ShootCommand extends Command {
   public void execute() {
 
     double distance =
-        ShootingUtil.getVirtualDistanceToHub(drive.getPose(), drive.getChassisSpeeds());
-    double turretAngle =
-        ShootingUtil.getAngleToAim(
-            drive.getPose(), drive.getChassisSpeeds(), ShootingConstants.getTimeOfFlight(distance));
-    double hoodAngle = ShootingConstants.getHoodAngle(distance);
-
-    shooter.setTurretTarget(turretAngle);
-    shooter.setHoodTarget(hoodAngle);
+        ShootingUtil.getVirtualDistanceToTarget(drive.getPose(), drive.getChassisSpeeds());
     shooter.runFlywheelAtRPS(ShootingConstants.getRPS(distance));
 
     Logger.recordOutput("Shooter/Virtual Distance to Hub", distance);
