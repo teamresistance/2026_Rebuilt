@@ -2,7 +2,6 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.DriverStation;
 
 // Use this file as an example file that allows for referencing positions on a field
 public final class FieldConstants {
@@ -75,12 +74,16 @@ public final class FieldConstants {
   public static final Pose2d BLUE_GOAL_CENTER = new Pose2d(4.65, 4.02, Rotation2d.kZero);
   public static final Pose2d RED_GOAL_CENTER = new Pose2d(11.91, 4.02, Rotation2d.kZero);
 
+  // Y+ blue alliance passing target
   public static final Pose2d BLUE_TOP_FERRY_TARGET =
       new Pose2d(APRILTAG_32.getX(), 6.02, Rotation2d.kZero);
+  // Y- blue alliance passing target
   public static final Pose2d BLUE_BOTTOM_FERRY_TARGET =
       new Pose2d(APRILTAG_32.getX(), 2.02, Rotation2d.kZero);
+  // Y+ red alliance passing target
   public static final Pose2d RED_TOP_FERRY_TARGET =
       new Pose2d(APRILTAG_16.getX(), 6.02, Rotation2d.kZero);
+  // Y- red alliance passing target
   public static final Pose2d RED_BOTTOM_FERRY_TARGET =
       new Pose2d(APRILTAG_16.getX(), 2.02, Rotation2d.kZero);
 
@@ -89,32 +92,4 @@ public final class FieldConstants {
   public static final double NEUTRAL_ZONE_REDSIDE = APRILTAG_4.getX() - 0.5;
   public static final double RED_SHOOTING_ZONE_START = APRILTAG_4.getX() - 0.5;
   public static final double TOP_BOTTOM_SPLIT_Y = APRILTAG_20.getY();
-
-  /** gets the shooting target based on the robot pose */
-  public static Pose2d getShootingTarget(Pose2d pose) {
-    var allianceOpt = DriverStation.getAlliance();
-    if (allianceOpt.isEmpty()) {
-      return Pose2d.kZero;
-    }
-
-    boolean isTop = pose.getY() >= TOP_BOTTOM_SPLIT_Y;
-
-    if (allianceOpt.get() == DriverStation.Alliance.Blue) {
-      if (pose.getX() <= BLUE_SHOOTING_ZONE_END) {
-        return BLUE_GOAL_CENTER;
-      }
-      if (pose.getX() > NEUTRAL_ZONE_BLUESIDE) {
-        return isTop ? BLUE_TOP_FERRY_TARGET : BLUE_BOTTOM_FERRY_TARGET;
-      }
-    } else {
-      if (pose.getX() >= RED_SHOOTING_ZONE_START) {
-        return RED_GOAL_CENTER;
-      }
-      if (pose.getX() < NEUTRAL_ZONE_REDSIDE) {
-        return isTop ? RED_TOP_FERRY_TARGET : RED_BOTTOM_FERRY_TARGET;
-      }
-    }
-
-    return Pose2d.kZero;
-  }
 }
