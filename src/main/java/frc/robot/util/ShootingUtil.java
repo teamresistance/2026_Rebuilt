@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.Constants;
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.shooter.ShootingConstants;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class ShootingUtil {
@@ -77,6 +78,27 @@ public class ShootingUtil {
     }
 
     return Pose2d.kZero;
+  }
+
+  /** Returns a 0 if shooting to hub and a 1 if ferrying. */
+  public static int getShootingType(Supplier<Pose2d> poseSupplier) {
+    Pose2d pose = poseSupplier.get();
+    var allianceOpt = DriverStation.getAlliance();
+    if (allianceOpt.isEmpty()) {
+      return 0;
+    }
+
+    boolean isTop = pose.getY() >= FieldConstants.TOP_BOTTOM_SPLIT_Y;
+
+    if (allianceOpt.get() == DriverStation.Alliance.Blue
+        && pose.getX() <= FieldConstants.BLUE_SHOOTING_ZONE_END) {
+      return 0;
+    }
+    if (allianceOpt.get() == DriverStation.Alliance.Red
+        && pose.getX() >= FieldConstants.RED_SHOOTING_ZONE_START) {
+      return 0;
+    }
+    return 1;
   }
 
   /**

@@ -1,8 +1,10 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.controls.RainbowAnimation;
+import com.ctre.phoenix6.controls.SolidColor;
+import com.ctre.phoenix6.controls.StrobeAnimation;
 import com.ctre.phoenix6.hardware.CANdle;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import com.ctre.phoenix6.signals.RGBWColor;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.LEDMode;
 import org.littletonrobotics.junction.Logger;
@@ -30,13 +32,50 @@ public class LEDSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
 
-    SmartDashboard.putString("LED Mode", mode.toString());
     Logger.recordOutput("LED Mode", mode.toString());
 
     // auto set led
     switch (mode) {
       case RAINBOW:
         candle.setControl(new RainbowAnimation(LED_START_INDEX, LED_END_INDEX).withFrameRate(60));
+        break;
+      case SHOOTING:
+        candle.setControl(
+            new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
+                .withFrameRate(10)
+                .withColor(new RGBWColor(100, 255, 100)));
+        break;
+      case PASSING:
+        candle.setControl(
+            new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
+                .withFrameRate(10)
+                .withColor(new RGBWColor(100, 100, 255)));
+        break;
+      case READY:
+        candle.setControl(
+            new SolidColor(LED_START_INDEX, LED_END_INDEX).withColor(new RGBWColor(100, 255, 100)));
+        break;
+      case NOT_READY:
+        candle.setControl(
+            new SolidColor(LED_START_INDEX, LED_END_INDEX).withColor(new RGBWColor(255, 100, 100)));
+        break;
+      case SHIFTING:
+        candle.setControl(
+            new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
+                .withFrameRate(10)
+                .withColor(new RGBWColor(255, 255, 0)));
+        break;
+      case ENDGAME:
+        candle.setControl(
+            new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
+                .withFrameRate(10)
+                .withColor(new RGBWColor(255, 100, 255)));
+        break;
+      case BUMP:
+        candle.setControl(
+            new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
+                .withFrameRate(10)
+                .withColor(new RGBWColor(0, 255, 255)));
         break;
     }
   }

@@ -49,6 +49,13 @@ public final class Constants {
 
   public enum LEDMode {
     RAINBOW,
+    READY,
+    SHOOTING,
+    PASSING,
+    NOT_READY,
+    SHIFTING,
+    ENDGAME,
+    BUMP
   }
 
   public enum Mode {
