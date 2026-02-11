@@ -6,18 +6,20 @@ import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.IdleShooterCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterReal;
 import frc.robot.subsystems.shooter.ShooterSim;
 import frc.robot.subsystems.shooter.ShootingConstants;
 import frc.robot.subsystems.vision.*;
+import frc.robot.util.ShootingUtil;
 import java.io.IOException;
 import java.util.Arrays;
 import org.littletonrobotics.junction.Logger;
@@ -42,6 +44,7 @@ public class RobotContainer {
   private final SwerveDriveIO drive;
   private VisionSubsystem vision;
   private final ShooterIO shooter;
+  private final LEDSubsystem leds = new LEDSubsystem(); // does not need IO
 
   // Controller
   private final CommandXboxController driver = new CommandXboxController(0);
@@ -71,6 +74,7 @@ public class RobotContainer {
         shooter = new ShooterReal();
     }
 
+    configureLEDS();
     autoChooser = configureAutos();
     configureButtonBindings();
     cameraFailureAlert = new Alert("Camera system failure", Alert.AlertType.kError);
@@ -158,11 +162,23 @@ public class RobotContainer {
     };
   }
 
-  /**
-   * Use this method to define your button->command mappings. Buttons can be created by
-   * instantiating a {@link GenericHID} or one of its subclasses ({@link Joystick} or {@link
-   * XboxController}), and then passing it to a {@link JoystickButton}.
-   */
+  private void configureLEDS() {
+    new Trigger(shooter::atShootingSetpoints)
+        .whileFalse(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.NOT_READY, false)))
+        .whileTrue(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.READY, false)));
+    driver
+        .rightTrigger()
+        .and(() -> ShootingUtil.getShootingType(drive::getPose) == 0)
+        .whileTrue(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.SHOOTING, true)));
+    driver
+        .rightTrigger()
+        .and(() -> ShootingUtil.getShootingType(drive::getPose) == 1)
+        .whileTrue(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.PASSING, true)));
+    driver.rightTrigger().onFalse(Commands.runOnce(leds::unlock));
+    // TODO: shifting and endgame
+  }
+
+  /** Defines button bindings and control triggers */
   private void configureButtonBindings() {
     // Normal field-relative drive
     drive.setDefaultCommand(
@@ -178,11 +194,7 @@ public class RobotContainer {
     driver.rightTrigger().whileTrue(new ShootCommand(drive, shooter));
   }
 
-  /**
-   * Use this to pass the autonomous command to the main {@link Robot} class.
-   *
-   * @return the command to run in autonomous
-   */
+  /** Returns the autonomous command to schedule for the auto period. */
   public Command getAutonomousCommand() {
     Command autoCommand = autoChooser.get();
     if (autoCommand == null) {
