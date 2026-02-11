@@ -2,6 +2,10 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
+import com.ctre.phoenix6.controls.RainbowAnimation;
+import com.ctre.phoenix6.controls.SolidColor;
+import com.ctre.phoenix6.controls.StrobeAnimation;
+import com.ctre.phoenix6.signals.RGBWColor;
 import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -57,6 +61,36 @@ public final class Constants {
     ENDGAME,
     BUMP
   }
+
+  public static final int LED_START_INDEX = 0;
+  public static final int LED_END_INDEX = 100; // todo: this
+
+  public static final RainbowAnimation LED_ANIMATION_RAINBOW =
+      new RainbowAnimation(LED_START_INDEX, LED_END_INDEX).withFrameRate(60);
+  public static final StrobeAnimation LED_ANIMATION_SHOOTING =
+      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
+          .withFrameRate(10)
+          .withColor(new RGBWColor(100, 255, 100));
+  public static final StrobeAnimation LED_ANIMATION_PASSING =
+      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
+          .withFrameRate(10)
+          .withColor(new RGBWColor(100, 100, 255));
+  public static final SolidColor LED_ANIMATION_READY =
+      new SolidColor(LED_START_INDEX, LED_END_INDEX).withColor(new RGBWColor(100, 255, 100));
+  public static final SolidColor LED_ANIMATION_NOT_READY =
+      new SolidColor(LED_START_INDEX, LED_END_INDEX).withColor(new RGBWColor(255, 100, 100));
+  public static final StrobeAnimation LED_ANIMATION_SHIFTING =
+      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
+          .withFrameRate(10)
+          .withColor(new RGBWColor(255, 255, 0));
+  public static final StrobeAnimation LED_ANIMATION_ENDGAME =
+      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
+          .withFrameRate(10)
+          .withColor(new RGBWColor(255, 100, 255));
+  public static final StrobeAnimation LED_ANIMATION_BUMP =
+      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
+          .withFrameRate(10)
+          .withColor(new RGBWColor(0, 255, 255));
 
   public enum Mode {
     /** Running on a real robot. */
