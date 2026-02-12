@@ -165,10 +165,11 @@ public class RobotContainer {
   }
 
   private void configureLEDS() {
-    // ready/not ready leds, does not lock
+    // ready / not ready leds, does not lock
     new Trigger(shooter::atShootingSetpoints)
         .whileFalse(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.NOT_READY, false)))
         .whileTrue(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.READY, false)));
+
     // shooting / passing indicators, unlocks when unpressed
     driver
         .rightTrigger()
@@ -179,6 +180,7 @@ public class RobotContainer {
         .and(() -> ShootingUtil.getShootingType(drive::getPose) == 1)
         .whileTrue(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.PASSING, true)));
     driver.rightTrigger().onFalse(Commands.runOnce(leds::unlock));
+
     // when endgame begins, endgame LED animation for 3 seconds
     new Trigger(() -> ShiftUtil.getNextShift() == Constants.ShiftOwner.BOTH)
         .onTrue(
@@ -186,12 +188,16 @@ public class RobotContainer {
                 .andThen(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.ENDGAME, true)))
                 .andThen(new WaitCommand(3))
                 .andThen(Commands.runOnce(leds::unlock)));
-    // when shift is 5s from now, shift LED animation for 3 seconds
+
+    // when shift is 5s from now, shift LED animation for 3 seconds, color depends on who gets it
+    // will be ours
     new Trigger(() -> ShiftUtil.isOurs(ShiftUtil.getNextShift()) && ShiftUtil.nearNextShift())
         .onTrue(
             Commands.runOnce(() -> leds.setMode(Constants.LEDMode.SHIFTING_US, true))
                 .andThen(new WaitCommand(3))
                 .andThen(Commands.runOnce(leds::unlock)));
+
+    // will not be ours
     new Trigger(() -> !ShiftUtil.isOurs(ShiftUtil.getNextShift()) && ShiftUtil.nearNextShift())
         .onTrue(
             Commands.runOnce(() -> leds.setMode(Constants.LEDMode.SHIFTING_THEM, true))
