@@ -92,5 +92,4 @@ public class ShiftUtilTest {
 
     assertEquals(Constants.ShiftOwner.BLUE, ShiftUtil.getNextShift());
   }
-
 }
