@@ -57,7 +57,8 @@ public final class Constants {
     SHOOTING,
     PASSING,
     NOT_READY,
-    SHIFTING,
+    SHIFTING_US,
+    SHIFTING_THEM,
     ENDGAME,
     BUMP
   }
@@ -79,10 +80,14 @@ public final class Constants {
       new SolidColor(LED_START_INDEX, LED_END_INDEX).withColor(new RGBWColor(100, 255, 100));
   public static final SolidColor LED_ANIMATION_NOT_READY =
       new SolidColor(LED_START_INDEX, LED_END_INDEX).withColor(new RGBWColor(255, 100, 100));
-  public static final StrobeAnimation LED_ANIMATION_SHIFTING =
+  public static final StrobeAnimation LED_ANIMATION_SHIFTING_US =
       new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
           .withFrameRate(10)
           .withColor(new RGBWColor(255, 255, 0));
+  public static final StrobeAnimation LED_ANIMATION_SHIFTING_THEM =
+      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
+          .withFrameRate(10)
+          .withColor(new RGBWColor(255, 155, 0));
   public static final StrobeAnimation LED_ANIMATION_ENDGAME =
       new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
           .withFrameRate(10)
@@ -91,6 +96,12 @@ public final class Constants {
       new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
           .withFrameRate(10)
           .withColor(new RGBWColor(0, 255, 255));
+
+  public enum ShiftOwner {
+    BLUE,
+    RED,
+    BOTH,
+  }
 
   public enum Mode {
     /** Running on a real robot. */
