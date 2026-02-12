@@ -14,6 +14,8 @@ public class ShiftUtil {
 
   private static final Timer shiftTimer = new Timer();
 
+  // TODO: option for manual setup by operator in case the game data is delayed?
+
   public static void setupShifts() {
     String msg = DriverStation.getGameSpecificMessage();
     if (Objects.equals(msg, "B")) {
