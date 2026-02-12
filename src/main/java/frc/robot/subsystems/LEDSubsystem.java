@@ -46,8 +46,11 @@ public class LEDSubsystem extends SubsystemBase {
       case NOT_READY:
         candle.setControl(Constants.LED_ANIMATION_NOT_READY);
         break;
-      case SHIFTING:
-        candle.setControl(Constants.LED_ANIMATION_SHIFTING);
+      case SHIFTING_US:
+        candle.setControl(Constants.LED_ANIMATION_SHIFTING_US);
+        break;
+      case SHIFTING_THEM:
+        candle.setControl(Constants.LED_ANIMATION_SHIFTING_THEM);
         break;
       case ENDGAME:
         candle.setControl(Constants.LED_ANIMATION_ENDGAME);
