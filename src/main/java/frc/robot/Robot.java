@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.generated.TunerConstants;
+import frc.robot.util.ShiftUtil;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -135,12 +136,22 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
+
+    robotContainer.setupShiftUtil();
   }
 
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    // Deliberately empty - teleop behavior is handled by commands and subsystems
+
+    // inform the operator that the shifts had an error and need to be assigned manually.
+    // if nothing is chosen yet from the chooser, it will just pass a blank string which will do
+    // nothing and the operator will continue to see that they are not assigned
+    boolean shiftsAssigned = ShiftUtil.isAssigned();
+    Logger.recordOutput("Shifts/Assigned", shiftsAssigned);
+    if (!shiftsAssigned) {
+      ShiftUtil.assignShifts(robotContainer.getShiftChoosen());
+    }
   }
 
   /** This function is called once when test mode is enabled. */
