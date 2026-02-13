@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Constants;
 import java.util.Objects;
+import org.littletonrobotics.junction.Logger;
 
 public class ShiftUtil {
 
@@ -12,25 +13,64 @@ public class ShiftUtil {
   private static Constants.ShiftOwner shift3 = Constants.ShiftOwner.BOTH;
   private static Constants.ShiftOwner shift4 = Constants.ShiftOwner.BOTH;
 
+  private static boolean wasAssigned = false;
   private static final Timer shiftTimer = new Timer();
 
-  // TODO: option for manual setup by operator in case the game data is delayed?
+  /** Must be called at the beginning of teleop to sync the shifts with the match clock */
+  public static void startShiftTimer() {
+    shiftTimer.reset();
+    shiftTimer.start();
+  }
 
-  public static void setupShifts() {
+  /**
+   * Automatically assigns shifts based on FMS game data. Called after a 1-second delay to ensure
+   * the game-specific message has been sent
+   */
+  public static void assignShifts() {
     String msg = DriverStation.getGameSpecificMessage();
     if (Objects.equals(msg, "B")) {
       shift1 = Constants.ShiftOwner.RED;
       shift2 = Constants.ShiftOwner.BLUE;
       shift3 = Constants.ShiftOwner.RED;
       shift4 = Constants.ShiftOwner.BLUE;
+      wasAssigned = true;
     } else if (Objects.equals(msg, "R")) {
       shift1 = Constants.ShiftOwner.BLUE;
       shift2 = Constants.ShiftOwner.RED;
       shift3 = Constants.ShiftOwner.BLUE;
       shift4 = Constants.ShiftOwner.RED;
+      wasAssigned = true;
     }
-    shiftTimer.reset();
-    shiftTimer.start();
+    Logger.recordOutput("Shifts/Automatically assigned", wasAssigned);
+    Logger.recordOutput("Shifts/Shift 1", shift1);
+    Logger.recordOutput("Shifts/Shift 2", shift2);
+    Logger.recordOutput("Shifts/Shift 3", shift3);
+    Logger.recordOutput("Shifts/Shift 4", shift4);
+  }
+
+  /** Manually assigns shifts based on whoever was active first. */
+  public static void assignShifts(String msg) {
+    if (Objects.equals(msg, "R")) {
+      shift1 = Constants.ShiftOwner.RED;
+      shift2 = Constants.ShiftOwner.BLUE;
+      shift3 = Constants.ShiftOwner.RED;
+      shift4 = Constants.ShiftOwner.BLUE;
+      wasAssigned = true;
+    } else if (Objects.equals(msg, "B")) {
+      shift1 = Constants.ShiftOwner.BLUE;
+      shift2 = Constants.ShiftOwner.RED;
+      shift3 = Constants.ShiftOwner.BLUE;
+      shift4 = Constants.ShiftOwner.RED;
+      wasAssigned = true;
+    }
+    Logger.recordOutput("Shifts/Shift 1", shift1);
+    Logger.recordOutput("Shifts/Shift 2", shift2);
+    Logger.recordOutput("Shifts/Shift 3", shift3);
+    Logger.recordOutput("Shifts/Shift 4", shift4);
+  }
+
+  public static boolean isAssigned() {
+    return wasAssigned;
   }
 
   /**

@@ -23,7 +23,8 @@ public class ShiftUtilTest {
     DriverStationSim.notifyNewData();
 
     SimHooks.restartTiming();
-    ShiftUtil.setupShifts();
+    ShiftUtil.startShiftTimer();
+    ShiftUtil.assignShifts();
   }
 
   @Test
@@ -82,13 +83,13 @@ public class ShiftUtilTest {
   }
 
   @Test
-  @DisplayName("setupShifts works correctly with both game-specific messages")
+  @DisplayName("assignShifts works correctly with both game-specific messages")
   public void testGameSpecificMessageR() {
 
     DriverStationSim.setGameSpecificMessage("R");
     DriverStationSim.notifyNewData();
 
-    ShiftUtil.setupShifts();
+    ShiftUtil.assignShifts();
 
     assertEquals(Constants.ShiftOwner.BLUE, ShiftUtil.getNextShift());
   }
