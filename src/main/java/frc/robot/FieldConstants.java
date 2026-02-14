@@ -2,8 +2,6 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.DriverStation;
-import java.util.function.Supplier;
 
 // Use this file as an example file that allows for referencing positions on a field
 public final class FieldConstants {
@@ -100,28 +98,4 @@ public final class FieldConstants {
   public static final double BUMPZONE_END_BLUE = APRILTAG_20.getX() + 1;
   public static final double BUMPZONE_START_RED = APRILTAG_4.getX() - 1;
   public static final double BUMPZONE_END_RED = APRILTAG_10.getX() + 1;
-
-  /**
-   * Returns if the robot is inside the bump auto-rotate zone, as defined with the BUMPZONE_START
-   * and BUMPZONE_END values.
-   */
-  public static boolean inBumpZone(Supplier<Pose2d> poseSupplier) {
-    Pose2d pose = poseSupplier.get();
-    if (DriverStation.getAlliance().isPresent()) {
-      if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
-        return pose.getX() < BUMPZONE_END_BLUE && pose.getX() > BUMPZONE_START_BLUE; // if blue
-      }
-    }
-    return pose.getX() < BUMPZONE_END_RED
-        && pose.getX() > BUMPZONE_START_RED; // if not blue, its red...
-  }
-
-  public static Rotation2d rotationToSnap(Supplier<Rotation2d> rotationSupplier) {
-    Rotation2d rotation = rotationSupplier.get();
-    double degrees = rotation.getDegrees();
-
-    // only 45deg multiples
-    double snappedDegrees = Math.round((degrees - 45.0) / 90.0) * 90.0 + 45.0;
-    return Rotation2d.fromDegrees(snappedDegrees);
-  }
 }

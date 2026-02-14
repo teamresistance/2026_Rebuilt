@@ -23,6 +23,7 @@ import frc.robot.subsystems.shooter.ShooterReal;
 import frc.robot.subsystems.shooter.ShooterSim;
 import frc.robot.subsystems.shooter.ShootingConstants;
 import frc.robot.subsystems.vision.*;
+import frc.robot.util.BumpUtil;
 import frc.robot.util.ShiftUtil;
 import frc.robot.util.ShootingUtil;
 import java.io.IOException;
@@ -85,13 +86,13 @@ public class RobotContainer {
     }
 
     // bump stuff
-    inBumpZone = new Trigger(() -> FieldConstants.inBumpZone(drive::getPose));
+    inBumpZone = new Trigger(() -> BumpUtil.inBumpZone(drive::getPose));
     driveAtAngleForBump =
         DriveCommands.joystickDriveAtAngle(
                 drive,
                 () -> -driver.getLeftY(),
                 () -> -driver.getLeftX(),
-                () -> FieldConstants.rotationToSnap(drive::getRotation))
+                () -> BumpUtil.rotationToSnap(drive::getRotation))
             .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming);
     driveAtAngleForBump.addRequirements(drive);
 
