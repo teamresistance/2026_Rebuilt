@@ -2,9 +2,12 @@ package frc.robot.util;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.FieldConstants;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 public class BumpUtil {
 
@@ -12,8 +15,17 @@ public class BumpUtil {
    * Returns if the robot is inside the bump auto-rotate zone, as defined with the BUMPZONE_START
    * and BUMPZONE_END values.
    */
-  public static boolean inBumpZone(Supplier<Pose2d> poseSupplier) {
-    Pose2d pose = poseSupplier.get();
+  public static boolean inBumpZone(
+      Supplier<Pose2d> poseSupplier, Supplier<ChassisSpeeds> speedsSupplier) {
+    ChassisSpeeds speeds = speedsSupplier.get();
+    Pose2d pose =
+        poseSupplier
+            .get()
+            .plus(
+                new Transform2d(
+                        speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, Rotation2d.kZero)
+                    .times(0.5));
+    Logger.recordOutput("Bump/Bump Zone Virtual Pose", pose);
     if (DriverStation.getAlliance().isPresent()) {
       if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
         return pose.getX() < FieldConstants.BUMPZONE_END_BLUE

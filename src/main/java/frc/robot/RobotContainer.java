@@ -86,7 +86,7 @@ public class RobotContainer {
     }
 
     // bump stuff
-    inBumpZone = new Trigger(() -> BumpUtil.inBumpZone(drive::getPose));
+    inBumpZone = new Trigger(() -> BumpUtil.inBumpZone(drive::getPose, drive::getChassisSpeeds));
     driveAtAngleForBump =
         DriveCommands.joystickDriveAtAngle(
                 drive,
@@ -230,10 +230,14 @@ public class RobotContainer {
                 .andThen(Commands.runOnce(leds::unlock)));
 
     // bump rotate indicator, will stay on for 1 second OR instantly stop if you leave the bump zone
-    inBumpZone.onTrue(
-        Commands.runOnce(() -> leds.setMode(Constants.LEDMode.BUMP, true))
-            .andThen(new WaitCommand(1).andThen(Commands.runOnce(leds::unlock))));
-    inBumpZone.onFalse(Commands.runOnce(leds::unlock));
+    driver
+        .y()
+        .negate()
+        .and(inBumpZone)
+        .onTrue(
+            Commands.runOnce(() -> leds.setMode(Constants.LEDMode.BUMP, true))
+                .andThen(new WaitCommand(1).andThen(Commands.runOnce(leds::unlock))));
+    driver.y().negate().and(inBumpZone).onFalse(Commands.runOnce(leds::unlock));
   }
 
   /** Defines button bindings and control triggers */
@@ -244,7 +248,8 @@ public class RobotContainer {
         DriveCommands.joystickDrive(
             drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
 
-    inBumpZone.whileTrue(driveAtAngleForBump);
+    // when left bumper is not pressed and in bump zone, auto rotate.
+    driver.y().negate().and(inBumpZone).whileTrue(driveAtAngleForBump);
 
     // auto-aim hood and turret always
     shooter.setDefaultCommand(new IdleShooterCommand(drive, shooter));
