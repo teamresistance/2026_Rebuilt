@@ -58,6 +58,10 @@ public class RobotContainer {
   private final LoggedDashboardChooser<Command> autoChooser;
   private final SendableChooser<String> manualShiftAssigner = new SendableChooser<>();
 
+  // bump stuff
+  private Trigger inBumpZone;
+  private Command driveAtAngleForBump;
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
 
@@ -79,6 +83,17 @@ public class RobotContainer {
       default:
         shooter = new ShooterReal();
     }
+
+    // bump stuff
+    inBumpZone = new Trigger(() -> FieldConstants.inBumpZone(drive::getPose));
+    driveAtAngleForBump =
+        DriveCommands.joystickDriveAtAngle(
+                drive,
+                () -> -driver.getLeftY(),
+                () -> -driver.getLeftX(),
+                () -> FieldConstants.rotationToSnap(drive::getRotation))
+            .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming);
+    driveAtAngleForBump.addRequirements(drive);
 
     manualShiftAssigner.addOption("Red", "R");
     manualShiftAssigner.addOption("Blue", "B");
@@ -212,14 +227,23 @@ public class RobotContainer {
             Commands.runOnce(() -> leds.setMode(Constants.LEDMode.SHIFTING_THEM, true))
                 .andThen(new WaitCommand(3))
                 .andThen(Commands.runOnce(leds::unlock)));
+
+    // bump rotate indicator, will stay on for 1 second OR instantly stop if you leave the bump zone
+    inBumpZone.onTrue(
+        Commands.runOnce(() -> leds.setMode(Constants.LEDMode.BUMP, true))
+            .andThen(new WaitCommand(1).andThen(Commands.runOnce(leds::unlock))));
+    inBumpZone.onFalse(Commands.runOnce(leds::unlock));
   }
 
   /** Defines button bindings and control triggers */
   private void configureButtonBindings() {
+
     // Normal field-relative drive
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
+
+    inBumpZone.whileTrue(driveAtAngleForBump);
 
     // auto-aim hood and turret always
     shooter.setDefaultCommand(new IdleShooterCommand(drive, shooter));
