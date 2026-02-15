@@ -272,7 +272,7 @@ public class RobotContainer {
                 .andThen(Commands.runOnce(ShiftUtil::assignShifts)));
   }
 
-  public String getShiftChoosen() {
+  public String getShiftChosen() {
     return manualShiftAssigner.getSelected();
   }
 

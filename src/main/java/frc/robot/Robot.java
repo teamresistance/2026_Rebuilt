@@ -144,13 +144,15 @@ public class Robot extends LoggedRobot {
   @Override
   public void teleopPeriodic() {
 
+    Logger.recordOutput("Shifts/Current Shift", ShiftUtil.getShift());
+
     // inform the operator that the shifts had an error and need to be assigned manually.
     // if nothing is chosen yet from the chooser, it will just pass a blank string which will do
     // nothing and the operator will continue to see that they are not assigned
     boolean shiftsAssigned = ShiftUtil.isAssigned();
     Logger.recordOutput("Shifts/Assigned", shiftsAssigned);
     if (!shiftsAssigned) {
-      ShiftUtil.assignShifts(robotContainer.getShiftChoosen());
+      ShiftUtil.assignShifts(robotContainer.getShiftChosen());
     }
   }
 

@@ -12,8 +12,8 @@ import org.littletonrobotics.junction.Logger;
 public class BumpUtil {
 
   /**
-   * Returns if transform(s) of the robot are in the bump auto-rotate zone, as defined with the BUMPZONE_START
-   * and BUMPZONE_END values.
+   * Returns if transform(s) of the robot are in the bump auto-rotate zone, as defined with the
+   * BUMPZONE_START and BUMPZONE_END values.
    */
   public static boolean inBumpZone(
       Supplier<Pose2d> poseSupplier, Supplier<ChassisSpeeds> speedsSupplier) {
