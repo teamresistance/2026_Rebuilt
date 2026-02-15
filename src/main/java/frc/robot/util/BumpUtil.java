@@ -12,28 +12,41 @@ import org.littletonrobotics.junction.Logger;
 public class BumpUtil {
 
   /**
-   * Returns if the robot is inside the bump auto-rotate zone, as defined with the BUMPZONE_START
-   * and BUMPZONE_END values.
+   * Returns if transform(s) of the robot are in the bump auto-rotate zone, as defined with the
+   * BUMPZONE_START and BUMPZONE_END values.
    */
   public static boolean inBumpZone(
       Supplier<Pose2d> poseSupplier, Supplier<ChassisSpeeds> speedsSupplier) {
     ChassisSpeeds speeds = speedsSupplier.get();
-    Pose2d pose =
-        poseSupplier
-            .get()
-            .plus(
-                new Transform2d(
-                        speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, Rotation2d.kZero)
-                    .times(0.5));
-    Logger.recordOutput("Bump/Bump Zone Virtual Pose", pose);
-    if (DriverStation.getAlliance().isPresent()) {
-      if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
-        return pose.getX() < FieldConstants.BUMPZONE_END_BLUE
-            && pose.getX() > FieldConstants.BUMPZONE_START_BLUE; // if blue
+    Pose2d basePose = poseSupplier.get();
+
+    // check multiple scaled virtual poses ahead of the robot (0.25x, 0.5x, 0.75x)
+    double[] scales = {0.25, 0.5, 0.75};
+    boolean isBlue =
+        DriverStation.getAlliance().isPresent()
+            && DriverStation.getAlliance().get() == DriverStation.Alliance.Blue;
+
+    for (double s : scales) {
+      Pose2d pose =
+          basePose.plus(
+              new Transform2d(
+                  speeds.vxMetersPerSecond * s, speeds.vyMetersPerSecond * s, Rotation2d.kZero));
+      Logger.recordOutput(String.format("Bump/Bump Zone Virtual Pose (scale=%.2f)", s), pose);
+
+      if (isBlue) {
+        if (pose.getX() < FieldConstants.BUMPZONE_END_BLUE
+            && pose.getX() > FieldConstants.BUMPZONE_START_BLUE) {
+          return true;
+        }
+      } else {
+        if (pose.getX() < FieldConstants.BUMPZONE_END_RED
+            && pose.getX() > FieldConstants.BUMPZONE_START_RED) {
+          return true;
+        }
       }
     }
-    return pose.getX() < FieldConstants.BUMPZONE_END_RED
-        && pose.getX() > FieldConstants.BUMPZONE_START_RED; // if not blue, its red...
+
+    return false;
   }
 
   /**
