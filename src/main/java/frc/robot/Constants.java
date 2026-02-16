@@ -30,6 +30,11 @@ public final class Constants {
           Units.degreesToRadians(540),
           Units.degreesToRadians(400));
 
+  public static final int CLIMBER_BRAKE_ID = 1; // TODO: correct DIO port
+  public static final int CLIMBER_MOTOR_ID = 11;
+  public static final int CLIMBER_ZERO = 0;
+  public static final int CLIMBER_FULL = 10; // TODO: actual high/low pos
+
   public static final int SHOOTER_HOOD_ID = 12;
   public static final int SHOOTER_TURRET_ID = 13;
   public static final int SHOOTER_FLYWHEEL_ID = 14;
