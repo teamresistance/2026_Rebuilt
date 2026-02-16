@@ -3,12 +3,12 @@ package frc.robot.subsystems.climber;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
+import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.Relay;
 import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
@@ -26,6 +26,7 @@ public class ClimberReal implements ClimberIO {
 
     SparkMaxConfig config = new SparkMaxConfig();
     config.closedLoop.p(0).i(0).d(0); // TODO: tune me! tune me!
+    config.closedLoop.allowedClosedLoopError(4, ClosedLoopSlot.kSlot0);
     climber.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
@@ -47,6 +48,11 @@ public class ClimberReal implements ClimberIO {
   @Override
   public void down() {
     climberControl.setSetpoint(Constants.CLIMBER_ZERO, SparkBase.ControlType.kPosition);
+  }
+
+  @Override
+  public boolean atTarget() {
+    return climberControl.isAtSetpoint();
   }
 
   @Override
