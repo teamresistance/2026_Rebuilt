@@ -16,6 +16,7 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.commands.IdleShooterCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.generated.TunerConstants;
+import frc.robot.input.KeyboardHID;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.shooter.ShooterIO;
@@ -52,6 +53,8 @@ public class RobotContainer {
 
   // Controller
   private final CommandXboxController driver = new CommandXboxController(0);
+  // Optional keyboard HID (captures global key events). Intended for SIM.
+  private final KeyboardHID keyboard = new KeyboardHID(0);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -73,7 +76,13 @@ public class RobotContainer {
         shooter = new ShooterReal();
         break;
       case SIM:
-        shooter = new ShooterSim();
+        // For SIM mode, create the simulation shooter and wire it to the drive
+        // subsystem so it can receive real simulation pose and chassis speeds.
+        ShooterSim simShooter = new ShooterSim();
+        // drive is already configured and will be a SwerveDriveSim in SIM mode;
+        // pass suppliers so the ShooterSim can call ShootingManager with real data.
+        simShooter.setDataInterfaces(drive::getPose, drive::getChassisSpeeds);
+        shooter = simShooter;
         break;
       default:
         shooter = new ShooterReal();
@@ -238,9 +247,13 @@ public class RobotContainer {
   private void configureButtonBindings() {
 
     // Normal field-relative drive
+    // Combine controller and keyboard inputs so both can drive the robot simultaneously.
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
-            drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
+            drive,
+            () -> Math.max(-1.0, Math.min(1.0, -driver.getLeftY() + keyboard.getRawAxis(0))),
+            () -> Math.max(-1.0, Math.min(1.0, -driver.getLeftX() + keyboard.getRawAxis(1))),
+            () -> Math.max(-1.0, Math.min(1.0, -driver.getRightX() + keyboard.getRawAxis(2)))));
 
     // when left bumper is not pressed and in bump zone, auto rotate.
     driver.y().negate().and(inBumpZone).whileTrue(driveAtAngleForBump);

@@ -209,10 +209,9 @@ spotless {
     }
     groovyGradle {
         target fileTree(".") {
-            include "**/*.gradle"
-            exclude "**/build/**", "**/build-*/**"
+        include "**/*.gradle"
+        exclude "**/build/**", "**/build-*/**"
         }
-        greclipse()
         leadingTabsToSpaces(4)
         trimTrailingWhitespace()
         endWithNewline()

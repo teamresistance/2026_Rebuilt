@@ -27,20 +27,25 @@ public class ShootingConstants {
    * Motor Adjustment Constants
    * =============== */
 
-  // Time interval for motor adjustment (seconds) - time to recover from launch and prepare for next shot
+  // Time interval for motor adjustment (seconds) - time to recover from launch and prepare for next
+  // shot
   public static final double RELOAD_TIME = 0.07675438596;
 
-  // Upswing velocity of projectile before launch (m/s) - pre-launch speed requirement for consistent shooting performance
+  // Upswing velocity of projectile before launch (m/s) - pre-launch speed requirement for
+  // consistent shooting performance
   public static final double UPSWING_VELOCITY = 5.7912;
 
-  // Moment of inertia of the shooter mechanism (kg·m^2) - affects how much torque is needed to adjust wheel speed after a shot
+  // Moment of inertia of the shooter mechanism (kg·m^2) - affects how much torque is needed to
+  // adjust wheel speed after a shot
   public static final double SHOOTER_MOMENT_OF_INERTIA = 0.00126;
 
-  // Resting angular velocity of the shooter wheel (rad/s) - target steady-state speed for consistent shooting performance
+  // Resting angular velocity of the shooter wheel (rad/s) - target steady-state speed for
+  // consistent shooting performance
   public static final double FREE_ANGULAR_VELOCITY = 0;
 
   /** Conversion factor from radians to degrees */
   public static final double RAD_TO_DEG = 180.0 / Math.PI;
+
   /** Conversion factor from degrees to radians */
   public static final double DEG_TO_RAD = Math.PI / 180.0;
 }

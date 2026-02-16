@@ -8,12 +8,12 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import frc.robot.Constants;
 import frc.robot.util.shooter.ShootingManager;
-
 import org.littletonrobotics.junction.Logger;
 
 public class ShooterReal implements ShooterIO {
 
-  // TODO: Place the thing that feeds balls into the shooter in another subsystem, such as a HopperSubsystem.
+  // TODO: Place the thing that feeds balls into the shooter in another subsystem, such as a
+  // HopperSubsystem.
 
   private final TalonFX hoodMotor = new TalonFX(Constants.SHOOTER_HOOD_ID, CANBus.roboRIO());
   private final TalonFX turretMotor = new TalonFX(Constants.SHOOTER_TURRET_ID, CANBus.roboRIO());
@@ -115,7 +115,8 @@ public class ShooterReal implements ShooterIO {
   public void setTurretTarget(double angle) {
     if (angle < Constants.SHOOTER_TURRET_MAX_YAW && angle > Constants.SHOOTER_TURRET_MIN_YAW) {
       turretTargetAngle = angle;
-      turretMotor.setControl(new PositionDutyCycle(ShootingManager.Conversions.toTurretRevs(angle)));
+      turretMotor.setControl(
+          new PositionDutyCycle(ShootingManager.Conversions.toTurretRevs(angle)));
     }
   }
 
@@ -139,7 +140,8 @@ public class ShooterReal implements ShooterIO {
     Logger.recordOutput("Shooter/Turret Target Angle", turretTargetAngle);
     Logger.recordOutput(
         "Shooter/Turret Real Angle",
-        ShootingManager.Conversions.toTurretDegrees(turretEncoder.getPosition().getValueAsDouble()));
+        ShootingManager.Conversions.toTurretDegrees(
+            turretEncoder.getPosition().getValueAsDouble()));
     Logger.recordOutput("Shooter/Hood Target Angle", hoodTargetAngle);
     Logger.recordOutput(
         "Shooter/Hood Real Angle",

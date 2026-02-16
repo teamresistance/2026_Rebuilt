@@ -4,7 +4,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.drive.SwerveDriveIO;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.util.shooter.ShootingManager;
-
 import org.littletonrobotics.junction.Logger;
 
 public class IdleShooterCommand extends Command {
@@ -23,11 +22,11 @@ public class IdleShooterCommand extends Command {
 
     // NOTE: All angles are field-relative!
     double distance =
-        ShootingManager.getPredictedDistanceToHubAfterReload(); // Use predicted distance after reload for idle aiming
-    double turretAngle =
-        ShootingManager.getHorizontalTotalShootingAngle();
-    double hoodAngle = 
-        ShootingManager.getVerticalShootingAngle();
+        ShootingManager
+            .getPredictedDistanceToHubAfterReload(); // Use predicted distance after reload for idle
+    // aiming
+    double turretAngle = ShootingManager.getHorizontalTotalShootingAngle();
+    double hoodAngle = ShootingManager.getVerticalShootingAngle();
 
     shooter.setTurretTarget(turretAngle);
     shooter.setHoodTarget(hoodAngle);
