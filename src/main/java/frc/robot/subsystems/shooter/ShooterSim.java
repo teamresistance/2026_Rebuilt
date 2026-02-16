@@ -5,14 +5,12 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
-import frc.robot.FieldConstants;
 import frc.robot.util.shooter.ShootingManager;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -91,8 +89,8 @@ public class ShooterSim implements ShooterIO {
 
         // Determine the target pose based on the current robot pose and alliance
         // settings. Compute the straight-line distance to the hub and the angle
-        // between the vector to the hub and the vector to the hub's projection on
-        // the alliance wall (three-point angle: hub, robot, hubProjection).
+        // between the vector to the hub and the +X direction at the robot
+        // (i.e., the three points: hub, robot, robot+(1,0)).
         var targetPose = ShootingManager.SimulationAndState.getShootingTarget(pose);
 
         Translation2d hub = targetPose.getTranslation();
@@ -103,36 +101,20 @@ public class ShooterSim implements ShooterIO {
         double dy = hub.getY() - robot.getY();
         double distanceToHub = Math.hypot(dx, dy);
 
-        // Determine alliance wall X coordinate. Use known apriltag X positions as
-        // field edge proxies (left = APRILTAG_29.x, right = APRILTAG_13.x).
-        double wallX = hub.getX();
-        var allianceOpt = DriverStation.getAlliance();
-        if (allianceOpt.isPresent()) {
-          if (allianceOpt.get() == DriverStation.Alliance.Blue) {
-            wallX = FieldConstants.APRILTAG_29.getX();
-          } else {
-            wallX = FieldConstants.APRILTAG_13.getX();
-          }
-        }
-
-        // Project the hub onto the alliance wall (preserve Y, replace X with wall X)
-        Translation2d hubProj = new Translation2d(wallX, hub.getY());
-
-        // Vectors from robot to hub and robot to projection
-        double v1x = dx; // hub - robot
-        double v1y = dy;
-        double v2x = hubProj.getX() - robot.getX(); // proj - robot
-        double v2y = hubProj.getY() - robot.getY();
-
-        double dot = v1x * v2x + v1y * v2y;
-        double cross = v1x * v2y - v1y * v2x;
-
-        double denom = Math.hypot(v1x, v1y) * Math.hypot(v2x, v2y);
+        // Angle between vector robot->hub and robot->(robot + (1,0)). For the
+        // +X direction the second vector is (1,0), so the signed angle is
+        // atan2(cross, dot) = atan2(-dy, dx) == -atan2(dy, dx).
         double fieldRelativeAngleToHub = 0.0;
+        double denom = Math.hypot(dx, dy);
         if (denom > 1e-9) {
-          // Signed angle between v1 and v2
-          fieldRelativeAngleToHub = Math.atan2(cross, dot);
+          fieldRelativeAngleToHub = Math.PI - Math.atan2(dy, dx);
         }
+
+        // Record the computed inputs so we can trace where a zero angle might
+        // originate (helps debugging in simulation/AdvantageScope).
+        Logger.recordOutput("Shooter/Sim Input DistanceToHub", distanceToHub);
+        Logger.recordOutput(
+            "Shooter/Sim InputFieldRelativeAngleToHub", Math.toDegrees(fieldRelativeAngleToHub));
 
         ShootingManager.updateShootingParameters(distanceToHub, fieldRelativeAngleToHub, speeds);
       } catch (Exception ex) {

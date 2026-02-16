@@ -105,7 +105,7 @@ public class ShootingManager {
     // velocity.
     FastBallisticCalculator.computeBallistics(
         predictedDistanceToHubAfterReload,
-        Math.toDegrees(1.67),
+        Math.toDegrees(predictedFieldRelativeAngleToHubAfterReload),
         chassisSpeeds.vxMetersPerSecond,
         chassisSpeeds.vyMetersPerSecond);
 
@@ -181,16 +181,26 @@ public class ShootingManager {
    */
   public static void predictDistanceAndAngleAfterReload(
       ChassisSpeeds chassisSpeeds, double currentDistanceToHub, double currentAngleToHub) {
+    // Represent the current hub position in the robot's local frame using the
+    // provided distance and field-relative angle. From there, apply the robot's
+    // linear displacement during the reload (assumed in the robot frame of the
+    // supplied chassisSpeeds) to predict the hub position when the next shot is
+    // ready.
+    double x = currentDistanceToHub * Math.cos(currentAngleToHub);
+    double y = currentDistanceToHub * Math.sin(currentAngleToHub);
+
     double predictedX = chassisSpeeds.vxMetersPerSecond * reloadTime;
     double predictedY = chassisSpeeds.vyMetersPerSecond * reloadTime;
 
+    double newX = x + predictedX;
+    double newY = y + predictedY;
+
     // Hypotenuse gives the predicted straight-line distance after applying the
     // translation due to robot motion during reload.
-    predictedDistanceToHubAfterReload = Math.hypot(currentDistanceToHub + predictedX, predictedY);
+    predictedDistanceToHubAfterReload = Math.hypot(newX, newY);
 
     // Angle relative to the robot/field after the predicted displacement.
-    predictedFieldRelativeAngleToHubAfterReload =
-        Math.atan2(predictedY, currentDistanceToHub + predictedX);
+    predictedFieldRelativeAngleToHubAfterReload = Math.atan2(newY, newX);
 
     Logger.recordOutput(
         "Shooting/PredictedDistanceToHubAfterReload", predictedDistanceToHubAfterReload);
