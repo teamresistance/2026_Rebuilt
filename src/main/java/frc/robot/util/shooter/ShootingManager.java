@@ -202,6 +202,8 @@ public class ShootingManager {
     // Angle relative to the robot/field after the predicted displacement.
     predictedFieldRelativeAngleToHubAfterReload = Math.atan2(newY, newX);
 
+    // TODO: Re-confirm that the above angle is field-relative.
+
     Logger.recordOutput(
         "Shooting/PredictedDistanceToHubAfterReload", predictedDistanceToHubAfterReload);
     Logger.recordOutput(

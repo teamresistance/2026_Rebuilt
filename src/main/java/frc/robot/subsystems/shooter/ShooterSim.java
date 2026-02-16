@@ -100,6 +100,7 @@ public class ShooterSim implements ShooterIO {
         double dx = hub.getX() - robot.getX();
         double dy = hub.getY() - robot.getY();
         double distanceToHub = Math.hypot(dx, dy);
+        // TODO: Determine a coordinate origin and finalize the direction of the above angle.
 
         // Angle between vector robot->hub and robot->(robot + (1,0)). For the
         // +X direction the second vector is (1,0), so the signed angle is
