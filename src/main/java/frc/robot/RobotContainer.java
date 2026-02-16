@@ -21,13 +21,11 @@ import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterReal;
 import frc.robot.subsystems.shooter.ShooterSim;
-import frc.robot.subsystems.shooter.ShootingConstants;
 import frc.robot.subsystems.vision.*;
 import frc.robot.util.BumpUtil;
 import frc.robot.util.ShiftUtil;
-import frc.robot.util.ShootingUtil;
+import frc.robot.util.shooter.ShootingManager;
 import java.io.IOException;
-import java.util.Arrays;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.photonvision.PhotonCamera;
@@ -65,10 +63,6 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-
-    // TODO: REMOVE THIS WHEN ACTUAL VALUES EXIST (makes sim possible)
-    Arrays.fill(ShootingConstants.params, new double[] {0, 0});
-    Arrays.fill(ShootingConstants.tofParams, 1);
 
     drive = configureDrive();
     vision = configureAprilTagVision();
@@ -198,11 +192,11 @@ public class RobotContainer {
     // shooting / passing indicators, unlocks when unpressed
     driver
         .rightTrigger()
-        .and(() -> ShootingUtil.getShootingType(drive::getPose) == 0)
+        .and(() -> ShootingManager.SimulationAndState.getShootingType(drive::getPose) == 0)
         .whileTrue(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.SHOOTING, true)));
     driver
         .rightTrigger()
-        .and(() -> ShootingUtil.getShootingType(drive::getPose) == 1)
+        .and(() -> ShootingManager.SimulationAndState.getShootingType(drive::getPose) == 1)
         .whileTrue(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.PASSING, true)));
     driver.rightTrigger().onFalse(Commands.runOnce(leds::unlock));
 

@@ -17,6 +17,8 @@ import frc.robot.generated.TunerConstants;
  * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
  * on a roboRIO. Change the value of "simMode" to switch between "sim" (physics sim) and "replay"
  * (log replay from a file).
+ * 
+ * NOTE: This class should only contain constants used by multiple subsystems. Place single-subsystem constants in the respective subsystem's folder.
  */
 public final class Constants {
 

@@ -11,8 +11,10 @@ public interface ShooterIO extends Subsystem {
 
   void runFlywheelAtRPS(double rps);
 
+  // TODO: In implementation, the angles here must be field-relative.
   void setHoodTarget(double hoodTargetAngle);
 
+  // TODO: In implementation, the angles here must be field-relative.
   void setTurretTarget(double turretTargetAngle);
 
   void zeroHood(double newValue);
