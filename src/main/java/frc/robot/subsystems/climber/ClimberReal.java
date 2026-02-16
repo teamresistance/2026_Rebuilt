@@ -9,6 +9,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.wpilibj.DigitalOutput;
+import edu.wpi.first.wpilibj.Relay;
 import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
 
@@ -18,7 +19,7 @@ public class ClimberReal implements ClimberIO {
   private final RelativeEncoder climberInternalEncoder = climber.getEncoder();
   private final SparkClosedLoopController climberControl = climber.getClosedLoopController();
 
-  private final DigitalOutput brakeSolenoid = new DigitalOutput(Constants.CLIMBER_BRAKE_ID);
+  private final Relay brakeSolenoid = new Relay(Constants.CLIMBER_BRAKE_ID);
 
   public ClimberReal() {
     register();
@@ -30,12 +31,12 @@ public class ClimberReal implements ClimberIO {
 
   @Override
   public void brake() {
-    brakeSolenoid.set(false);
+    brakeSolenoid.set(Relay.Value.kOff);
   }
 
   @Override
   public void unbrake() {
-    brakeSolenoid.set(true);
+    brakeSolenoid.set(Relay.Value.kOn);
   }
 
   @Override
@@ -51,6 +52,7 @@ public class ClimberReal implements ClimberIO {
   @Override
   public void periodic() {
     Logger.recordOutput("Climber/Setpoint", climberControl.getSetpoint());
-    Logger.recordOutput("Climber/Setpoint", climberInternalEncoder.getPosition());
+    Logger.recordOutput("Climber/Position", climberInternalEncoder.getPosition());
+    Logger.recordOutput("Climber/Braking", brakeSolenoid.get().equals(Relay.Value.kOff));
   }
 }
