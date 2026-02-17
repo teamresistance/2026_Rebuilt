@@ -1,42 +1,37 @@
 package frc.robot.subsystems.shooter;
 
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+
 public class ShootingConstants {
 
   private ShootingConstants() {}
 
-  /**
-   * This contains information on what angle and RPS to shoot at in a two-dimensional array. Data is
-   * stored in the format of {@code [rotations per sec, hood angle]}. <br>
-   * <br>
-   * Usage: {@code shootingParameters[distance*10]}. <br>
-   * For example, shootingParameters[67] would correlate to 6.7 meters away from the hub.
-   */
-  public static final double[][] params =
-      new double[250][]; // TODO: this is a placeholder, get actual values...
+  /** Sets up the interpolating maps with all recorded data points */
+  public static void setupShootingConstants() {
+    distanceToRpmMap.put(1.0, 1.0);
 
-  /**
-   * Contains Time of Flight values for rounded distances (to 0.5m). [2] correlates to 1m, [3] to
-   * 1.5m, so on.
-   */
-  public static final double[] tofParams = new double[60]; // TODO: get values...
+    distanceToHoodMap.put(2.0, 2.0);
 
-  /** Gets the time of flight of a shot based on distance from the time of flight array. */
+    distanceToTimeOfFlightMap.put(3.0, 3.0);
+  }
+
+  private static final InterpolatingDoubleTreeMap distanceToRpsMap = new InterpolatingDoubleTreeMap();
+  private static final InterpolatingDoubleTreeMap distanceToHoodMap = new InterpolatingDoubleTreeMap();
+  private static final InterpolatingDoubleTreeMap distanceToTimeOfFlightMap = new InterpolatingDoubleTreeMap();
+
+  /** Gets time of flight for a set distance */
   public static double getTimeOfFlight(double distance) {
-    return tofParams[((int) distance) * 2];
+    return distanceToTimeOfFlightMap.get(distance);
   }
 
-  /** Gets only the rotations per second from the parameter array. */
+  /** Gets the rotations per second for a set distance */
   public static double getRPS(double distance) {
-    return params[(int) Math.round((distance) * 10)][0];
+    return distanceToRpsMap.get(distance);
   }
 
-  /** Gets only the hood angle from the parameter array. */
+  /** Gets the hood angle for a set distance */
   public static double getHoodAngle(double distance) {
-    return params[(int) Math.round((distance) * 10)][1];
+    return distanceToHoodMap.get(distance);
   }
 
-  /** Gets parameters in the format of {@code [rotations per sec, hood angle]} */
-  public static double[] getParams(double distance) {
-    return params[(int) Math.round((distance) * 10)];
-  }
 }
