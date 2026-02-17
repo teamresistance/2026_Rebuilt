@@ -2,6 +2,7 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -27,7 +28,6 @@ import frc.robot.util.BumpUtil;
 import frc.robot.util.ShiftUtil;
 import frc.robot.util.ShootingUtil;
 import java.io.IOException;
-import java.util.Arrays;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.photonvision.PhotonCamera;
@@ -60,20 +60,18 @@ public class RobotContainer {
   private final LoggedDashboardChooser<Command> autoChooser;
   private final SendableChooser<String> manualShiftAssigner = new SendableChooser<>();
 
-  // bump stuff
+  // special stuff
   private Trigger inBumpZone;
   private Command driveAtAngleForBump;
+  private Command driveAtLimitedSpeed;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
 
-    // TODO: REMOVE THIS WHEN ACTUAL VALUES EXIST (makes sim possible)
-    Arrays.fill(ShootingConstants.params, new double[] {0, 0});
-    Arrays.fill(ShootingConstants.tofParams, 1);
-
     drive = configureDrive();
     vision = configureAprilTagVision();
     configureNamedCommands();
+    ShootingConstants.configureShootingConstants();
 
     switch (Constants.CURRENT_MODE) {
       case REAL:
@@ -99,6 +97,15 @@ public class RobotContainer {
                 () -> BumpUtil.rotationToSnap(drive::getRotation))
             .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming);
     driveAtAngleForBump.addRequirements(drive);
+
+    driveAtLimitedSpeed =
+        DriveCommands.joystickDrive(
+                drive,
+                () -> MathUtil.clamp(-driver.getLeftY(), -0.8, 0.8),
+                () -> MathUtil.clamp(-driver.getLeftX(), -0.8, 0.8),
+                () -> MathUtil.clamp(-driver.getRightX(), -0.75, 0.75))
+            .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming);
+    driveAtLimitedSpeed.addRequirements(drive);
 
     manualShiftAssigner.addOption("Red", "R");
     manualShiftAssigner.addOption("Blue", "B");
@@ -280,6 +287,7 @@ public class RobotContainer {
     driver.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
     driver.rightTrigger().whileTrue(new ShootCommand(drive, shooter));
+    driver.rightTrigger().whileTrue(driveAtLimitedSpeed);
   }
 
   /**

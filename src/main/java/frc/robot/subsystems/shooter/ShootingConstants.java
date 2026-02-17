@@ -7,12 +7,17 @@ public class ShootingConstants {
   private ShootingConstants() {}
 
   /** Sets up the interpolating maps with all recorded data points */
-  public static void setupShootingConstants() {
+  public static void configureShootingConstants() {
     distanceToRpsMap.put(1.0, 1.0);
 
     distanceToHoodMap.put(2.0, 2.0);
 
-    distanceToTimeOfFlightMap.put(3.0, 3.0);
+    // placeholder values TODO: ts
+    distanceToTimeOfFlightMap.put(1.0, 0.9);
+    distanceToTimeOfFlightMap.put(2.0, 1.0);
+    distanceToTimeOfFlightMap.put(3.0, 1.1);
+    distanceToTimeOfFlightMap.put(4.0, 1.2);
+    distanceToTimeOfFlightMap.put(5.0, 1.3);
   }
 
   private static final InterpolatingDoubleTreeMap distanceToRpsMap =
