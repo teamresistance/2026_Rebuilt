@@ -60,7 +60,7 @@ public class RobotContainer {
   private final LoggedDashboardChooser<Command> autoChooser;
   private final SendableChooser<String> manualShiftAssigner = new SendableChooser<>();
 
-  // special stuff
+  // bump zone and prebuilt commands
   private Trigger inBumpZone;
   private Command driveAtAngleForBump;
   private Command driveAtLimitedSpeed;
@@ -89,6 +89,8 @@ public class RobotContainer {
 
     // bump stuff
     inBumpZone = new Trigger(() -> BumpUtil.inBumpZone(drive::getPose, drive::getChassisSpeeds));
+
+    // pid angle control to the rotationToSnap() return
     driveAtAngleForBump =
         DriveCommands.joystickDriveAtAngle(
                 drive,
@@ -98,6 +100,7 @@ public class RobotContainer {
             .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming);
     driveAtAngleForBump.addRequirements(drive);
 
+    // clamps inputs to the drive command
     driveAtLimitedSpeed =
         DriveCommands.joystickDrive(
                 drive,
