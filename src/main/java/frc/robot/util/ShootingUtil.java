@@ -88,8 +88,6 @@ public class ShootingUtil {
       return 0;
     }
 
-    boolean isTop = pose.getY() >= FieldConstants.TOP_BOTTOM_SPLIT_Y;
-
     if (allianceOpt.get() == DriverStation.Alliance.Blue
         && pose.getX() <= FieldConstants.BLUE_SHOOTING_ZONE_END) {
       return 0;
@@ -156,7 +154,7 @@ public class ShootingUtil {
 
     double estimatedAirtime =
         ShootingConstants.getTimeOfFlight(
-            ShootingUtil.getApproximateVirtualDistanceToHub(
+            getApproximateVirtualDistanceToHub(
                 robotPose,
                 new Translation2d(robotSpeeds.vxMetersPerSecond, robotSpeeds.vyMetersPerSecond)));
 
