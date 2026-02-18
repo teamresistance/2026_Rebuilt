@@ -78,7 +78,7 @@ public class RobotContainer {
         climber = new ClimberReal();
         break;
       case SIM:
-        shooter = new ShooterSim();
+        shooter = new ShooterSim(drive::getPose, drive::getChassisSpeeds);
         climber = new ClimberSim();
         break;
       default:

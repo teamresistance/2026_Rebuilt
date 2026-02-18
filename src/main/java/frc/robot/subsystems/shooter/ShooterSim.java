@@ -36,8 +36,11 @@ public class ShooterSim implements ShooterIO {
   private Supplier<Pose2d> poseSupplier = null;
   private Supplier<ChassisSpeeds> speedsSupplier = null;
 
-  public ShooterSim() {
+  public ShooterSim(Supplier<Pose2d> poseSupplier, Supplier<ChassisSpeeds> speedsSupplier) {
     register();
+
+    this.poseSupplier = poseSupplier;
+    this.speedsSupplier = speedsSupplier;
 
     mech = new Mechanism2d(3, 3);
     root = mech.getRoot("turretRoot", 1.5, 0.5);
@@ -47,17 +50,6 @@ public class ShooterSim implements ShooterIO {
 
     hood = turretBase.append(new MechanismLigament2d("Hood", 0.4, 0, 6, new Color8Bit(Color.kRed)));
     SmartDashboard.putData("Turret Mechanism2d", mech);
-  }
-
-  /**
-   * Set suppliers that provide the current robot pose and chassis speeds from the drive subsystem.
-   * RobotContainer should call this when running in simulation so ShootingManager can be fed with
-   * real sim data.
-   */
-  public void setDataInterfaces(
-      Supplier<Pose2d> poseSupplier, Supplier<ChassisSpeeds> speedsSupplier) {
-    this.poseSupplier = poseSupplier;
-    this.speedsSupplier = speedsSupplier;
   }
 
   @Override
