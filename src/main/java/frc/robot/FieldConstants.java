@@ -94,8 +94,8 @@ public final class FieldConstants {
   public static final double TOP_BOTTOM_SPLIT_Y = APRILTAG_20.getY();
 
   // TODO: change during testing to driver needs
-  public static final double BUMPZONE_START_BLUE = APRILTAG_26.getX() - 0.5;
-  public static final double BUMPZONE_END_BLUE = APRILTAG_20.getX() + 0.5;
-  public static final double BUMPZONE_START_RED = APRILTAG_4.getX() - 0.5;
-  public static final double BUMPZONE_END_RED = APRILTAG_10.getX() + 0.5;
+  public static final double BUMPZONE_START_BLUE = APRILTAG_26.getX();
+  public static final double BUMPZONE_END_BLUE = APRILTAG_20.getX();
+  public static final double BUMPZONE_START_RED = APRILTAG_4.getX();
+  public static final double BUMPZONE_END_RED = APRILTAG_10.getX();
 }

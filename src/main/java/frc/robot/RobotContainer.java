@@ -5,10 +5,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -18,6 +15,9 @@ import frc.robot.commands.ShootCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.input.KeyboardHID;
 import frc.robot.subsystems.LEDSubsystem;
+import frc.robot.subsystems.climber.ClimberIO;
+import frc.robot.subsystems.climber.ClimberReal;
+import frc.robot.subsystems.climber.ClimberSim;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterReal;
@@ -49,6 +49,7 @@ public class RobotContainer {
   private final SwerveDriveIO drive;
   private VisionSubsystem vision;
   private final ShooterIO shooter;
+  private final ClimberIO climber;
   private final LEDSubsystem leds = new LEDSubsystem(); // does not need IO
 
   // Controller
@@ -74,18 +75,15 @@ public class RobotContainer {
     switch (Constants.CURRENT_MODE) {
       case REAL:
         shooter = new ShooterReal();
+        climber = new ClimberReal();
         break;
       case SIM:
-        // For SIM mode, create the simulation shooter and wire it to the drive
-        // subsystem so it can receive real simulation pose and chassis speeds.
-        ShooterSim simShooter = new ShooterSim();
-        // drive is already configured and will be a SwerveDriveSim in SIM mode;
-        // pass suppliers so the ShooterSim can call ShootingManager with real data.
-        simShooter.setDataInterfaces(drive::getPose, drive::getChassisSpeeds);
-        shooter = simShooter;
+        shooter = new ShooterSim();
+        climber = new ClimberSim();
         break;
       default:
         shooter = new ShooterReal();
+        climber = new ClimberReal();
     }
 
     // bump stuff
@@ -258,6 +256,24 @@ public class RobotContainer {
     // when left bumper is not pressed and in bump zone, auto rotate.
     driver.y().negate().and(inBumpZone).whileTrue(driveAtAngleForBump);
 
+    // climb raise
+    driver
+        .b()
+        .onTrue(
+            Commands.runOnce(climber::unbrake)
+                .andThen(climber::up)
+                .andThen(new WaitUntilCommand(climber::atTarget))
+                .andThen(climber::brake));
+
+    // climb descend
+    driver
+        .a()
+        .onTrue(
+            Commands.runOnce(climber::unbrake)
+                .andThen(climber::down)
+                .andThen(new WaitUntilCommand(climber::atTarget))
+                .andThen(climber::brake));
+
     // auto-aim hood and turret always
     shooter.setDefaultCommand(new IdleShooterCommand(drive, shooter));
 
@@ -279,7 +295,7 @@ public class RobotContainer {
                 .andThen(Commands.runOnce(ShiftUtil::assignShifts)));
   }
 
-  public String getShiftChoosen() {
+  public String getShiftChosen() {
     return manualShiftAssigner.getSelected();
   }
 

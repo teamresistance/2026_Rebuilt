@@ -94,6 +94,29 @@ public class ShiftUtil {
     return Constants.ShiftOwner.BOTH; // next is endgame
   }
 
+  /**
+   * Returns which alliance owns this shift.
+   *
+   * @return the {@code ShiftOwner} for this shift
+   */
+  public static Constants.ShiftOwner getShift() {
+    double elapsed = shiftTimer.get();
+
+    if (elapsed < 10.0) {
+      return Constants.ShiftOwner.BOTH; // transition shift
+    } else if (elapsed < 35.0) {
+      return shift1;
+    } else if (elapsed < 60.0) {
+      return shift2;
+    } else if (elapsed < 85.0) {
+      return shift3;
+    } else if (elapsed < 110.0) {
+      return shift4;
+    }
+
+    return Constants.ShiftOwner.BOTH; // endgame
+  }
+
   /** Returns if the provided {@code shiftOwner} matches our alliance color. */
   public static boolean isOurs(Constants.ShiftOwner shiftOwner) {
     if (DriverStation.getAlliance().isPresent()) {
