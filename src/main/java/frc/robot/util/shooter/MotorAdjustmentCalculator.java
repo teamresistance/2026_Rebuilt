@@ -1,6 +1,6 @@
 package frc.robot.util.shooter;
 
-import frc.robot.ShootingConstants;
+import frc.robot.Constants.ShootingConstants;
 
 /**
  * MotorAdjustmentCalculator - Computes motor adjustments to compensate for energy loss during
@@ -72,12 +72,6 @@ public class MotorAdjustmentCalculator {
     desiredAngularAcceleration = (desiredAngularVelocity - restingAngularVelocity) / t;
 
     long end = System.nanoTime();
-
-    System.out.println("Initial Angular Velocity: " + restingAngularVelocity);
-    System.out.println("Desired Angular Acceleration: " + desiredAngularAcceleration);
-    System.out.println("Desired Angular Velocity:" + desiredAngularVelocity);
-
-    System.out.println("Launch Velocity: " + v_out);
-    System.out.printf("time_s = %.9f%n", (end - start) * 1e-9);
+    // TODO: Log start/end times
   }
 }

@@ -1,6 +1,6 @@
 package frc.robot.util.shooter;
 
-import frc.robot.ShootingConstants;
+import frc.robot.Constants.ShootingConstants;
 
 /**
  * FastBallisticCalculator - Calculates projectile launch parameters with air resistance.
@@ -94,12 +94,6 @@ public final class FastBallisticCalculator {
     deltaFloorAngleDeg = Math.atan2(cross, dot) * ShootingConstants.RAD_TO_DEG;
 
     long end = System.nanoTime();
-
-    // Output
-    System.out.println("v_total = " + vTotalNew);
-    System.out.println("theta_deg = " + thetaDeg);
-    System.out.println("floor_angle_deg = " + floorAzimuthDeg);
-    System.out.println("floor_angle_delta_deg = " + deltaFloorAngleDeg);
-    System.out.printf("time_s = %.9f%n", (end - start) * 1e-9);
+    // TODO: Log start/end times
   }
 }
