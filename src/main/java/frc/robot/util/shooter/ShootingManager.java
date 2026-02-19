@@ -1,6 +1,7 @@
 package frc.robot.util.shooter;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.Constants;
@@ -95,19 +96,35 @@ public class ShootingManager {
    * @param chassisSpeeds current robot chassis speeds (m/s)
    */
   public static void updateShootingParameters(
-      double distanceToHub, double fieldRelativeAngleToHub, ChassisSpeeds chassisSpeeds) {
+      double distanceToHub,
+      double fieldRelativeAngleToHub,
+      ChassisSpeeds chassisSpeeds,
+      Pose2d robotPose) {
+
+    // Convert the supplied robot-relative chassis speeds into field-relative
+    // components before using them for prediction and in the ballistic solver.
+    // This matches the expectations of FastBallisticCalculator which assumes
+    // vx/vy are expressed in the field (floor) frame.
+    Rotation2d robotRotation = robotPose.getRotation();
+    double cos = Math.cos(robotRotation.getRadians());
+    double sin = Math.sin(robotRotation.getRadians());
+
+    // Robot-relative velocities (vx, vy) are rotated into the field frame.
+    double vxField = chassisSpeeds.vxMetersPerSecond * cos - chassisSpeeds.vyMetersPerSecond * sin;
+    double vyField = chassisSpeeds.vxMetersPerSecond * sin + chassisSpeeds.vyMetersPerSecond * cos;
 
     // Predict where the robot/target will be after the reload delay so ballistic
-    // calculations account for robot motion during the reload.
-    predictDistanceAndAngleAfterReload(chassisSpeeds, distanceToHub, fieldRelativeAngleToHub);
+    // calculations account for robot motion during the reload. Use the field
+    // frame velocities for that prediction.
+    predictDistanceAndAngleAfterReload(vxField, vyField, distanceToHub, fieldRelativeAngleToHub);
 
     // Compute ballistic solution for predicted range/angle using current robot
-    // velocity.
+    // velocity in the field frame.
     FastBallisticCalculator.computeBallistics(
         predictedDistanceToHubAfterReload,
         Math.toDegrees(predictedFieldRelativeAngleToHubAfterReload),
-        chassisSpeeds.vxMetersPerSecond,
-        chassisSpeeds.vyMetersPerSecond);
+        vxField,
+        vyField);
 
     // Compute the motor adjustment required to restore wheel energy after firing.
     MotorAdjustmentCalculator.computeMotorAdjustment();
@@ -175,22 +192,22 @@ public class ShootingManager {
    * <p>Outputs are written to {@code predictedDistanceToHubAfterReload} and {@code
    * predictedFieldRelativeAngleToHubAfterReload} and also recorded via Logger.
    *
-   * @param chassisSpeeds current chassis speeds (m/s)
+   * @param vxField robot linear velocity in the field X direction (m/s)
+   * @param vyField robot linear velocity in the field Y direction (m/s)
    * @param currentDistanceToHub current straight-line distance to the hub (meters)
    * @param currentAngleToHub current field-relative angle to the hub (radians)
    */
   public static void predictDistanceAndAngleAfterReload(
-      ChassisSpeeds chassisSpeeds, double currentDistanceToHub, double currentAngleToHub) {
-    // Represent the current hub position in the robot's local frame using the
+      double vxField, double vyField, double currentDistanceToHub, double currentAngleToHub) {
+    // Represent the current hub position in the field frame using the
     // provided distance and field-relative angle. From there, apply the robot's
-    // linear displacement during the reload (assumed in the robot frame of the
-    // supplied chassisSpeeds) to predict the hub position when the next shot is
-    // ready.
+    // linear displacement during the reload (provided in field-frame vx/vy)
+    // to predict the hub position when the next shot is ready.
     double x = currentDistanceToHub * Math.cos(currentAngleToHub);
     double y = currentDistanceToHub * Math.sin(currentAngleToHub);
 
-    double predictedX = chassisSpeeds.vxMetersPerSecond * reloadTime;
-    double predictedY = chassisSpeeds.vyMetersPerSecond * reloadTime;
+    double predictedX = vxField * reloadTime;
+    double predictedY = vyField * reloadTime;
 
     double newX = x + predictedX;
     double newY = y + predictedY;

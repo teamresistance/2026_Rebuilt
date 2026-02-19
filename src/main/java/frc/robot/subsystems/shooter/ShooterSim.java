@@ -20,7 +20,11 @@ public class ShooterSim implements ShooterIO {
   private final Mechanism2d mech;
   private final MechanismRoot2d root;
   private final MechanismLigament2d turretBase;
-  private final MechanismLigament2d hood;
+  // Visualization: target/angles and velocities (with visible labels)
+  private final MechanismLigament2d totalHorizontal; // total horizontal shooting angle
+  private final MechanismLigament2d originalHorizontal; // original angle to hub
+  private final MechanismLigament2d robotVel;
+  private final MechanismLigament2d shotVel;
 
   private double turretAngleDegs = 180;
   private double hoodAngleDegs = 13;
@@ -46,9 +50,30 @@ public class ShooterSim implements ShooterIO {
     root = mech.getRoot("turretRoot", 1.5, 0.5);
 
     turretBase =
-        root.append(new MechanismLigament2d("TurretBase", 0.6, 0, 12, new Color8Bit(Color.kBlue)));
+        root.append(new MechanismLigament2d("TurretBase", 0.6, 0, 12, new Color8Bit(Color.kBlack)));
 
-    hood = turretBase.append(new MechanismLigament2d("Hood", 0.4, 0, 6, new Color8Bit(Color.kRed)));
+    // Show the total horizontal shooting angle (green). This is the absolute
+    // horizontal angle the shooter should be set to in the faield frame.
+    totalHorizontal =
+        root.append(
+            new MechanismLigament2d(
+                "Total Horizontal (deg)", 0.6, turretTargetDegs, 4, new Color8Bit(Color.kGreen)));
+
+    // Show the original field-relative angle to the hub (blue-ish) so we can
+    // compare current target vs raw angle-to-hub.
+    originalHorizontal =
+        root.append(
+            new MechanismLigament2d(
+                "Original Horizontal (deg)", 0.6, 0, 3, new Color8Bit(Color.kTeal)));
+
+    // Robot velocity vector (cyan) anchored at the root
+    robotVel =
+        root.append(new MechanismLigament2d("RobotVel", 0.6, 0, 3, new Color8Bit(Color.kCyan)));
+
+    // Shot velocity vector (magenta/cyan mix) anchored at turret tip
+    shotVel =
+        turretBase.append(
+            new MechanismLigament2d("ShotVel", 0.8, 0, 5, new Color8Bit(Color.kPurple)));
     SmartDashboard.putData("Turret Mechanism2d", mech);
   }
 
@@ -64,7 +89,7 @@ public class ShooterSim implements ShooterIO {
     hoodAngleDegs += hoodOutput;
 
     turretBase.setAngle(turretAngleDegs);
-    hood.setAngle(hoodAngleDegs);
+    ;
 
     Logger.recordOutput("Shooter/Sim Turret Angle", turretAngleDegs);
     Logger.recordOutput("Shooter/Sim Hood Angle", hoodAngleDegs);
@@ -100,7 +125,7 @@ public class ShooterSim implements ShooterIO {
         double fieldRelativeAngleToHub = 0.0;
         double denom = Math.hypot(dx, dy);
         if (denom > 1e-9) {
-          fieldRelativeAngleToHub = Math.PI - Math.atan2(dy, dx);
+          fieldRelativeAngleToHub = Math.atan2(dy, dx);
         }
 
         // Record the computed inputs so we can trace where a zero angle might
@@ -109,7 +134,38 @@ public class ShooterSim implements ShooterIO {
         Logger.recordOutput(
             "Shooter/Sim InputFieldRelativeAngleToHub", Math.toDegrees(fieldRelativeAngleToHub));
 
-        ShootingManager.updateShootingParameters(distanceToHub, fieldRelativeAngleToHub, speeds);
+        // Update the ShootingManager with the latest inputs so ballistic
+        // parameters are available for visualization below.
+        ShootingManager.updateShootingParameters(
+            distanceToHub, fieldRelativeAngleToHub, speeds, pose);
+
+        // --- Visualization updates ---
+        // Show the desired absolute shooting angle computed by the manager
+        // (total horizontal) and the original raw angle to the hub so you can
+        // visually compare them.
+        totalHorizontal.setAngle(ShootingManager.getHorizontalTotalShootingAngle());
+
+        // original angle to hub (field-relative) in degrees
+        originalHorizontal.setAngle(Math.toDegrees(fieldRelativeAngleToHub));
+
+        // Compute robot field-frame velocity (match ShootingManager conversion).
+        var robotRotation = pose.getRotation();
+        double cosR = Math.cos(robotRotation.getRadians());
+        double sinR = Math.sin(robotRotation.getRadians());
+        double vxField = speeds.vxMetersPerSecond * cosR - speeds.vyMetersPerSecond * sinR;
+        double vyField = speeds.vxMetersPerSecond * sinR + speeds.vyMetersPerSecond * cosR;
+
+        double robotSpeed = Math.hypot(vxField, vyField);
+        double robotAngleDeg = Math.toDegrees(Math.atan2(vyField, vxField));
+        robotVel.setAngle(robotAngleDeg);
+        // Scale the length for visualization (clamp to a reasonable size)
+        robotVel.setLength(Math.min(1.5, robotSpeed * 0.25));
+
+        // Shot velocity vector: angle uses the manager's total horizontal angle,
+        // length is proportional to computed launch velocity.
+        double launch = ShootingManager.getLaunchVelocity();
+        shotVel.setAngle(ShootingManager.getHorizontalTotalShootingAngle());
+        shotVel.setLength(Math.min(1.5, Math.abs(launch) * 0.075));
       } catch (Exception ex) {
         // Defensive: do not let simulation UI break on unexpected errors. Log and continue.
         Logger.recordOutput("Shooter/Sim Error", ex.toString());
