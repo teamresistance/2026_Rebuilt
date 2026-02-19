@@ -64,7 +64,7 @@ public class MotorAdjustmentCalculator {
 
     long start = System.nanoTime();
 
-    double desiredAngularVelocity =
+    desiredAngularVelocity =
         Math.sqrt(
             restingAngularVelocity * restingAngularVelocity
                 + m / I * (v_out * v_out - v_up * v_up));

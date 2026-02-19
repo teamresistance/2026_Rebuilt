@@ -209,8 +209,8 @@ public class ShootingManager {
     double predictedX = vxField * reloadTime;
     double predictedY = vyField * reloadTime;
 
-    double newX = x + predictedX;
-    double newY = y + predictedY;
+    double newX = x - predictedX;
+    double newY = y - predictedY;
 
     // Hypotenuse gives the predicted straight-line distance after applying the
     // translation due to robot motion during reload.
