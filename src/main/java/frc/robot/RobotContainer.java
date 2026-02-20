@@ -232,14 +232,17 @@ public class RobotContainer {
     // will be ours
     new Trigger(() -> ShiftUtil.isOurs(ShiftUtil.getNextShift()) && ShiftUtil.nearNextShift())
         .onTrue(
-            Commands.runOnce(() -> leds.setMode(Constants.LEDMode.SHIFTING_US, true))
+            Commands.runOnce(leds::unlock)
+                .andThen(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.SHIFTING_US, true)))
                 .andThen(new WaitCommand(3))
                 .andThen(Commands.runOnce(leds::unlock)));
 
     // will not be ours
     new Trigger(() -> !ShiftUtil.isOurs(ShiftUtil.getNextShift()) && ShiftUtil.nearNextShift())
         .onTrue(
-            Commands.runOnce(() -> leds.setMode(Constants.LEDMode.SHIFTING_THEM, true))
+            Commands.runOnce(leds::unlock)
+                .andThen(
+                    Commands.runOnce(() -> leds.setMode(Constants.LEDMode.SHIFTING_THEM, true)))
                 .andThen(new WaitCommand(3))
                 .andThen(Commands.runOnce(leds::unlock)));
 
@@ -249,9 +252,16 @@ public class RobotContainer {
         .negate()
         .and(inBumpZone)
         .onTrue(
-            Commands.runOnce(() -> leds.setMode(Constants.LEDMode.BUMP, true))
+            Commands.runOnce(leds::unlock)
+                .andThen(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.BUMP, true)))
                 .andThen(new WaitCommand(1).andThen(Commands.runOnce(leds::unlock))));
-    driver.y().negate().and(inBumpZone).onFalse(Commands.runOnce(leds::unlock));
+
+    // when not in bump zone BUT bump leds are on, unlock leds. prevents unlocking other states when
+    // leaving bump zone
+    inBumpZone
+        .negate()
+        .and(() -> leds.getMode() == Constants.LEDMode.BUMP)
+        .onTrue(Commands.runOnce(leds::unlock));
   }
 
   /** Defines button bindings and control triggers */
