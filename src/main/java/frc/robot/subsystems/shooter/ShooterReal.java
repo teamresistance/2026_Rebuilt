@@ -3,6 +3,7 @@ package frc.robot.subsystems.shooter;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.*;
 import com.ctre.phoenix6.controls.PositionDutyCycle;
+import com.ctre.phoenix6.controls.StrictFollower;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -18,6 +19,8 @@ public class ShooterReal implements ShooterIO {
   private final TalonFX turretMotor = new TalonFX(Constants.SHOOTER_TURRET_ID, CANBus.roboRIO());
   private final TalonFX flywheelMotor =
       new TalonFX(Constants.SHOOTER_FLYWHEEL_ID, CANBus.roboRIO());
+  private final TalonFX flywheelMotor2 =
+      new TalonFX(Constants.SHOOTER_FLYWHEEL_ID_2, CANBus.roboRIO());
   private final CANcoder turretEncoder =
       new CANcoder(Constants.SHOOTER_TURRET_ENCODER_ID, CANBus.roboRIO());
 
@@ -70,6 +73,16 @@ public class ShooterReal implements ShooterIO {
                     .withSupplyCurrentLimit(0)
                     .withSupplyCurrentLimitEnable(true));
     flywheelMotor.getConfigurator().apply(flywheelConfig);
+
+    TalonFXConfiguration flywheelConfig2 =
+        new TalonFXConfiguration()
+            .withCurrentLimits(
+                new CurrentLimitsConfigs()
+                    .withStatorCurrentLimit(0)
+                    .withStatorCurrentLimitEnable(true)
+                    .withSupplyCurrentLimit(0)
+                    .withSupplyCurrentLimitEnable(true));
+    flywheelMotor2.getConfigurator().apply(flywheelConfig2);
   }
 
   /**
@@ -96,6 +109,7 @@ public class ShooterReal implements ShooterIO {
   public void runFlywheelAtRPS(double rps) {
     flywheelTargetRPS = rps;
     flywheelMotor.setControl(new VelocityDutyCycle(rps));
+    flywheelMotor2.setControl(new StrictFollower(Constants.SHOOTER_FLYWHEEL_ID));
   }
 
   /**
