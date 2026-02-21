@@ -277,7 +277,7 @@ public class RobotContainer {
 
     // climb raise
     driver
-        .b()
+        .start()
         .onTrue(
             Commands.runOnce(climber::unbrake)
                 .andThen(climber::up)
@@ -286,12 +286,20 @@ public class RobotContainer {
 
     // climb descend
     driver
-        .a()
+        .back()
         .onTrue(
             Commands.runOnce(climber::unbrake)
                 .andThen(climber::down)
                 .andThen(new WaitUntilCommand(climber::atTarget))
                 .andThen(climber::brake));
+
+    // auto-align to climber positions with bumpers (left/right bumper = left/right pos)
+    driver
+        .leftBumper()
+        .whileTrue(DriveCommands.goToTransform(drive, FieldConstants.getClimberAlignPos(true)));
+    driver
+        .rightBumper()
+        .whileTrue(DriveCommands.goToTransform(drive, FieldConstants.getClimberAlignPos(false)));
 
     // auto-aim hood and turret always
     shooter.setDefaultCommand(new IdleShooterCommand(drive, shooter));
