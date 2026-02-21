@@ -45,6 +45,7 @@ public final class Constants {
   public static final double SHOOTER_TURRET_REVS_PER_DEG = 1;
   public static final double SHOOTER_HOOD_REVS_TOLERANCE = 0;
   public static final double SHOOTER_TURRET_REVS_TOLERANCE = 0;
+  public static final double SHOOTER_RPS_TOLERANCE = 0;
 
   // TODO: correct numbers with real hardware
   public static final double SHOOTER_HOOD_MAX_PITCH = 47;

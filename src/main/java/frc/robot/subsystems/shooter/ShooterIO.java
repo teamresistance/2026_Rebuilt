@@ -15,5 +15,7 @@ public interface ShooterIO extends Subsystem {
 
   void setTurretTarget(double turretTargetAngle);
 
+  boolean atTargetRPS();
+
   void zeroHood(double newValue);
 }

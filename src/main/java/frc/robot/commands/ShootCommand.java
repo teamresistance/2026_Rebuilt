@@ -24,6 +24,8 @@ public class ShootCommand extends Command {
         ShootingUtil.getVirtualDistanceToTarget(drive.getPose(), drive.getChassisSpeeds());
     shooter.runFlywheelAtRPS(ShootingConstants.getRPS(distance));
 
+    // TODO: only feed shooter when atTargetRPS true
+
     Logger.recordOutput("Shooter/Virtual Distance to Hub", distance);
 
     // TODO: all of these

@@ -57,8 +57,6 @@ public class ShooterReal implements ShooterIO {
                     .withSupplyCurrentLimit(0)
                     .withSupplyCurrentLimitEnable(true))
             .withFeedback(
-                // using CANcoder and assuming encoder mounted directly to motor.
-                // TODO: otherwise, correct the ratio if it is mounted elsewhere
                 new FeedbackConfigs().withRemoteCANcoder(turretEncoder).withRotorToSensorRatio(1));
     turretMotor.getConfigurator().apply(turretConfig);
 
@@ -82,9 +80,15 @@ public class ShooterReal implements ShooterIO {
   @Override
   public boolean atShootingSetpoints() {
     return hoodMotor.getPosition().isNear(hoodTargetAngle, Constants.SHOOTER_HOOD_REVS_TOLERANCE)
-        && turretEncoder
+        && turretMotor
             .getPosition()
             .isNear(turretTargetAngle, Constants.SHOOTER_TURRET_REVS_TOLERANCE);
+  }
+
+  /** Returns if the flywheel motors are at their target speed. */
+  @Override
+  public boolean atTargetRPS() {
+    return flywheelMotor.getVelocity().isNear(flywheelTargetRPS, Constants.SHOOTER_RPS_TOLERANCE);
   }
 
   /** Sets the velocity target for the flywheel in rotations/second */
@@ -101,6 +105,7 @@ public class ShooterReal implements ShooterIO {
   @Override
   public void setHoodTarget(double angle) {
     if (angle < Constants.SHOOTER_HOOD_MAX_PITCH && angle > Constants.SHOOTER_HOOD_MIN_PITCH) {
+      angle = angle - Constants.SHOOTER_HOOD_MIN_PITCH; // zero position is not zero degrees
       hoodTargetAngle = angle;
       hoodMotor.setControl(new PositionDutyCycle(ShootingUtil.toHoodRevs(angle)));
     }
