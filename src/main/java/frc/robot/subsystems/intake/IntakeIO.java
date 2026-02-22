@@ -7,6 +7,11 @@ public interface IntakeIO extends Subsystem {
   @Override
   void periodic();
 
+  void activateIntake();
 
+  void stopIntake();
 
+  void reverseIntake();
+
+  boolean isIntaking();
 }
