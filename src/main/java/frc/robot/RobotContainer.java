@@ -25,6 +25,7 @@ import frc.robot.subsystems.shooter.ShooterSim;
 import frc.robot.subsystems.shooter.ShootingConstants;
 import frc.robot.subsystems.vision.*;
 import frc.robot.util.BumpUtil;
+import frc.robot.util.OtherUtil;
 import frc.robot.util.ShiftUtil;
 import frc.robot.util.ShootingUtil;
 import java.io.IOException;
@@ -296,10 +297,10 @@ public class RobotContainer {
     // auto-align to climber positions with bumpers (left/right bumper = left/right pos)
     driver
         .leftBumper()
-        .whileTrue(DriveCommands.goToTransform(drive, FieldConstants.getClimberAlignPos(true)));
+        .whileTrue(DriveCommands.goToTransform(drive, OtherUtil.getClimberAlignPos(true)));
     driver
         .rightBumper()
-        .whileTrue(DriveCommands.goToTransform(drive, FieldConstants.getClimberAlignPos(false)));
+        .whileTrue(DriveCommands.goToTransform(drive, OtherUtil.getClimberAlignPos(false)));
 
     // auto-aim hood and turret always
     shooter.setDefaultCommand(new IdleShooterCommand(drive, shooter));

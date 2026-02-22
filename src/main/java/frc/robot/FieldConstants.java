@@ -3,7 +3,6 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.wpilibj.DriverStation;
 
 // Use this file as an example file that allows for referencing positions on a field
 public final class FieldConstants {
@@ -107,16 +106,4 @@ public final class FieldConstants {
   public static final Transform2d BLUE_LEFT_CLIMBER_ALIGN = new Transform2d(0, 0, Rotation2d.kZero);
   public static final Transform2d BLUE_RIGHT_CLIMBER_ALIGN =
       new Transform2d(0, 0, Rotation2d.kZero);
-
-  public static Transform2d getClimberAlignPos(boolean left) {
-    if (DriverStation.getAlliance().isPresent()) {
-      if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
-        return left ? BLUE_LEFT_CLIMBER_ALIGN : BLUE_RIGHT_CLIMBER_ALIGN;
-      } else if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
-        return left ? RED_LEFT_CLIMBER_ALIGN : RED_RIGHT_CLIMBER_ALIGN;
-      }
-    }
-
-    return Transform2d.kZero;
-  }
 }
