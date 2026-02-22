@@ -109,12 +109,12 @@ public final class FieldConstants {
       new Transform2d(0, 0, Rotation2d.kZero);
 
   public static Transform2d getClimberAlignPos(boolean left) {
-    if (DriverStation.getAlliance().isPresent()
-        && DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
-      return left ? BLUE_LEFT_CLIMBER_ALIGN : BLUE_RIGHT_CLIMBER_ALIGN;
-    } else if (DriverStation.getAlliance().isPresent()
-        && DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
-      return left ? RED_LEFT_CLIMBER_ALIGN : RED_RIGHT_CLIMBER_ALIGN;
+    if (DriverStation.getAlliance().isPresent()) {
+      if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
+        return left ? BLUE_LEFT_CLIMBER_ALIGN : BLUE_RIGHT_CLIMBER_ALIGN;
+      } else if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
+        return left ? RED_LEFT_CLIMBER_ALIGN : RED_RIGHT_CLIMBER_ALIGN;
+      }
     }
 
     return Transform2d.kZero;
