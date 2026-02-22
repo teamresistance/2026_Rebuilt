@@ -1,12 +1,12 @@
 package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.intakeReal;
+import frc.robot.subsystems.intake.IntakeYabadabaReal;
 
 public class RunIntakeCommand extends Command {
 
-    private final intakeReal m_Real;
+    private final IntakeYabadabaReal m_Real;
 
-    public RunIntakeCommand(intakeReal intake) {
+    public RunIntakeCommand(IntakeYabadabaReal intake) {
          m_Real= intake;
     }
 

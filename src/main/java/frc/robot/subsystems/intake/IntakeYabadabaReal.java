@@ -1,18 +1,18 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.intake;
 
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.hardware.TalonFX;
 
-public class intakeReal extends SubsystemBase {
+public class IntakeYabadabaReal extends IntakeIO {
 
     private final TalonFX intakeMotor= new TalonFX(Constants.INTAKE_MOTOR_ID, CANBus.roboRIO());
     public static boolean intakeActivating= false;
     public static boolean isRejecting= false;
-    public intakeReal(){
 
+    public IntakeYabadabaReal() {
+      register();
     }
 
     public void activateIntake(){
@@ -27,4 +27,8 @@ public class intakeReal extends SubsystemBase {
         intakeMotor.set(0);
     }
 
+  @Override
+  public void periodic() {
+
+  }
 }
