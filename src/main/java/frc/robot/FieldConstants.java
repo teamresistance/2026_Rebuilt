@@ -112,7 +112,7 @@ public final class FieldConstants {
     if (DriverStation.getAlliance().isPresent()) {
       if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
         return left ? BLUE_LEFT_CLIMBER_ALIGN : BLUE_RIGHT_CLIMBER_ALIGN;
-      } else if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
+      } else if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
         return left ? RED_LEFT_CLIMBER_ALIGN : RED_RIGHT_CLIMBER_ALIGN;
       }
     }
