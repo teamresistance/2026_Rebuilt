@@ -66,34 +66,58 @@ public final class FastBallisticCalculator {
   public static void computeBallistics(double D, double floorAzimuthDeg, double v_x, double v_y) {
     long start = System.nanoTime();
 
-    // Base floor-parallel shoot speed
-    double expTerm = Math.exp((K * D) / M);
-    double vFloor = (M * (expTerm - 1.0)) / (K * T);
-
-    // Vertical elevation angle
-    thetaDeg = Math.atan(VY / vFloor) * ShootingConstants.RAD_TO_DEG;
-
-    // Original floor-frame shoot vector
     double azRad = floorAzimuthDeg * ShootingConstants.DEG_TO_RAD;
-    double vx0 = vFloor * Math.cos(azRad);
-    double vy0 = vFloor * Math.sin(azRad);
 
-    // Subtract robot floor velocity
-    double vx1 = vx0 - v_x;
-    double vy1 = vy0 - v_y;
+    // Hub position
+    double xHub = D * Math.cos(azRad);
+    double yHub = D * Math.sin(azRad);
 
-    // New floor-parallel magnitude
-    double vFloorNew = Math.sqrt(vx1 * vx1 + vy1 * vy1);
+    // Robot displacement
+    double xRobot = v_x * T;
+    double yRobot = v_y * T;
 
-    // New total shoot velocity
+    // Required relative displacement
+    double xReq = xHub - xRobot;
+    double yReq = yHub - yRobot;
+
+    double dReq = Math.hypot(xReq, yReq);
+    double azReq = Math.atan2(yReq, xReq);
+
+    // Backsolve quadratic drag
+    double vFloorNew = (M / (K * T)) * (Math.exp((K * dReq) / M) - 1.0);
+
+    // Components
+    double vx1 = vFloorNew * Math.cos(azReq);
+    double vy1 = vFloorNew * Math.sin(azReq);
+
+    // Outputs
     vTotalNew = Math.sqrt(VY2 + vFloorNew * vFloorNew);
-
-    // Floor azimuth correction (floor-frame)
-    double cross = vx0 * vy1 - vy0 * vx1;
-    double dot = vx0 * vx1 + vy0 * vy1;
-    deltaFloorAngleDeg = Math.atan2(cross, dot) * ShootingConstants.RAD_TO_DEG;
+    thetaDeg = Math.atan(VY / vFloorNew) * ShootingConstants.RAD_TO_DEG;
+    deltaFloorAngleDeg = (azReq - azRad) * ShootingConstants.RAD_TO_DEG;
 
     long end = System.nanoTime();
     // TODO: Log start/end times
+
+    double alpha = K / M;
+
+    // Ball relative displacement under quadratic drag
+    double xRel = (1.0 / alpha) * Math.log(1.0 + alpha * vx1 * T);
+    double yRel = (1.0 / alpha) * Math.log(1.0 + alpha * vy1 * T);
+
+    // Robot displacement (constant velocity)
+    double xRobotCheck = v_x * T;
+    double yRobotCheck = v_y * T;
+
+    // Total predicted impact position
+    double xTotal = xRel + xRobotCheck;
+    double yTotal = yRel + yRobotCheck;
+
+    // Hub position (already computed earlier)
+    double errX = xTotal - xHub;
+    double errY = yTotal - yHub;
+    double errMag = Math.hypot(errX, errY);
+
+    System.out.printf(
+        "Ballistic check -> errX=%.4f m, errY=%.4f m, errMag=%.4f m%n", errX, errY, errMag);
   }
 }

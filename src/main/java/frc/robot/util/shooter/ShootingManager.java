@@ -5,8 +5,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.Constants;
-import frc.robot.FieldConstants;
 import frc.robot.Constants.ShootingConstants;
+import frc.robot.FieldConstants;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
