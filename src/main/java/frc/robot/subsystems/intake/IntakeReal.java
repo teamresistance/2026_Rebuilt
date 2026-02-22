@@ -5,13 +5,13 @@ import frc.robot.Constants;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.hardware.TalonFX;
 
-public class IntakeYabadabaReal extends IntakeIO {
+public class IntakeReal extends IntakeIO {
 
     private final TalonFX intakeMotor= new TalonFX(Constants.INTAKE_MOTOR_ID, CANBus.roboRIO());
     public static boolean intakeActivating= false;
     public static boolean isRejecting= false;
 
-    public IntakeYabadabaReal() {
+    public IntakeReal() {
       register();
     }
 
