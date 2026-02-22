@@ -40,6 +40,8 @@ public final class Constants {
   public static final int SHOOTER_FLYWHEEL_ID = 14;
   public static final int SHOOTER_TURRET_ENCODER_ID = 15;
 
+  public static final int INTAKE_MOTOR_ID = 16;
+
   // TODO: correct numbers with real hardware
   public static final double SHOOTER_HOOD_REVS_PER_DEG = 1;
   public static final double SHOOTER_TURRET_REVS_PER_DEG = 1;
