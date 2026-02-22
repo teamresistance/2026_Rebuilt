@@ -64,6 +64,11 @@ public class ShooterSim implements ShooterIO {
   }
 
   @Override
+  public boolean atTargetRPS() {
+    return true;
+  }
+
+  @Override
   public void runFlywheelAtRPS(double rps) {
     // not relevant in sim
   }

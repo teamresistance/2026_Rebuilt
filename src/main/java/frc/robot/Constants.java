@@ -38,13 +38,15 @@ public final class Constants {
   public static final int SHOOTER_HOOD_ID = 12;
   public static final int SHOOTER_TURRET_ID = 13;
   public static final int SHOOTER_FLYWHEEL_ID = 14;
-  public static final int SHOOTER_TURRET_ENCODER_ID = 15;
+  public static final int SHOOTER_FLYWHEEL_ID_2 = 15;
+  public static final int SHOOTER_TURRET_ENCODER_ID = 16;
 
   // TODO: correct numbers with real hardware
   public static final double SHOOTER_HOOD_REVS_PER_DEG = 1;
   public static final double SHOOTER_TURRET_REVS_PER_DEG = 1;
   public static final double SHOOTER_HOOD_REVS_TOLERANCE = 0;
   public static final double SHOOTER_TURRET_REVS_TOLERANCE = 0;
+  public static final double SHOOTER_RPS_TOLERANCE = 0;
 
   // TODO: correct numbers with real hardware
   public static final double SHOOTER_HOOD_MAX_PITCH = 47;
