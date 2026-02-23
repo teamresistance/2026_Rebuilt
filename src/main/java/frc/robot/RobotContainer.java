@@ -29,6 +29,7 @@ import frc.robot.subsystems.shooter.ShooterSim;
 import frc.robot.subsystems.shooter.ShootingConstants;
 import frc.robot.subsystems.vision.*;
 import frc.robot.util.BumpUtil;
+import frc.robot.util.OtherUtil;
 import frc.robot.util.ShiftUtil;
 import frc.robot.util.ShootingUtil;
 import java.io.IOException;
@@ -240,14 +241,17 @@ public class RobotContainer {
     // will be ours
     new Trigger(() -> ShiftUtil.isOurs(ShiftUtil.getNextShift()) && ShiftUtil.nearNextShift())
         .onTrue(
-            Commands.runOnce(() -> leds.setMode(Constants.LEDMode.SHIFTING_US, true))
+            Commands.runOnce(leds::unlock)
+                .andThen(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.SHIFTING_US, true)))
                 .andThen(new WaitCommand(3))
                 .andThen(Commands.runOnce(leds::unlock)));
 
     // will not be ours
     new Trigger(() -> !ShiftUtil.isOurs(ShiftUtil.getNextShift()) && ShiftUtil.nearNextShift())
         .onTrue(
-            Commands.runOnce(() -> leds.setMode(Constants.LEDMode.SHIFTING_THEM, true))
+            Commands.runOnce(leds::unlock)
+                .andThen(
+                    Commands.runOnce(() -> leds.setMode(Constants.LEDMode.SHIFTING_THEM, true)))
                 .andThen(new WaitCommand(3))
                 .andThen(Commands.runOnce(leds::unlock)));
 
@@ -257,9 +261,16 @@ public class RobotContainer {
         .negate()
         .and(inBumpZone)
         .onTrue(
-            Commands.runOnce(() -> leds.setMode(Constants.LEDMode.BUMP, true))
+            Commands.runOnce(leds::unlock)
+                .andThen(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.BUMP, true)))
                 .andThen(new WaitCommand(1).andThen(Commands.runOnce(leds::unlock))));
-    driver.y().negate().and(inBumpZone).onFalse(Commands.runOnce(leds::unlock));
+
+    // when not in bump zone BUT bump leds are on, unlock leds. prevents unlocking other states when
+    // leaving bump zone
+    inBumpZone
+        .negate()
+        .and(() -> leds.getMode() == Constants.LEDMode.BUMP)
+        .onTrue(Commands.runOnce(leds::unlock));
   }
 
   /** Defines button bindings and control triggers */
@@ -275,7 +286,7 @@ public class RobotContainer {
 
     // climb raise
     driver
-        .b()
+        .start()
         .onTrue(
             Commands.runOnce(climber::unbrake)
                 .andThen(climber::up)
@@ -284,12 +295,20 @@ public class RobotContainer {
 
     // climb descend
     driver
-        .a()
+        .back()
         .onTrue(
             Commands.runOnce(climber::unbrake)
                 .andThen(climber::down)
                 .andThen(new WaitUntilCommand(climber::atTarget))
                 .andThen(climber::brake));
+
+    // auto-align to climber positions with bumpers (left/right bumper = left/right pos)
+    driver
+        .leftBumper()
+        .whileTrue(DriveCommands.goToTransform(drive, OtherUtil.getClimberAlignPos(true)));
+    driver
+        .rightBumper()
+        .whileTrue(DriveCommands.goToTransform(drive, OtherUtil.getClimberAlignPos(false)));
 
     // auto-aim hood and turret always
     shooter.setDefaultCommand(new IdleShooterCommand(drive, shooter));

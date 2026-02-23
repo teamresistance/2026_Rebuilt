@@ -20,6 +20,10 @@ public class LEDSubsystem extends SubsystemBase {
     if (lock) isLocked = true;
   }
 
+  public LEDMode getMode() {
+    return mode;
+  }
+
   public void unlock() {
     isLocked = false;
   }
