@@ -4,35 +4,35 @@ import org.littletonrobotics.junction.Logger;
 
 public class IntakeSim implements IntakeIO {
 
-  private boolean intakeActive = false;
-  private boolean isRejecting = false;
+  private boolean intaking = false;
+  private boolean rejecting = false;
 
   @Override
   public void periodic() {
-    Logger.recordOutput("Intake/Intaking", intakeActive);
-    Logger.recordOutput("Intake/Rejecting", isRejecting);
+    Logger.recordOutput("Intake/Intaking", intaking);
+    Logger.recordOutput("Intake/Rejecting", rejecting);
   }
 
   @Override
   public void activateIntake() {
-    intakeActive = true;
-    isRejecting = false;
+    intaking = true;
+    rejecting = false;
   }
 
   @Override
   public void stopIntake() {
-    intakeActive = false;
-    isRejecting = false;
+    intaking = false;
+    rejecting = false;
   }
 
   @Override
   public void reverseIntake() {
-    isRejecting = true;
-    intakeActive = false;
+    rejecting = true;
+    intaking = false;
   }
 
   @Override
   public boolean isIntaking() {
-    return intakeActive;
+    return intaking;
   }
 }

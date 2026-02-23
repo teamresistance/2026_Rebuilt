@@ -11,8 +11,8 @@ import org.littletonrobotics.junction.Logger;
 public class IntakeReal implements IntakeIO {
 
   private final TalonFX intakeMotor = new TalonFX(Constants.INTAKE_MOTOR_ID, CANBus.roboRIO());
-  private boolean intakeActive = false;
-  private boolean isRejecting = false;
+  private boolean intaking = false;
+  private boolean rejecting = false;
 
   public IntakeReal() {
     register();
@@ -30,33 +30,33 @@ public class IntakeReal implements IntakeIO {
 
   @Override
   public void activateIntake() {
-    intakeActive = true;
-    isRejecting = false;
+    intaking = true;
+    rejecting = false;
     intakeMotor.setControl(new DutyCycleOut(1));
   }
 
   @Override
   public void reverseIntake() {
-    isRejecting = true;
-    intakeActive = false;
+    rejecting = true;
+    intaking = false;
     intakeMotor.set(-1);
   }
 
   @Override
   public void stopIntake() {
-    intakeActive = false;
-    isRejecting = false;
+    intaking = false;
+    rejecting = false;
     intakeMotor.set(0);
   }
 
   @Override
   public void periodic() {
-    Logger.recordOutput("Intake/Intaking", intakeActive);
-    Logger.recordOutput("Intake/Rejecting", isRejecting);
+    Logger.recordOutput("Intake/Intaking", intaking);
+    Logger.recordOutput("Intake/Rejecting", rejecting);
   }
 
   @Override
   public boolean isIntaking() {
-    return intakeActive;
+    return intaking;
   }
 }
