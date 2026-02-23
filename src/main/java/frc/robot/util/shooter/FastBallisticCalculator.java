@@ -96,9 +96,9 @@ public final class FastBallisticCalculator {
 
     // ================= FAST RK2 CORRECTION =================
     // Predict final position using RK2 (midpoint) under quadratic drag
-    int steps = 20;
+    int steps = 30;
     double dt = T / steps;
-
+    
     double x = 0.0, y = 0.0;
     double vx = vx1, vy = vy1;
 
