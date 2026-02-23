@@ -35,9 +35,11 @@ public final class FastBallisticCalculator {
   /** Alpha constant for RK2 correction - derived from drag coefficient and mass */
   private static final double ALPHA = K / M;
 
-  /* =======================
+  /*
+   * =======================
    * Output State Variables
-   * ======================= */
+   * =======================
+   */
 
   /** Final total launch velocity magnitude (m/s) */
   public static double vTotalNew;
@@ -94,42 +96,72 @@ public final class FastBallisticCalculator {
     thetaDeg = Math.atan(VY / vFloor) * ShootingConstants.RAD_TO_DEG;
     deltaFloorAngleDeg = (azReq - azRad) * ShootingConstants.RAD_TO_DEG;
 
-    // ================= FAST RK2 CORRECTION =================
-    // Predict final position using RK2 (midpoint) under quadratic drag
-    int steps = 30;
-    double dt = T / steps;
-    
+    // ================= ADAPTIVE RK2 CORRECTION =================
     double x = 0.0, y = 0.0;
     double vx = vx1, vy = vy1;
 
-    for (int i = 0; i < steps; i++) {
-      // midpoint velocities
+    double tAccum = 0.0;
+    double dtMax = T / 10.0; // max step for RoboRIO speed
+    double dtMin = T / 100.0; // minimum step to avoid zero
+    double tol = 0.001; // target position tolerance (meters)
+
+    while (tAccum < T) {
+      double dt = Math.min(dtMax, T - tAccum);
+
+      // compute midpoint RK2 step
       double vxMid = vx / (1 + 0.5 * ALPHA * dt * Math.abs(vx));
       double vyMid = vy / (1 + 0.5 * ALPHA * dt * Math.abs(vy));
 
-      // update positions
-      x += dt * vxMid;
-      y += dt * vyMid;
+      double xStep = dt * vxMid;
+      double yStep = dt * vyMid;
 
-      // update velocities for next step
-      vx = vx / (1 + ALPHA * dt * Math.abs(vxMid));
-      vy = vy / (1 + ALPHA * dt * Math.abs(vyMid));
+      double vxNew = vx / (1 + ALPHA * dt * Math.abs(vxMid));
+      double vyNew = vy / (1 + ALPHA * dt * Math.abs(vyMid));
+
+      // estimate local error with half-step
+      double vxHalf = vx, vyHalf = vy;
+      double xHalf = 0.0, yHalf = 0.0;
+      double dtHalf = dt / 2.0;
+
+      for (int i = 0; i < 2; i++) {
+        double vxMidHalf = vxHalf / (1 + 0.5 * ALPHA * dtHalf * Math.abs(vxHalf));
+        double vyMidHalf = vyHalf / (1 + 0.5 * ALPHA * dtHalf * Math.abs(vyHalf));
+
+        xHalf += dtHalf * vxMidHalf;
+        yHalf += dtHalf * vyMidHalf;
+
+        vxHalf = vxHalf / (1 + ALPHA * dtHalf * Math.abs(vxMidHalf));
+        vyHalf = vyHalf / (1 + ALPHA * dtHalf * Math.abs(vyMidHalf));
+      }
+
+      double err = Math.hypot((xStep - xHalf), (yStep - yHalf));
+
+      // adapt dt
+      if (err > tol && dt > dtMin) {
+        dt *= 0.5; // reduce step
+        continue;
+      } else if (err < tol / 4 && dt * 2 <= dtMax) {
+        dt *= 2.0; // increase step
+      }
+
+      // accept step
+      x += xStep;
+      y += yStep;
+      vx = vxNew;
+      vy = vyNew;
+      tAccum += dt;
     }
 
-    // Robot motion already accounted
     x += xRobot;
     y += yRobot;
 
-    // Compute error from hub
+    // Corrective gain for final tiny adjustment
     double errX = x - xHub;
     double errY = y - yHub;
-
-    // Single corrective adjustment (tiny gain to keep deterministic timing)
     double gain = 0.9;
     vx1 -= gain * errX / T;
     vy1 -= gain * errY / T;
 
-    // Recompute corrected outputs
     double vFloorCorrected = Math.hypot(vx1, vy1);
     double azCorrected = Math.atan2(vy1, vx1);
 
@@ -137,14 +169,12 @@ public final class FastBallisticCalculator {
     thetaDeg = Math.atan(VY / vFloorCorrected) * ShootingConstants.RAD_TO_DEG;
     deltaFloorAngleDeg = (azCorrected - azRad) * ShootingConstants.RAD_TO_DEG;
 
-    // ================= LOGGING =================
-
-    double end = System.nanoTime();
-    double duration = (end - start) / 1_000_000_000.0; // Convert to s
+    long end = System.nanoTime();
+    double duration = (end - start) / 1_000_000_000.0;
 
     double errMag = Math.hypot(errX, errY);
     System.out.printf(
-        "Ballistic check -> errX=%.4f m, errY=%.4f m, errMag=%.4f m, duration=%.9f s%n",
+        "Adaptive RK2 -> errX=%.4f m, errY=%.4f m, errMag=%.4f m, duration=%.9f s%n",
         errX, errY, errMag, duration);
   }
 }
