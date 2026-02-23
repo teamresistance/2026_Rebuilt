@@ -32,6 +32,9 @@ public final class FastBallisticCalculator {
   /** Fixed flight time (seconds) - predetermined projectile flight duration */
   private static final double T = ShootingConstants.MINIMUM_TIME_OF_FLIGHT;
 
+  /** Alpha constant for RK2 correction - derived from drag coefficient and mass */
+  private static final double ALPHA = K / M;
+
   /* =======================
    * Output State Variables
    * ======================= */
@@ -79,45 +82,69 @@ public final class FastBallisticCalculator {
     // Required relative displacement
     double xReq = xHub - xRobot;
     double yReq = yHub - yRobot;
-
     double dReq = Math.hypot(xReq, yReq);
     double azReq = Math.atan2(yReq, xReq);
 
-    // Backsolve quadratic drag
-    double vFloorNew = (M / (K * T)) * (Math.exp((K * dReq) / M) - 1.0);
+    // ================= ANALYTIC BASE =================
+    double vFloor = (M / (K * T)) * (Math.exp((K * dReq) / M) - 1.0);
+    double vx1 = vFloor * Math.cos(azReq);
+    double vy1 = vFloor * Math.sin(azReq);
 
-    // Components
-    double vx1 = vFloorNew * Math.cos(azReq);
-    double vy1 = vFloorNew * Math.sin(azReq);
-
-    // Outputs
-    vTotalNew = Math.sqrt(VY2 + vFloorNew * vFloorNew);
-    thetaDeg = Math.atan(VY / vFloorNew) * ShootingConstants.RAD_TO_DEG;
+    vTotalNew = Math.sqrt(VY2 + vFloor * vFloor);
+    thetaDeg = Math.atan(VY / vFloor) * ShootingConstants.RAD_TO_DEG;
     deltaFloorAngleDeg = (azReq - azRad) * ShootingConstants.RAD_TO_DEG;
 
-    long end = System.nanoTime();
-    // TODO: Log start/end times
+    // ================= FAST RK2 CORRECTION =================
+    // Predict final position using RK2 (midpoint) under quadratic drag
+    int steps = 20;
+    double dt = T / steps;
 
-    double alpha = K / M;
+    double x = 0.0, y = 0.0;
+    double vx = vx1, vy = vy1;
 
-    // Ball relative displacement under quadratic drag
-    double xRel = (1.0 / alpha) * Math.log(1.0 + alpha * vx1 * T);
-    double yRel = (1.0 / alpha) * Math.log(1.0 + alpha * vy1 * T);
+    for (int i = 0; i < steps; i++) {
+      // midpoint velocities
+      double vxMid = vx / (1 + 0.5 * ALPHA * dt * Math.abs(vx));
+      double vyMid = vy / (1 + 0.5 * ALPHA * dt * Math.abs(vy));
 
-    // Robot displacement (constant velocity)
-    double xRobotCheck = v_x * T;
-    double yRobotCheck = v_y * T;
+      // update positions
+      x += dt * vxMid;
+      y += dt * vyMid;
 
-    // Total predicted impact position
-    double xTotal = xRel + xRobotCheck;
-    double yTotal = yRel + yRobotCheck;
+      // update velocities for next step
+      vx = vx / (1 + ALPHA * dt * Math.abs(vxMid));
+      vy = vy / (1 + ALPHA * dt * Math.abs(vyMid));
+    }
 
-    // Hub position (already computed earlier)
-    double errX = xTotal - xHub;
-    double errY = yTotal - yHub;
+    // Robot motion already accounted
+    x += xRobot;
+    y += yRobot;
+
+    // Compute error from hub
+    double errX = x - xHub;
+    double errY = y - yHub;
+
+    // Single corrective adjustment (tiny gain to keep deterministic timing)
+    double gain = 0.9;
+    vx1 -= gain * errX / T;
+    vy1 -= gain * errY / T;
+
+    // Recompute corrected outputs
+    double vFloorCorrected = Math.hypot(vx1, vy1);
+    double azCorrected = Math.atan2(vy1, vx1);
+
+    vTotalNew = Math.sqrt(VY2 + vFloorCorrected * vFloorCorrected);
+    thetaDeg = Math.atan(VY / vFloorCorrected) * ShootingConstants.RAD_TO_DEG;
+    deltaFloorAngleDeg = (azCorrected - azRad) * ShootingConstants.RAD_TO_DEG;
+
+    // ================= LOGGING =================
+
+    double end = System.nanoTime();
+    double duration = (end - start) / 1_000_000_000.0; // Convert to s
+
     double errMag = Math.hypot(errX, errY);
-
     System.out.printf(
-        "Ballistic check -> errX=%.4f m, errY=%.4f m, errMag=%.4f m%n", errX, errY, errMag);
+        "Ballistic check -> errX=%.4f m, errY=%.4f m, errMag=%.4f m, duration=%.9f s%n",
+        errX, errY, errMag, duration);
   }
 }
