@@ -150,6 +150,11 @@ public class ShooterReal implements ShooterIO {
   }
 
   @Override
+  public boolean isShooting() {
+    return flywheelTargetRPS > 1.0;
+  }
+
+  @Override
   public void periodic() {
     Logger.recordOutput("Shooter/Flywheel Target RPS", flywheelTargetRPS);
     Logger.recordOutput(

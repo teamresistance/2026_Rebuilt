@@ -1,14 +1,5 @@
 package frc.robot.subsystems.hoppert;
 
-import com.ctre.phoenix6.CANBus;
-import com.ctre.phoenix6.configs.MotorOutputConfigs;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.CoastOut;
-import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.StaticBrake;
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.NeutralModeValue;
-import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
 
 public class HoppertSim implements HoppertIO {

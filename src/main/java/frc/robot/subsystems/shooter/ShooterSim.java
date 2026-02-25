@@ -73,6 +73,10 @@ public class ShooterSim implements ShooterIO {
     // not relevant in sim
   }
 
+  public boolean isShooting() {
+    return true;
+  }
+
   @Override
   public void setTurretTarget(double turretTargetAngle) {
     turretTargetDegs = turretTargetAngle;
