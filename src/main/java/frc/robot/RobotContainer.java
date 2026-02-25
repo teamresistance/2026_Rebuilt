@@ -13,12 +13,16 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.IdleShooterCommand;
 import frc.robot.commands.ShootCommand;
+import frc.robot.commands.ToggleIntakeCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.climber.ClimberReal;
 import frc.robot.subsystems.climber.ClimberSim;
 import frc.robot.subsystems.drive.*;
+import frc.robot.subsystems.intake.IntakeIO;
+import frc.robot.subsystems.intake.IntakeReal;
+import frc.robot.subsystems.intake.IntakeSim;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterReal;
 import frc.robot.subsystems.shooter.ShooterSim;
@@ -52,6 +56,7 @@ public class RobotContainer {
   private VisionSubsystem vision;
   private final ShooterIO shooter;
   private final ClimberIO climber;
+  private final IntakeIO intake;
   private final LEDSubsystem leds = new LEDSubsystem(); // does not need IO
 
   // Controller
@@ -78,12 +83,15 @@ public class RobotContainer {
       case REAL:
         shooter = new ShooterReal();
         climber = new ClimberReal();
+        intake = new IntakeReal();
         break;
       case SIM:
         shooter = new ShooterSim();
         climber = new ClimberSim();
+        intake = new IntakeSim();
         break;
       default:
+        intake = new IntakeReal();
         shooter = new ShooterReal();
         climber = new ClimberReal();
     }
@@ -310,6 +318,9 @@ public class RobotContainer {
 
     driver.rightTrigger().whileTrue(new ShootCommand(drive, shooter));
     driver.rightTrigger().whileTrue(driveAtLimitedSpeed);
+
+    // left trigger toggles intake
+    driver.leftTrigger().onTrue(new ToggleIntakeCommand(intake));
   }
 
   /**
