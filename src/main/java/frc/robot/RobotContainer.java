@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.HoppertCommand;
 import frc.robot.commands.IdleShooterCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.commands.ToggleIntakeCommand;
@@ -20,6 +21,9 @@ import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.climber.ClimberReal;
 import frc.robot.subsystems.climber.ClimberSim;
 import frc.robot.subsystems.drive.*;
+import frc.robot.subsystems.hoppert.HoppertIO;
+import frc.robot.subsystems.hoppert.HoppertReal;
+import frc.robot.subsystems.hoppert.HoppertSim;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeReal;
 import frc.robot.subsystems.intake.IntakeSim;
@@ -56,6 +60,7 @@ public class RobotContainer {
   private VisionSubsystem vision;
   private final ShooterIO shooter;
   private final ClimberIO climber;
+  private final HoppertIO hoppert;
   private final IntakeIO intake;
   private final LEDSubsystem leds = new LEDSubsystem(); // does not need IO
 
@@ -82,17 +87,20 @@ public class RobotContainer {
     switch (Constants.CURRENT_MODE) {
       case REAL:
         shooter = new ShooterReal();
+        hoppert = new HoppertReal();
         climber = new ClimberReal();
         intake = new IntakeReal();
         break;
       case SIM:
         shooter = new ShooterSim();
+        hoppert = new HoppertSim();
         climber = new ClimberSim();
         intake = new IntakeSim();
         break;
       default:
         intake = new IntakeReal();
         shooter = new ShooterReal();
+        hoppert = new HoppertReal();
         climber = new ClimberReal();
     }
 
@@ -280,6 +288,9 @@ public class RobotContainer {
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
+
+    // have hopper automatically deciding when to run or not to run
+    hoppert.setDefaultCommand(new HoppertCommand(hoppert, shooter));
 
     // when left bumper is not pressed and in bump zone, auto rotate.
     driver.y().negate().and(inBumpZone).whileTrue(driveAtAngleForBump);

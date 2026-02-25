@@ -45,6 +45,7 @@
     "feedforward",
     "gradlew",
     "holonomic",
+    "hoppert",
     "intaking",
     "Kalman",
     "multitag",

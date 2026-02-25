@@ -17,5 +17,7 @@ public interface ShooterIO extends Subsystem {
 
   boolean atTargetRPS();
 
+  boolean isShooting();
+
   void zeroHood(double newValue);
 }
