@@ -5,10 +5,12 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants.DriveMotorArrangement;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerMotorArrangement;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import edu.wpi.first.wpilibj.Threads;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.generated.TunerConstants;
 import frc.robot.util.ShiftUtil;
+import frc.robot.util.TurretConfidenceUtil;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -154,6 +156,10 @@ public class Robot extends LoggedRobot {
     if (!shiftsAssigned) {
       ShiftUtil.assignShifts(robotContainer.getShiftChosen());
     }
+
+    TurretConfidenceUtil.confidence = TurretConfidenceUtil.calculateConfidence();
+    // Calculate and update the shot confidence value from the utility class
+    SmartDashboard.putNumber("Shot Confidence", TurretConfidenceUtil.confidence);
   }
 
   /** This function is called once when test mode is enabled. */
