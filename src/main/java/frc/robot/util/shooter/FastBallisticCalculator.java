@@ -32,6 +32,9 @@ public final class FastBallisticCalculator {
   /** Fixed flight time (seconds) - predetermined projectile flight duration */
   private static final double T = ShootingConstants.MINIMUM_TIME_OF_FLIGHT;
 
+  /** Inverse of flight time (1/T) - precomputed for efficiency in calculations */
+  private static final double invT = 1.0 / T;
+
   /** Alpha constant for RK2 correction - derived from drag coefficient and mass */
   private static final double ALPHA = K / M;
 
@@ -84,7 +87,7 @@ public final class FastBallisticCalculator {
     // Required relative displacement
     double xReq = xHub - xRobot;
     double yReq = yHub - yRobot;
-    double dReq = Math.hypot(xReq, yReq);
+    double dReq = Math.sqrt(xReq * xReq + yReq * yReq);
     double azReq = Math.atan2(yReq, xReq);
 
     // ================= ANALYTIC BASE =================
@@ -96,74 +99,70 @@ public final class FastBallisticCalculator {
     thetaDeg = Math.atan(VY / vFloor) * ShootingConstants.RAD_TO_DEG;
     deltaFloorAngleDeg = (azReq - azRad) * ShootingConstants.RAD_TO_DEG;
 
-    // ================= ADAPTIVE RK2 CORRECTION =================
-    double x = 0.0, y = 0.0;
-    double vx = vx1, vy = vy1;
+    // ================= ITERATIVE RK2 ROOT SOLVE =================
 
-    double tAccum = 0.0;
-    double dtMax = T / 10.0; // max step for RoboRIO speed
-    double dtMin = T / 100.0; // minimum step to avoid zero
-    double tol = 0.001; // target position tolerance (meters)
+    // Start from analytic guess
+    double vxGuess = vx1;
+    double vyGuess = vy1;
 
-    while (tAccum < T) {
-      double dt = Math.min(dtMax, T - tAccum);
+    final int RK_STEPS = 20; // fixed integration resolution
+    final int SOLVE_ITERS = 3; // 3–4 is ideal
+    final double gain = 1.0; // Newton-like gain (usually stable)
 
-      // compute midpoint RK2 step
-      double vxMid = vx / (1 + 0.5 * ALPHA * dt * Math.abs(vx));
-      double vyMid = vy / (1 + 0.5 * ALPHA * dt * Math.abs(vy));
+    // Precompute
+    double dt = T / RK_STEPS;
 
-      double xStep = dt * vxMid;
-      double yStep = dt * vyMid;
+    double errX = 0.0;
+    double errY = 0.0;
 
-      double vxNew = vx / (1 + ALPHA * dt * Math.abs(vxMid));
-      double vyNew = vy / (1 + ALPHA * dt * Math.abs(vyMid));
+    for (int iter = 0; iter < SOLVE_ITERS; iter++) {
 
-      // estimate local error with half-step
-      double vxHalf = vx, vyHalf = vy;
-      double xHalf = 0.0, yHalf = 0.0;
-      double dtHalf = dt / 2.0;
+      double x = 0.0;
+      double y = 0.0;
+      double vx = vxGuess;
+      double vy = vyGuess;
 
-      for (int i = 0; i < 2; i++) {
-        double vxMidHalf = vxHalf / (1 + 0.5 * ALPHA * dtHalf * Math.abs(vxHalf));
-        double vyMidHalf = vyHalf / (1 + 0.5 * ALPHA * dtHalf * Math.abs(vyHalf));
+      // ===== fixed RK2 forward integration =====
+      for (int i = 0; i < RK_STEPS; i++) {
 
-        xHalf += dtHalf * vxMidHalf;
-        yHalf += dtHalf * vyMidHalf;
+        double speed = Math.sqrt(vx * vx + vy * vy);
+        double ax = -ALPHA * speed * vx;
+        double ay = -ALPHA * speed * vy;
 
-        vxHalf = vxHalf / (1 + ALPHA * dtHalf * Math.abs(vxMidHalf));
-        vyHalf = vyHalf / (1 + ALPHA * dtHalf * Math.abs(vyMidHalf));
+        // midpoint
+        double vxMid = vx + 0.5 * dt * ax;
+        double vyMid = vy + 0.5 * dt * ay;
+        double speedMid = Math.sqrt(vxMid * vxMid + vyMid * vyMid);
+
+        double axMid = -ALPHA * speedMid * vxMid;
+        double ayMid = -ALPHA * speedMid * vyMid;
+
+        // update position
+        x += dt * vxMid;
+        y += dt * vyMid;
+
+        // update velocity
+        vx += dt * axMid;
+        vy += dt * ayMid;
       }
 
-      double err = Math.hypot((xStep - xHalf), (yStep - yHalf));
+      // add robot motion
+      double xTotal = x + xRobot;
+      double yTotal = y + yRobot;
 
-      // adapt dt
-      if (err > tol && dt > dtMin) {
-        dt *= 0.5; // reduce step
-        continue;
-      } else if (err < tol / 4 && dt * 2 <= dtMax) {
-        dt *= 2.0; // increase step
-      }
+      // compute error
+      errX = xTotal - xHub;
+      errY = yTotal - yHub;
 
-      // accept step
-      x += xStep;
-      y += yStep;
-      vx = vxNew;
-      vy = vyNew;
-      tAccum += dt;
+      // Newton-like correction
+      vxGuess -= gain * errX * invT;
+      vyGuess -= gain * errY * invT;
     }
 
-    x += xRobot;
-    y += yRobot;
+    // ===== final corrected values =====
 
-    // Corrective gain for final tiny adjustment
-    double errX = x - xHub;
-    double errY = y - yHub;
-    double gain = 0.9;
-    vx1 -= gain * errX / T;
-    vy1 -= gain * errY / T;
-
-    double vFloorCorrected = Math.hypot(vx1, vy1);
-    double azCorrected = Math.atan2(vy1, vx1);
+    double vFloorCorrected = Math.sqrt(vxGuess * vxGuess + vyGuess * vyGuess);
+    double azCorrected = Math.atan2(vyGuess, vxGuess);
 
     vTotalNew = Math.sqrt(VY2 + vFloorCorrected * vFloorCorrected);
     thetaDeg = Math.atan(VY / vFloorCorrected) * ShootingConstants.RAD_TO_DEG;
@@ -172,9 +171,9 @@ public final class FastBallisticCalculator {
     long end = System.nanoTime();
     double duration = (end - start) / 1_000_000_000.0;
 
-    double errMag = Math.hypot(errX, errY);
+    double errMag = Math.sqrt(errX * errX + errY * errY);
     System.out.printf(
-        "Adaptive RK2 -> errX=%.4f m, errY=%.4f m, errMag=%.4f m, duration=%.9f s%n",
+        "RK2 root solve -> errX=%.4f m, errY=%.4f m, errMag=%.4f m, duration=%.9f s%n",
         errX, errY, errMag, duration);
   }
 }
