@@ -25,6 +25,9 @@ public class HoppertCommand extends Command {
 
   @Override
   public void execute() {
+
+    // TODO: only run the hopper when at target speed too? test if motors stall constantly or something
+
     if (shooter.isShooting()) {
 
       // wheels always running when shooting
@@ -37,6 +40,11 @@ public class HoppertCommand extends Command {
         directionSwitchTimer.reset();
       } else if (directionSwitchTimer.hasElapsed(1)) {
         hoppert.runHopperBackwards();
+      }
+
+      // only feed through tower when flywheel is ready
+      if (shooter.atTargetRPS()) {
+        hoppert.runTowerForwards();
       }
     } else {
       // do not run stuff when not shooting
