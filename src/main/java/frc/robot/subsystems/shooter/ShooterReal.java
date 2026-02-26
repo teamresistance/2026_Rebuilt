@@ -7,10 +7,11 @@ import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import frc.robot.Constants;
-import frc.robot.util.shooter.ShootingManager;
+import frc.robot.util.Conversions;
+
 import org.littletonrobotics.junction.Logger;
 
-public class ShooterReal implements ShooterIO {
+public class ShooterReal extends ShooterIO {
 
   // TODO: Place the thing that feeds balls into the shooter in another subsystem, such as a
   // HopperSubsystem.
@@ -103,7 +104,7 @@ public class ShooterReal implements ShooterIO {
   public void setHoodTarget(double angle) {
     if (angle < Constants.SHOOTER_HOOD_MAX_PITCH && angle > Constants.SHOOTER_HOOD_MIN_PITCH) {
       hoodTargetAngle = angle;
-      hoodMotor.setControl(new PositionDutyCycle(ShootingManager.Conversions.toHoodRevs(angle)));
+      hoodMotor.setControl(new PositionDutyCycle(Conversions.toHoodRevs(angle)));
     }
   }
 
@@ -116,7 +117,7 @@ public class ShooterReal implements ShooterIO {
     if (angle < Constants.SHOOTER_TURRET_MAX_YAW && angle > Constants.SHOOTER_TURRET_MIN_YAW) {
       turretTargetAngle = angle;
       turretMotor.setControl(
-          new PositionDutyCycle(ShootingManager.Conversions.toTurretRevs(angle)));
+          new PositionDutyCycle(Conversions.toTurretRevs(angle)));
     }
   }
 
@@ -128,7 +129,7 @@ public class ShooterReal implements ShooterIO {
   public void zeroHood(double newValueDegrees) {
     if (newValueDegrees > Constants.SHOOTER_HOOD_MAX_PITCH
         || newValueDegrees < Constants.SHOOTER_HOOD_MIN_PITCH) {
-      hoodMotor.setPosition(ShootingManager.Conversions.toHoodRevs(newValueDegrees));
+      hoodMotor.setPosition(Conversions.toHoodRevs(newValueDegrees));
     }
   }
 
@@ -140,12 +141,11 @@ public class ShooterReal implements ShooterIO {
     Logger.recordOutput("Shooter/Turret Target Angle", turretTargetAngle);
     Logger.recordOutput(
         "Shooter/Turret Real Angle",
-        ShootingManager.Conversions.toTurretDegrees(
+        Conversions.toTurretDegrees(
             turretEncoder.getPosition().getValueAsDouble()));
     Logger.recordOutput("Shooter/Hood Target Angle", hoodTargetAngle);
     Logger.recordOutput(
         "Shooter/Hood Real Angle",
-        ShootingManager.Conversions.toTurretDegrees(
-            ShootingManager.Conversions.toHoodDegrees(hoodMotor.getPosition().getValueAsDouble())));
+        Conversions.toHoodDegrees(hoodMotor.getPosition().getValueAsDouble()));
   }
 }

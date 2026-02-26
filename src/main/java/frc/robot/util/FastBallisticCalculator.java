@@ -1,4 +1,4 @@
-package frc.robot.util.shooter;
+package frc.robot.util;
 
 import frc.robot.Constants.ShootingConstants;
 
@@ -55,6 +55,11 @@ public final class FastBallisticCalculator {
 
   /** Required correction to the floor azimuth (degrees) */
   public static double deltaFloorAngleDeg;
+
+  /** For debug checking */
+  public static double vxFloor;
+
+  public static double vyFloor;
 
   /**
    * Computes the required projectile launch parameters while compensating for robot motion.
@@ -172,8 +177,8 @@ public final class FastBallisticCalculator {
     double duration = (end - start) / 1_000_000_000.0;
 
     double errMag = Math.sqrt(errX * errX + errY * errY);
-    System.out.printf(
-        "RK2 root solve -> errX=%.4f m, errY=%.4f m, errMag=%.4f m, duration=%.9f s%n",
-        errX, errY, errMag, duration);
+    // System.out.printf(
+    //    "RK2 root solve -> errX=%.4f m, errY=%.4f m, errMag=%.4f m, duration=%.9f s%n",
+    //    errX, errY, errMag, duration);
   }
 }

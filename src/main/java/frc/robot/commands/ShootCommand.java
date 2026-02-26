@@ -4,7 +4,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.drive.SwerveDriveIO;
 import frc.robot.subsystems.shooter.ShooterIO;
-import frc.robot.util.shooter.ShootingManager;
+
 import org.littletonrobotics.junction.Logger;
 
 public class ShootCommand extends Command {
@@ -19,11 +19,11 @@ public class ShootCommand extends Command {
 
   @Override
   public void execute() {
-
-    shooter.runFlywheelAtRPS(Units.radiansToRotations(ShootingManager.getDesiredAngularVelocity()));
+    
+    shooter.runFlywheelAtRPS(Units.radiansToRotations(ShooterIO.getDesiredAngularVelocity()));
 
     Logger.recordOutput(
-        "Shooter/Desired Angular Velocity", ShootingManager.getDesiredAngularVelocity());
+        "Shooter/Desired Angular Velocity", ShooterIO.getDesiredAngularVelocity());
 
     // TODO: all of these
     //

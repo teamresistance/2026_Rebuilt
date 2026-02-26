@@ -11,11 +11,12 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
-import frc.robot.util.shooter.ShootingManager;
+import frc.robot.util.SimulationAndState;
+
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
-public class ShooterSim implements ShooterIO {
+public class ShooterSim extends ShooterIO {
 
   private final Mechanism2d mech;
   private final MechanismRoot2d root;
@@ -108,7 +109,7 @@ public class ShooterSim implements ShooterIO {
         // settings. Compute the straight-line distance to the hub and the angle
         // between the vector to the hub and the +X direction at the robot
         // (i.e., the three points: hub, robot, robot+(1,0)).
-        var targetPose = ShootingManager.SimulationAndState.getShootingTarget(pose);
+        var targetPose = SimulationAndState.getShootingTarget(pose);
 
         Translation2d hub = targetPose.getTranslation();
         Translation2d robot = pose.getTranslation();
@@ -117,7 +118,6 @@ public class ShooterSim implements ShooterIO {
         double dx = hub.getX() - robot.getX();
         double dy = hub.getY() - robot.getY();
         double distanceToHub = Math.hypot(dx, dy);
-        // TODO: Determine a coordinate origin and finalize the direction of the above angle.
 
         // Angle between vector robot->hub and robot->(robot + (1,0)). For the
         // +X direction the second vector is (1,0), so the signed angle is
@@ -136,14 +136,14 @@ public class ShooterSim implements ShooterIO {
 
         // Update the ShootingManager with the latest inputs so ballistic
         // parameters are available for visualization below.
-        ShootingManager.updateShootingParameters(
+        updateShootingParameters(
             distanceToHub, fieldRelativeAngleToHub, speeds, pose);
 
         // --- Visualization updates ---
         // Show the desired absolute shooting angle computed by the manager
         // (total horizontal) and the original raw angle to the hub so you can
         // visually compare them.
-        totalHorizontal.setAngle(ShootingManager.getHorizontalTotalShootingAngle());
+        totalHorizontal.setAngle(getHorizontalTotalShootingAngle());
 
         // original angle to hub (field-relative) in degrees
         originalHorizontal.setAngle(Math.toDegrees(fieldRelativeAngleToHub));
@@ -163,8 +163,8 @@ public class ShooterSim implements ShooterIO {
 
         // Shot velocity vector: angle uses the manager's total horizontal angle,
         // length is proportional to computed launch velocity.
-        double launch = ShootingManager.getLaunchVelocity();
-        shotVel.setAngle(ShootingManager.getHorizontalTotalShootingAngle());
+        double launch = getLaunchVelocity();
+        shotVel.setAngle(getHorizontalTotalShootingAngle());
         shotVel.setLength(Math.min(1.5, Math.abs(launch) * 0.075));
       } catch (Exception ex) {
         // Defensive: do not let simulation UI break on unexpected errors. Log and continue.

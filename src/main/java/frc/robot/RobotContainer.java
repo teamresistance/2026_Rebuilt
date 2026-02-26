@@ -25,7 +25,8 @@ import frc.robot.subsystems.shooter.ShooterSim;
 import frc.robot.subsystems.vision.*;
 import frc.robot.util.BumpUtil;
 import frc.robot.util.ShiftUtil;
-import frc.robot.util.shooter.ShootingManager;
+import frc.robot.util.SimulationAndState;
+
 import java.io.IOException;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -192,18 +193,18 @@ public class RobotContainer {
 
   private void configureLEDS() {
     // ready / not ready leds, does not lock
-    new Trigger(shooter::atShootingSetpoints)
+    new Trigger(() -> !shooter.atShootingSetpoints())
         .whileFalse(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.NOT_READY, false)))
         .whileTrue(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.READY, false)));
 
     // shooting / passing indicators, unlocks when unpressed
     driver
         .rightTrigger()
-        .and(() -> ShootingManager.SimulationAndState.getShootingType(drive::getPose) == 0)
+        .and(() -> SimulationAndState.getShootingType(drive::getPose) == 0)
         .whileTrue(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.SHOOTING, true)));
     driver
         .rightTrigger()
-        .and(() -> ShootingManager.SimulationAndState.getShootingType(drive::getPose) == 1)
+        .and(() -> SimulationAndState.getShootingType(drive::getPose) == 1)
         .whileTrue(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.PASSING, true)));
     driver.rightTrigger().onFalse(Commands.runOnce(leds::unlock));
 

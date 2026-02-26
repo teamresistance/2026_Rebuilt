@@ -1,4 +1,4 @@
-package frc.robot.util.shooter;
+package frc.robot.util;
 
 import frc.robot.Constants.ShootingConstants;
 

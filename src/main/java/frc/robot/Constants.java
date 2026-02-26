@@ -116,10 +116,12 @@ public final class Constants {
     /// Mass of the projectile fuel (kg) - affects drag and energy loss calculations
     public static final double FUEL_MASS = 0.227;
 
+    // TODO: correct numbers with real hardware
     // Vertical velocity component (m/s) - gravitational component of projectile
     // motion
     public static final double VERTICAL_VELOCITY_COMPONENT = 6.92858460962;
 
+    // TODO: correct numbers with real hardware
     // Square of vertical velocity component (m^2/s^2) - used in total velocity
     // calculations
     public static final double VERTICAL_VELOCITY_COMPONENT_SQUARED = 48.0052946927;
@@ -137,21 +139,25 @@ public final class Constants {
      * ===============
      */
 
+    // TODO: correct numbers with real hardware
     // Time interval for motor adjustment (seconds) - time to recover from launch
     // and prepare for next
     // shot
     public static final double RELOAD_TIME = 0.07675438596;
 
+    // TODO: correct numbers with real hardware
     // Upswing velocity of projectile before launch (m/s) - pre-launch speed
     // requirement for
     // consistent shooting performance
     public static final double UPSWING_VELOCITY = 5.7912;
 
+    // TODO: correct numbers with real hardware
     // Moment of inertia of the shooter mechanism (kg·m^2) - affects how much torque
     // is needed to
     // adjust wheel speed after a shot
     public static final double SHOOTER_MOMENT_OF_INERTIA = 0.00126;
 
+    // TODO: correct numbers with real hardware
     // Resting angular velocity of the shooter wheel (rad/s) - target steady-state
     // speed for
     // consistent shooting performance
