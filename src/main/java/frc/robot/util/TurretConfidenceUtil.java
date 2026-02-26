@@ -3,7 +3,6 @@ package frc.robot.util;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import frc.robot.util.ShootingUtil;
 import frc.robot.subsystems.drive.SwerveDriveIO;
 
 public class TurretConfidenceUtil {
@@ -27,11 +26,9 @@ public class TurretConfidenceUtil {
   public static double confidence = 0.0;
 
   // Call this in Robot.java to update confidence
-  public static double calculateConfidence() {
+  public static double calculateConfidence() {;
 
-    ShootingUtil.getShootingTarget(drive.getPose()).getTranslation();
-
-    //
+    // Get current robot pose and velocity
     Pose2d pose = drive.getPose();
     ChassisSpeeds speeds = drive.getChassisSpeeds();
 
@@ -60,11 +57,8 @@ public class TurretConfidenceUtil {
     // Convert miss distance to probability (Gaussian curve equation)
     double probability = Math.exp(-Math.pow(totalError, 2) / (2 * Math.pow(ERROR_STD_DEV, 2)));
 
-    return clamp(probability);
-  }
-
-  private static double clamp(double value) {
-    return Math.max(0.0, Math.min(1.0, value));
+    confidence = probability;
+    return confidence;
   }
 
   public double getConfidence() {
