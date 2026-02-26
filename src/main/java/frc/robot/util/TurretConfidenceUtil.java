@@ -20,14 +20,11 @@ public class TurretConfidenceUtil {
       1.0; // tune the standard deviation for the robot's accuracy
   private static final double SHOOTER_HEIGHT =
       0.7; // in meters, height of the shooter from the ground - placeholder
-  private static Translation2d TARGET_POSITION =
-      ShootingUtil.getShootingTarget(drive.getPose()).getTranslation();
-
-  public static double confidence = 0.0;
+  private static Translation2d TARGET_POSITION;
+  public static double confidence;
 
   // Call this in Robot.java to update confidence
   public static double calculateConfidence() {
-    ;
 
     // Get current robot pose and velocity
     Pose2d pose = drive.getPose();
@@ -61,13 +58,5 @@ public class TurretConfidenceUtil {
 
     confidence = probability;
     return confidence;
-  }
-
-  public double getConfidence() {
-    return confidence;
-  }
-
-  public boolean isSafeToShoot(double threshold) {
-    return confidence >= threshold;
   }
 }
