@@ -1,39 +1,50 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.leds;
 
 import com.ctre.phoenix6.hardware.CANdle;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.Constants.LEDMode;
+import java.util.*;
 import org.littletonrobotics.junction.Logger;
 
 public class LEDSubsystem extends SubsystemBase {
 
-  public LEDSubsystem() {}
-
+  private final List<LEDStream> streams = new ArrayList<>();
+  private Constants.LEDMode lastMode = Constants.LEDMode.RAINBOW;
   private final CANdle candle = new CANdle(60);
 
-  private LEDMode mode = LEDMode.RAINBOW;
-  private boolean isLocked = false;
+  public LEDSubsystem() {}
 
-  public void setMode(LEDMode newMode, boolean lock) {
-    if (!isLocked) mode = newMode;
-    if (lock) isLocked = true;
-  }
-
-  public LEDMode getMode() {
-    return mode;
-  }
-
-  public void unlock() {
-    isLocked = false;
+  /** Adds an LEDStream to the list of periodically checked streams. */
+  public void addStream(LEDStream stream) {
+    streams.add(stream);
   }
 
   @Override
   public void periodic() {
 
+    LEDStream highest = null;
+
+    for (LEDStream stream : streams) {
+
+      if (!stream.isActive()) continue;
+
+      if (highest == null || stream.priority >= highest.priority) {
+        highest = stream;
+      }
+    }
+
+    Constants.LEDMode newMode =
+        (highest == null) ? Constants.LEDMode.RAINBOW : highest.getLEDMode();
+
+    if (!newMode.equals(lastMode)) {
+      applyMode(newMode);
+      lastMode = newMode;
+    }
+  }
+
+  private void applyMode(Constants.LEDMode mode) {
     Logger.recordOutput("LED Mode", mode.toString());
 
-    // auto set led
     switch (mode) {
       case RAINBOW:
         candle.setControl(Constants.LED_ANIMATION_RAINBOW);

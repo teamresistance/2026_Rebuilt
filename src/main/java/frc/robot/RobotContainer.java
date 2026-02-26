@@ -16,7 +16,6 @@ import frc.robot.commands.IdleShooterCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.commands.ToggleIntakeCommand;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.climber.ClimberReal;
 import frc.robot.subsystems.climber.ClimberSim;
@@ -27,6 +26,8 @@ import frc.robot.subsystems.hoppert.HoppertSim;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeReal;
 import frc.robot.subsystems.intake.IntakeSim;
+import frc.robot.subsystems.leds.LEDStream;
+import frc.robot.subsystems.leds.LEDSubsystem;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterReal;
 import frc.robot.subsystems.shooter.ShooterSim;
@@ -221,64 +222,64 @@ public class RobotContainer {
   }
 
   private void configureLEDS() {
-    // ready / not ready leds, does not lock
-    new Trigger(shooter::atShootingSetpoints)
-        .whileFalse(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.NOT_READY, false)))
-        .whileTrue(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.READY, false)));
 
-    // shooting / passing indicators, unlocks when unpressed
-    driver
-        .rightTrigger()
-        .and(() -> ShootingUtil.getShootingType(drive::getPose) == 0)
-        .whileTrue(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.SHOOTING, true)));
-    driver
-        .rightTrigger()
-        .and(() -> ShootingUtil.getShootingType(drive::getPose) == 1)
-        .whileTrue(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.PASSING, true)));
-    driver.rightTrigger().onFalse(Commands.runOnce(leds::unlock));
+    // constant led modes
 
-    // when endgame begins, endgame LED animation for 3 seconds
+    // READY / NOT READY (priority 1, always active)
+    LEDStream readyStream =
+        new LEDStream(
+            "ready",
+            1,
+            () ->
+                shooter.atShootingSetpoints()
+                    ? Constants.LEDMode.READY
+                    : Constants.LEDMode.NOT_READY,
+            () -> true);
+    leds.addStream(readyStream);
+
+    LEDStream shootingStream =
+        new LEDStream(
+            "shooting",
+            2,
+            () ->
+                ShootingUtil.getShootingType(drive::getPose) == 0
+                    ? Constants.LEDMode.SHOOTING
+                    : Constants.LEDMode.PASSING,
+            () -> driver.rightTrigger().getAsBoolean());
+    leds.addStream(shootingStream);
+
+    // ENDGAME (priority 8, timed 3s)
+    LEDStream endgameStream = new LEDStream("endgame", 8, () -> Constants.LEDMode.ENDGAME);
+    leds.addStream(endgameStream);
+
+    // SHIFTING (priority 6, timed 3s)
+    LEDStream shiftStream =
+        new LEDStream(
+            "shift",
+            6,
+            () ->
+                ShiftUtil.isOurs(ShiftUtil.getNextShift())
+                    ? Constants.LEDMode.SHIFTING_US
+                    : Constants.LEDMode.SHIFTING_THEM);
+    leds.addStream(shiftStream);
+
+    // BUMP (priority 5, timed 1s, cancels if leaving zone)
+    LEDStream bumpStream =
+        new LEDStream("bump", 5, () -> Constants.LEDMode.BUMP, () -> inBumpZone.getAsBoolean());
+    leds.addStream(bumpStream);
+
+    // time-based led modes
+
+    // ENDGAME trigger (timed 3s)
     new Trigger(() -> ShiftUtil.getNextShift() == Constants.ShiftOwner.BOTH)
-        .onTrue(
-            new WaitCommand(3)
-                .andThen(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.ENDGAME, true)))
-                .andThen(new WaitCommand(3))
-                .andThen(Commands.runOnce(leds::unlock)));
+        .onTrue(Commands.runOnce(() -> endgameStream.runForSeconds(2)));
 
-    // when shift is 5s from now, shift LED animation for 3 seconds, color depends on who gets it
-    // will be ours
-    new Trigger(() -> ShiftUtil.isOurs(ShiftUtil.getNextShift()) && ShiftUtil.nearNextShift())
-        .onTrue(
-            Commands.runOnce(leds::unlock)
-                .andThen(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.SHIFTING_US, true)))
-                .andThen(new WaitCommand(3))
-                .andThen(Commands.runOnce(leds::unlock)));
+    // SHIFT warning (timed 3s when near shift)
+    new Trigger(ShiftUtil::nearNextShift)
+        .onTrue(Commands.runOnce(() -> shiftStream.runForSeconds(2)));
 
-    // will not be ours
-    new Trigger(() -> !ShiftUtil.isOurs(ShiftUtil.getNextShift()) && ShiftUtil.nearNextShift())
-        .onTrue(
-            Commands.runOnce(leds::unlock)
-                .andThen(
-                    Commands.runOnce(() -> leds.setMode(Constants.LEDMode.SHIFTING_THEM, true)))
-                .andThen(new WaitCommand(3))
-                .andThen(Commands.runOnce(leds::unlock)));
-
-    // bump rotate indicator, will stay on for 1 second OR instantly stop if you leave the bump zone
-    driver
-        .y()
-        .negate()
-        .and(inBumpZone)
-        .onTrue(
-            Commands.runOnce(leds::unlock)
-                .andThen(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.BUMP, true)))
-                .andThen(new WaitCommand(1).andThen(Commands.runOnce(leds::unlock))));
-
-    // when not in bump zone BUT bump leds are on, unlock leds. prevents unlocking other states when
-    // leaving bump zone
-    inBumpZone
-        .negate()
-        .and(() -> leds.getMode() == Constants.LEDMode.BUMP)
-        .onTrue(Commands.runOnce(leds::unlock));
+    // BUMP trigger (timed 1s when entering bump zone)
+    driver.y().negate().and(inBumpZone).onTrue(Commands.runOnce(() -> bumpStream.runForSeconds(1)));
   }
 
   /** Defines button bindings and control triggers */
