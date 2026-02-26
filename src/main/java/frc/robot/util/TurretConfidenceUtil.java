@@ -20,13 +20,14 @@ public class TurretConfidenceUtil {
       1.0; // tune the standard deviation for the robot's accuracy
   private static final double SHOOTER_HEIGHT =
       0.7; // in meters, height of the shooter from the ground - placeholder
-  private static Translation2d TARGET_POSITION = ShootingUtil.getShootingTarget(drive.getPose()).getTranslation();
-  
+  private static Translation2d TARGET_POSITION =
+      ShootingUtil.getShootingTarget(drive.getPose()).getTranslation();
 
   public static double confidence = 0.0;
 
   // Call this in Robot.java to update confidence
-  public static double calculateConfidence() {;
+  public static double calculateConfidence() {
+    ;
 
     // Get current robot pose and velocity
     Pose2d pose = drive.getPose();
@@ -39,7 +40,8 @@ public class TurretConfidenceUtil {
     double distance = pose.getTranslation().getDistance(TARGET_POSITION);
 
     // Time of flight (simple model, no air resistance, shot is flat, shooter velocity is constant)
-    double timeOfFlight = Math.sqrt(distance * distance + SHOOTER_HEIGHT * SHOOTER_HEIGHT) / SHOOTER_VELOCITY;
+    double timeOfFlight =
+        Math.sqrt(distance * distance + SHOOTER_HEIGHT * SHOOTER_HEIGHT) / SHOOTER_VELOCITY;
 
     // Calculate lateral velocity of the robot with the x and y velocity
     double lateralVelocity = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
