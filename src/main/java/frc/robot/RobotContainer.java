@@ -36,6 +36,7 @@ import frc.robot.util.BumpUtil;
 import frc.robot.util.OtherUtil;
 import frc.robot.util.ShiftUtil;
 import frc.robot.util.ShootingUtil;
+import frc.robot.util.TurretConfidenceUtil;
 import java.io.IOException;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -83,6 +84,7 @@ public class RobotContainer {
     vision = configureAprilTagVision();
     configureNamedCommands();
     ShootingConstants.configureShootingConstants();
+    TurretConfidenceUtil.instantiateDrive(drive);
 
     switch (Constants.CURRENT_MODE) {
       case REAL:
