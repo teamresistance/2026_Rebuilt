@@ -21,7 +21,8 @@ public class IdleShooterCommand extends Command {
 
     // NOTE: All angles are field-relative!
     double distance =
-        ShooterIO.getPredictedDistanceToHubAfterReload(); // Use predicted distance after reload for idle
+        ShooterIO
+            .getPredictedDistanceToHubAfterReload(); // Use predicted distance after reload for idle
     // aiming
     double turretAngle = ShooterIO.getHorizontalTotalShootingAngle();
     double hoodAngle = ShooterIO.getVerticalShootingAngle();

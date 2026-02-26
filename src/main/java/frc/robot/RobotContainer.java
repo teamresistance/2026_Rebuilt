@@ -26,7 +26,6 @@ import frc.robot.subsystems.vision.*;
 import frc.robot.util.BumpUtil;
 import frc.robot.util.ShiftUtil;
 import frc.robot.util.SimulationAndState;
-
 import java.io.IOException;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;

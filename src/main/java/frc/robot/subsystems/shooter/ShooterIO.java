@@ -1,7 +1,5 @@
 package frc.robot.subsystems.shooter;
 
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -9,10 +7,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ShootingConstants;
 import frc.robot.util.FastBallisticCalculator;
 import frc.robot.util.MotorAdjustmentCalculator;
+import org.littletonrobotics.junction.Logger;
 
 public class ShooterIO extends SubsystemBase {
 
-  
   /**
    * Vertical (elevation) angle to set the shooter to, in degrees. Updated by {@link
    * #updateShootingParameters} after ballistic calculation.
@@ -237,16 +235,20 @@ public class ShooterIO extends SubsystemBase {
 
   public boolean atShootingSetpoints() {
     return false;
-  };
+  }
+  ;
 
-  public void runFlywheelAtRPS(double rps) {};
+  public void runFlywheelAtRPS(double rps) {}
+  ;
 
   // TODO: In implementation, the angles here must be field-relative.
-  public void setHoodTarget(double hoodTargetAngle) {};
+  public void setHoodTarget(double hoodTargetAngle) {}
+  ;
 
   // TODO: In implementation, the angles here must be field-relative.
-  public void setTurretTarget(double turretTargetAngle) {};
+  public void setTurretTarget(double turretTargetAngle) {}
+  ;
 
-  public void zeroHood(double newValue) {};
-  
+  public void zeroHood(double newValue) {}
+  ;
 }

@@ -8,7 +8,6 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import frc.robot.Constants;
 import frc.robot.util.Conversions;
-
 import org.littletonrobotics.junction.Logger;
 
 public class ShooterReal extends ShooterIO {
@@ -116,8 +115,7 @@ public class ShooterReal extends ShooterIO {
   public void setTurretTarget(double angle) {
     if (angle < Constants.SHOOTER_TURRET_MAX_YAW && angle > Constants.SHOOTER_TURRET_MIN_YAW) {
       turretTargetAngle = angle;
-      turretMotor.setControl(
-          new PositionDutyCycle(Conversions.toTurretRevs(angle)));
+      turretMotor.setControl(new PositionDutyCycle(Conversions.toTurretRevs(angle)));
     }
   }
 
@@ -141,8 +139,7 @@ public class ShooterReal extends ShooterIO {
     Logger.recordOutput("Shooter/Turret Target Angle", turretTargetAngle);
     Logger.recordOutput(
         "Shooter/Turret Real Angle",
-        Conversions.toTurretDegrees(
-            turretEncoder.getPosition().getValueAsDouble()));
+        Conversions.toTurretDegrees(turretEncoder.getPosition().getValueAsDouble()));
     Logger.recordOutput("Shooter/Hood Target Angle", hoodTargetAngle);
     Logger.recordOutput(
         "Shooter/Hood Real Angle",

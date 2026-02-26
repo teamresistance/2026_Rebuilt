@@ -12,7 +12,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import frc.robot.util.SimulationAndState;
-
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -136,8 +135,7 @@ public class ShooterSim extends ShooterIO {
 
         // Update the ShootingManager with the latest inputs so ballistic
         // parameters are available for visualization below.
-        updateShootingParameters(
-            distanceToHub, fieldRelativeAngleToHub, speeds, pose);
+        updateShootingParameters(distanceToHub, fieldRelativeAngleToHub, speeds, pose);
 
         // --- Visualization updates ---
         // Show the desired absolute shooting angle computed by the manager
