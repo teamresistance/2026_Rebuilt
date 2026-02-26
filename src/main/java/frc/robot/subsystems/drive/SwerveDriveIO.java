@@ -131,6 +131,8 @@ public interface SwerveDriveIO extends Subsystem {
 
   Transform2d getVelocity();
 
+  Transform2d getAcceleration();
+
   @Override
   void periodic();
 

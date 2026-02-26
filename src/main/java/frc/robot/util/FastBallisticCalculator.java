@@ -177,8 +177,8 @@ public final class FastBallisticCalculator {
     double duration = (end - start) / 1_000_000_000.0;
 
     double errMag = Math.sqrt(errX * errX + errY * errY);
-    // System.out.printf(
-    //    "RK2 root solve -> errX=%.4f m, errY=%.4f m, errMag=%.4f m, duration=%.9f s%n",
-    //    errX, errY, errMag, duration);
+    System.out.printf(
+        "RK2 root solve -> errX=%.4f m, errY=%.4f m, errMag=%.4f m, duration=%.9f s%n",
+        errX, errY, errMag, duration);
   }
 }

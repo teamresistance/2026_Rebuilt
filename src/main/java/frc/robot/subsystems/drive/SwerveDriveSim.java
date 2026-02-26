@@ -30,6 +30,9 @@ public class SwerveDriveSim implements SwerveDriveIO {
   final DriveTrainSimulationConfig simulationConfig;
   final SelfControlledSwerveDriveSimulation driveSimulation;
   final Field2d field2d;
+  // For acceleration estimation: store previous chassis speeds and latest accel
+  private ChassisSpeeds previousChassisSpeeds = new ChassisSpeeds();
+  private Transform2d acceleration = new Transform2d();
 
   public SwerveDriveSim() {
     simulationConfig =
@@ -75,6 +78,29 @@ public class SwerveDriveSim implements SwerveDriveIO {
     field2d.setRobotPose(getPose());
     field2d.getObject("odometry").setPose(getPose());
     Logger.recordOutput("Drive/Robot Pose", getPose());
+
+    // --- Acceleration estimation ---
+    // Compute current chassis speeds from module states and estimate linear/angular
+    // acceleration by differencing with the previous stored speeds and dividing
+    // by the period (20ms). Store the result for callers of getAcceleration().
+    try {
+      ChassisSpeeds current = getChassisSpeeds();
+      double dt = 0.02; // periodic loop at 20ms
+      double ax = (current.vxMetersPerSecond - previousChassisSpeeds.vxMetersPerSecond) / dt;
+      double ay = (current.vyMetersPerSecond - previousChassisSpeeds.vyMetersPerSecond) / dt;
+      double aomega =
+          (current.omegaRadiansPerSecond - previousChassisSpeeds.omegaRadiansPerSecond) / dt;
+      acceleration = new Transform2d(ax, ay, new Rotation2d(aomega));
+      previousChassisSpeeds = current;
+      Logger.recordOutput("Drive/EstimatedAcceleration", acceleration);
+    } catch (Exception ex) {
+      // Defensive: do not let acceleration estimation break periodic
+      Logger.recordOutput("Drive/AccelerationError", ex.toString());
+    }
+  }
+
+  public Transform2d getAcceleration() {
+    return acceleration;
   }
 
   @Override
