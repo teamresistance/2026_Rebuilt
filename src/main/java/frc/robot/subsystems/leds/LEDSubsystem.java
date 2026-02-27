@@ -115,6 +115,9 @@ public class LEDSubsystem extends SubsystemBase {
       case BUMP:
         candle.setControl(Constants.LED_ANIMATION_BUMP);
         break;
+      case AUTO:
+        candle.setControl(Constants.LED_ANIMATION_AUTO);
+        break;
     }
   }
 }

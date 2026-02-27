@@ -347,6 +347,15 @@ public class RobotContainer {
                 .andThen(Commands.runOnce(ShiftUtil::assignShifts)));
   }
 
+  /**
+   * Creates an LEDStream that runs the auto animation 20 seconds and then is never accessed again.
+   */
+  public void runAutoLeds() {
+    LEDStream autoStream = new LEDStream("auto", 100, () -> Constants.LEDMode.AUTO);
+    leds.addStream(autoStream);
+    autoStream.runForSeconds(20);
+  }
+
   public String getShiftChosen() {
     return manualShiftAssigner.getSelected();
   }

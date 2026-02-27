@@ -2,6 +2,7 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
+import com.ctre.phoenix6.controls.LarsonAnimation;
 import com.ctre.phoenix6.controls.RainbowAnimation;
 import com.ctre.phoenix6.controls.SolidColor;
 import com.ctre.phoenix6.controls.StrobeAnimation;
@@ -73,7 +74,8 @@ public final class Constants {
     SHIFTING_US,
     SHIFTING_THEM,
     ENDGAME,
-    BUMP
+    BUMP,
+    AUTO
   }
 
   public static final int LED_START_INDEX = 0;
@@ -109,6 +111,11 @@ public final class Constants {
       new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
           .withFrameRate(10)
           .withColor(new RGBWColor(0, 255, 255));
+  public static final LarsonAnimation LED_ANIMATION_AUTO =
+      new LarsonAnimation(LED_START_INDEX, LED_END_INDEX)
+          .withFrameRate(10)
+          .withColor(new RGBWColor(255, 150, 0))
+          .withSize(10);
 
   public enum ShiftOwner {
     BLUE,
