@@ -177,8 +177,17 @@ public class ShooterSim extends ShooterIO {
   }
 
   @Override
+  public boolean atTargetRPS() {
+    return true;
+  }
+
+  @Override
   public void runFlywheelAtRPS(double rps) {
     // not relevant in sim
+  }
+
+  public boolean isShooting() {
+    return true;
   }
 
   @Override

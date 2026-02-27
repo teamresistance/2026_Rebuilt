@@ -3,9 +3,11 @@ package frc.robot.subsystems.shooter;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.*;
 import com.ctre.phoenix6.controls.PositionDutyCycle;
+import com.ctre.phoenix6.controls.StrictFollower;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import frc.robot.Constants;
 import frc.robot.util.Conversions;
 import org.littletonrobotics.junction.Logger;
@@ -19,6 +21,8 @@ public class ShooterReal extends ShooterIO {
   private final TalonFX turretMotor = new TalonFX(Constants.SHOOTER_TURRET_ID, CANBus.roboRIO());
   private final TalonFX flywheelMotor =
       new TalonFX(Constants.SHOOTER_FLYWHEEL_ID, CANBus.roboRIO());
+  private final TalonFX flywheelMotor2 =
+      new TalonFX(Constants.SHOOTER_FLYWHEEL_ID_2, CANBus.roboRIO());
   private final CANcoder turretEncoder =
       new CANcoder(Constants.SHOOTER_TURRET_ENCODER_ID, CANBus.roboRIO());
 
@@ -40,6 +44,7 @@ public class ShooterReal extends ShooterIO {
     TalonFXConfiguration hoodConfig =
         new TalonFXConfiguration()
             .withSlot0(new Slot0Configs().withKP(0).withKI(0).withKD(0).withKS(0))
+            .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
                     .withStatorCurrentLimit(0)
@@ -51,6 +56,7 @@ public class ShooterReal extends ShooterIO {
     TalonFXConfiguration turretConfig =
         new TalonFXConfiguration()
             .withSlot0(new Slot0Configs().withKP(0).withKI(0).withKD(0).withKS(0))
+            .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
                     .withStatorCurrentLimit(0)
@@ -58,8 +64,6 @@ public class ShooterReal extends ShooterIO {
                     .withSupplyCurrentLimit(0)
                     .withSupplyCurrentLimitEnable(true))
             .withFeedback(
-                // using CANcoder and assuming encoder mounted directly to motor.
-                // TODO: otherwise, correct the ratio if it is mounted elsewhere
                 new FeedbackConfigs().withRemoteCANcoder(turretEncoder).withRotorToSensorRatio(1));
     turretMotor.getConfigurator().apply(turretConfig);
 
@@ -73,6 +77,16 @@ public class ShooterReal extends ShooterIO {
                     .withSupplyCurrentLimit(0)
                     .withSupplyCurrentLimitEnable(true));
     flywheelMotor.getConfigurator().apply(flywheelConfig);
+
+    TalonFXConfiguration flywheelConfig2 =
+        new TalonFXConfiguration()
+            .withCurrentLimits(
+                new CurrentLimitsConfigs()
+                    .withStatorCurrentLimit(0)
+                    .withStatorCurrentLimitEnable(true)
+                    .withSupplyCurrentLimit(0)
+                    .withSupplyCurrentLimitEnable(true));
+    flywheelMotor2.getConfigurator().apply(flywheelConfig2);
   }
 
   /**
@@ -83,9 +97,15 @@ public class ShooterReal extends ShooterIO {
   @Override
   public boolean atShootingSetpoints() {
     return hoodMotor.getPosition().isNear(hoodTargetAngle, Constants.SHOOTER_HOOD_REVS_TOLERANCE)
-        && turretEncoder
+        && turretMotor
             .getPosition()
             .isNear(turretTargetAngle, Constants.SHOOTER_TURRET_REVS_TOLERANCE);
+  }
+
+  /** Returns if the flywheel motors are at their target speed. */
+  @Override
+  public boolean atTargetRPS() {
+    return flywheelMotor.getVelocity().isNear(flywheelTargetRPS, Constants.SHOOTER_RPS_TOLERANCE);
   }
 
   /** Sets the velocity target for the flywheel in rotations/second */
@@ -93,6 +113,7 @@ public class ShooterReal extends ShooterIO {
   public void runFlywheelAtRPS(double rps) {
     flywheelTargetRPS = rps;
     flywheelMotor.setControl(new VelocityDutyCycle(rps));
+    flywheelMotor2.setControl(new StrictFollower(Constants.SHOOTER_FLYWHEEL_ID));
   }
 
   /**
@@ -102,6 +123,7 @@ public class ShooterReal extends ShooterIO {
   @Override
   public void setHoodTarget(double angle) {
     if (angle < Constants.SHOOTER_HOOD_MAX_PITCH && angle > Constants.SHOOTER_HOOD_MIN_PITCH) {
+      angle = angle - Constants.SHOOTER_HOOD_MIN_PITCH; // zero position is not zero degrees
       hoodTargetAngle = angle;
       hoodMotor.setControl(new PositionDutyCycle(Conversions.toHoodRevs(angle)));
     }
@@ -129,6 +151,11 @@ public class ShooterReal extends ShooterIO {
         || newValueDegrees < Constants.SHOOTER_HOOD_MIN_PITCH) {
       hoodMotor.setPosition(Conversions.toHoodRevs(newValueDegrees));
     }
+  }
+
+  @Override
+  public boolean isShooting() {
+    return flywheelTargetRPS > 1.0;
   }
 
   @Override

@@ -2,6 +2,7 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -9,9 +10,13 @@ import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants;
+import frc.robot.Constants.ShootingConstants;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.HoppertCommand;
 import frc.robot.commands.IdleShooterCommand;
 import frc.robot.commands.ShootCommand;
+import frc.robot.commands.ToggleIntakeCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.input.KeyboardHID;
 import frc.robot.subsystems.LEDSubsystem;
@@ -19,11 +24,18 @@ import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.climber.ClimberReal;
 import frc.robot.subsystems.climber.ClimberSim;
 import frc.robot.subsystems.drive.*;
+import frc.robot.subsystems.hoppert.HoppertIO;
+import frc.robot.subsystems.hoppert.HoppertReal;
+import frc.robot.subsystems.hoppert.HoppertSim;
+import frc.robot.subsystems.intake.IntakeIO;
+import frc.robot.subsystems.intake.IntakeReal;
+import frc.robot.subsystems.intake.IntakeSim;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterReal;
 import frc.robot.subsystems.shooter.ShooterSim;
 import frc.robot.subsystems.vision.*;
 import frc.robot.util.BumpUtil;
+import frc.robot.util.OtherUtil;
 import frc.robot.util.ShiftUtil;
 import frc.robot.util.SimulationAndState;
 import java.io.IOException;
@@ -50,6 +62,8 @@ public class RobotContainer {
   private VisionSubsystem vision;
   private final ShooterIO shooter;
   private final ClimberIO climber;
+  private final HoppertIO hoppert;
+  private final IntakeIO intake;
   private final LEDSubsystem leds = new LEDSubsystem(); // does not need IO
 
   // Controller
@@ -61,9 +75,10 @@ public class RobotContainer {
   private final LoggedDashboardChooser<Command> autoChooser;
   private final SendableChooser<String> manualShiftAssigner = new SendableChooser<>();
 
-  // bump stuff
+  // bump zone and prebuilt commands
   private Trigger inBumpZone;
   private Command driveAtAngleForBump;
+  private Command driveAtLimitedSpeed;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -75,19 +90,27 @@ public class RobotContainer {
     switch (Constants.CURRENT_MODE) {
       case REAL:
         shooter = new ShooterReal();
+        hoppert = new HoppertReal();
         climber = new ClimberReal();
+        intake = new IntakeReal();
         break;
       case SIM:
         shooter = new ShooterSim(drive::getPose, drive::getChassisSpeeds);
+        hoppert = new HoppertSim();
         climber = new ClimberSim();
+        intake = new IntakeSim();
         break;
       default:
+        intake = new IntakeReal();
         shooter = new ShooterReal();
+        hoppert = new HoppertReal();
         climber = new ClimberReal();
     }
 
     // bump stuff
     inBumpZone = new Trigger(() -> BumpUtil.inBumpZone(drive::getPose, drive::getChassisSpeeds));
+
+    // pid angle control to the rotationToSnap() return
     driveAtAngleForBump =
         DriveCommands.joystickDriveAtAngle(
                 drive,
@@ -96,6 +119,16 @@ public class RobotContainer {
                 () -> BumpUtil.rotationToSnap(drive::getRotation))
             .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming);
     driveAtAngleForBump.addRequirements(drive);
+
+    // clamps inputs to the drive command
+    driveAtLimitedSpeed =
+        DriveCommands.joystickDrive(
+                drive,
+                () -> MathUtil.clamp(-driver.getLeftY(), -0.8, 0.8),
+                () -> MathUtil.clamp(-driver.getLeftX(), -0.8, 0.8),
+                () -> MathUtil.clamp(-driver.getRightX(), -0.75, 0.75))
+            .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming);
+    driveAtLimitedSpeed.addRequirements(drive);
 
     manualShiftAssigner.addOption("Red", "R");
     manualShiftAssigner.addOption("Blue", "B");
@@ -219,14 +252,17 @@ public class RobotContainer {
     // will be ours
     new Trigger(() -> ShiftUtil.isOurs(ShiftUtil.getNextShift()) && ShiftUtil.nearNextShift())
         .onTrue(
-            Commands.runOnce(() -> leds.setMode(Constants.LEDMode.SHIFTING_US, true))
+            Commands.runOnce(leds::unlock)
+                .andThen(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.SHIFTING_US, true)))
                 .andThen(new WaitCommand(3))
                 .andThen(Commands.runOnce(leds::unlock)));
 
     // will not be ours
     new Trigger(() -> !ShiftUtil.isOurs(ShiftUtil.getNextShift()) && ShiftUtil.nearNextShift())
         .onTrue(
-            Commands.runOnce(() -> leds.setMode(Constants.LEDMode.SHIFTING_THEM, true))
+            Commands.runOnce(leds::unlock)
+                .andThen(
+                    Commands.runOnce(() -> leds.setMode(Constants.LEDMode.SHIFTING_THEM, true)))
                 .andThen(new WaitCommand(3))
                 .andThen(Commands.runOnce(leds::unlock)));
 
@@ -236,9 +272,16 @@ public class RobotContainer {
         .negate()
         .and(inBumpZone)
         .onTrue(
-            Commands.runOnce(() -> leds.setMode(Constants.LEDMode.BUMP, true))
+            Commands.runOnce(leds::unlock)
+                .andThen(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.BUMP, true)))
                 .andThen(new WaitCommand(1).andThen(Commands.runOnce(leds::unlock))));
-    driver.y().negate().and(inBumpZone).onFalse(Commands.runOnce(leds::unlock));
+
+    // when not in bump zone BUT bump leds are on, unlock leds. prevents unlocking other states when
+    // leaving bump zone
+    inBumpZone
+        .negate()
+        .and(() -> leds.getMode() == Constants.LEDMode.BUMP)
+        .onTrue(Commands.runOnce(leds::unlock));
   }
 
   /** Defines button bindings and control triggers */
@@ -253,12 +296,15 @@ public class RobotContainer {
             () -> Math.max(-1.0, Math.min(1.0, -driver.getLeftX() + keyboard.getRawAxis(1))),
             () -> Math.max(-1.0, Math.min(1.0, -driver.getRightX() + keyboard.getRawAxis(2)))));
 
+    // have hopper automatically deciding when to run or not to run
+    hoppert.setDefaultCommand(new HoppertCommand(hoppert, shooter));
+
     // when left bumper is not pressed and in bump zone, auto rotate.
     driver.y().negate().and(inBumpZone).whileTrue(driveAtAngleForBump);
 
     // climb raise
     driver
-        .b()
+        .start()
         .onTrue(
             Commands.runOnce(climber::unbrake)
                 .andThen(climber::up)
@@ -267,12 +313,20 @@ public class RobotContainer {
 
     // climb descend
     driver
-        .a()
+        .back()
         .onTrue(
             Commands.runOnce(climber::unbrake)
                 .andThen(climber::down)
                 .andThen(new WaitUntilCommand(climber::atTarget))
                 .andThen(climber::brake));
+
+    // auto-align to climber positions with bumpers (left/right bumper = left/right pos)
+    driver
+        .leftBumper()
+        .whileTrue(DriveCommands.goToTransform(drive, OtherUtil.getClimberAlignPos(true)));
+    driver
+        .rightBumper()
+        .whileTrue(DriveCommands.goToTransform(drive, OtherUtil.getClimberAlignPos(false)));
 
     // auto-aim hood and turret always
     shooter.setDefaultCommand(new IdleShooterCommand(drive, shooter));
@@ -281,6 +335,10 @@ public class RobotContainer {
     driver.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
     driver.rightTrigger().whileTrue(new ShootCommand(drive, shooter));
+    driver.rightTrigger().whileTrue(driveAtLimitedSpeed);
+
+    // left trigger toggles intake
+    driver.leftTrigger().onTrue(new ToggleIntakeCommand(intake));
   }
 
   /**

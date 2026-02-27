@@ -249,6 +249,13 @@ public class ShooterIO extends SubsystemBase {
   public void setTurretTarget(double turretTargetAngle) {}
   ;
 
-  public void zeroHood(double newValue) {}
-  ;
+  public boolean atTargetRPS() {
+    return false;
+  };
+
+  public boolean isShooting() {
+    return false;
+  };
+
+  void zeroHood(double newValue) {}
 }

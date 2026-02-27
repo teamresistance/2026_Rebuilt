@@ -33,7 +33,11 @@ public final class Constants {
           Units.degreesToRadians(540),
           Units.degreesToRadians(400));
 
-  public static final int CLIMBER_BRAKE_ID = 0; // TODO: correct DIO port
+  public static final int HOPPER_ROLLERS_ID = 17;
+  public static final int HOPPER_WHEELS_ID = 18;
+  public static final int TOWER_MOTOR_ID = 19;
+
+  public static final int CLIMBER_BRAKE_ID = 0; // TODO: correct RELAY port
   public static final int CLIMBER_MOTOR_ID = 11;
   public static final int CLIMBER_ZERO = 0;
   public static final int CLIMBER_FULL = 10; // TODO: actual high/low pos
@@ -41,13 +45,17 @@ public final class Constants {
   public static final int SHOOTER_HOOD_ID = 12;
   public static final int SHOOTER_TURRET_ID = 13;
   public static final int SHOOTER_FLYWHEEL_ID = 14;
-  public static final int SHOOTER_TURRET_ENCODER_ID = 15;
+  public static final int SHOOTER_FLYWHEEL_ID_2 = 15;
+  public static final int SHOOTER_TURRET_ENCODER_ID = 16;
+
+  public static final int INTAKE_MOTOR_ID = 16;
 
   // TODO: correct numbers with real hardware
   public static final double SHOOTER_HOOD_REVS_PER_DEG = 1;
   public static final double SHOOTER_TURRET_REVS_PER_DEG = 1;
   public static final double SHOOTER_HOOD_REVS_TOLERANCE = 0;
   public static final double SHOOTER_TURRET_REVS_TOLERANCE = 0;
+  public static final double SHOOTER_RPS_TOLERANCE = 0;
 
   // TODO: correct numbers with real hardware
   public static final double SHOOTER_HOOD_MAX_PITCH = 47;
