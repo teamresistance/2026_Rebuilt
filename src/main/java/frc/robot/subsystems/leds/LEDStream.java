@@ -2,15 +2,24 @@ package frc.robot.subsystems.leds;
 
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Constants;
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
+// TODO:
+//  Convert this to a builder format?
+//  Example: new LEDStream().withName(...).withPriority(...).withLEDModeSupplier(...)
 public class LEDStream {
 
   private final String name;
   public final int priority;
-
   private final Supplier<Constants.LEDMode> ledModeSupplier;
   private final Supplier<Boolean> activeSupplier;
+
+  public boolean useBrightnessSupplier = false;
+  public DoubleSupplier brightnessSupplier = () -> 1;
+
+  public boolean useFramerateSupplier = false;
+  public DoubleSupplier framerateSupplier = () -> 10;
 
   private double expirationTime = -1;
   private boolean timedActive = false;
@@ -67,5 +76,17 @@ public class LEDStream {
 
   public Constants.LEDMode getLEDMode() {
     return ledModeSupplier.get();
+  }
+
+  public LEDStream withBrightnessSupplier(DoubleSupplier brightnessSupplier) {
+    this.brightnessSupplier = brightnessSupplier;
+    useBrightnessSupplier = true;
+    return this;
+  }
+
+  public LEDStream withFramerateSupplier(DoubleSupplier framerateSupplier) {
+    this.framerateSupplier = framerateSupplier;
+    useFramerateSupplier = true;
+    return this;
   }
 }
