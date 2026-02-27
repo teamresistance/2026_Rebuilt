@@ -33,6 +33,7 @@ import frc.robot.subsystems.intake.IntakeSim;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterReal;
 import frc.robot.subsystems.shooter.ShooterSim;
+import frc.robot.subsystems.shooter.ShootingMaps;
 import frc.robot.subsystems.vision.*;
 import frc.robot.util.BumpUtil;
 import frc.robot.util.OtherUtil;
@@ -82,7 +83,7 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-
+    ShootingMaps.configureShootingMaps();
     drive = configureDrive();
     vision = configureAprilTagVision();
     configureNamedCommands();

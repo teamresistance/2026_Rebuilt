@@ -2,12 +2,12 @@ package frc.robot.subsystems.shooter;
 
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 
-public class ShootingConstants {
+public class ShootingMaps {
 
-  private ShootingConstants() {}
+  private ShootingMaps() {}
 
   /** Sets up the interpolating maps with all recorded data points */
-  public static void configureShootingConstants() {
+  public static void configureShootingMaps() {
     distanceToRpsMap.put(1.0, 1.0);
 
     distanceToHoodMap.put(2.0, 2.0);

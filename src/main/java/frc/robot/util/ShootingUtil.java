@@ -8,7 +8,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.Constants;
 import frc.robot.FieldConstants;
-import frc.robot.subsystems.shooter.ShootingConstants;
+import frc.robot.subsystems.shooter.ShootingMaps;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -153,7 +153,7 @@ public class ShootingUtil {
     Logger.recordOutput("Shooter/GoalPose", goalPose);
 
     double estimatedAirtime =
-        ShootingConstants.getTimeOfFlight(
+        ShootingMaps.getTimeOfFlight(
             getApproximateVirtualDistanceToHub(
                 robotPose,
                 new Translation2d(robotSpeeds.vxMetersPerSecond, robotSpeeds.vyMetersPerSecond)));
