@@ -223,60 +223,50 @@ public class RobotContainer {
 
   private void configureLEDS() {
 
-    // constant led modes
-
-    // READY / NOT READY (priority 1, always active)
-    LEDStream readyStream =
-        new LEDStream(
-            "ready",
-            1,
-            () ->
-                shooter.atShootingSetpoints()
-                    ? Constants.LEDMode.READY
-                    : Constants.LEDMode.NOT_READY,
-            () -> true);
-    leds.addStream(readyStream);
-
+    // TODO: integrate confidence system
+    // SHOOTING/PASSING (priority 4, determines confidence and passing/shooting, framerate based on
+    // confidence)
     LEDStream shootingStream =
         new LEDStream(
-            "shooting",
-            2,
-            () ->
-                ShootingUtil.getShootingType(drive::getPose) == 0
-                    ? Constants.LEDMode.SHOOTING
-                    : Constants.LEDMode.PASSING,
-            () -> driver.rightTrigger().getAsBoolean());
+                "shooting/passing",
+                4,
+                () ->
+                    ShootingUtil.getShootingType(drive::getPose) == 0
+                        ? true
+                            ? Constants.LEDMode.SHOOTING_CONFIDENT
+                            : Constants.LEDMode.SHOOTING_DOUBTFUL
+                        : true
+                            ? Constants.LEDMode.PASSING_CONFIDENT
+                            : Constants.LEDMode.PASSING_DOUBTFUL,
+                () -> driver.rightTrigger().getAsBoolean())
+            .withFramerateSupplier(() -> 0);
     leds.addStream(shootingStream);
 
-    // ENDGAME (priority 8, timed 3s)
-    LEDStream endgameStream = new LEDStream("endgame", 8, () -> Constants.LEDMode.ENDGAME);
-    leds.addStream(endgameStream);
-
-    // SHIFTING (priority 6, timed 3s)
-    LEDStream shiftStream =
+    // INTAKING (priority 2, flashing yellow)
+    LEDStream intakeStream =
         new LEDStream(
-            "shift",
-            6,
+            "intake",
+            2,
+            () -> Constants.LEDMode.INTAKING,
+            () -> driver.rightTrigger().getAsBoolean());
+    leds.addStream(intakeStream);
+
+    // ACTIVE/INACTIVE
+    LEDStream activeInactiveStream =
+        new LEDStream(
+            "active/inactive",
+            1,
             () ->
-                ShiftUtil.isOurs(ShiftUtil.getNextShift())
-                    ? Constants.LEDMode.SHIFTING_US
-                    : Constants.LEDMode.SHIFTING_THEM);
-    leds.addStream(shiftStream);
+                ShiftUtil.isOurs(ShiftUtil.getShift())
+                    ? Constants.LEDMode.ACTIVE
+                    : Constants.LEDMode.INACTIVE,
+            () -> true);
+    leds.addStream(activeInactiveStream);
 
     // BUMP (priority 5, timed 1s, cancels if leaving zone)
     LEDStream bumpStream =
-        new LEDStream("bump", 5, () -> Constants.LEDMode.BUMP, () -> inBumpZone.getAsBoolean());
+        new LEDStream("bump", 3, () -> Constants.LEDMode.BUMP, () -> inBumpZone.getAsBoolean());
     leds.addStream(bumpStream);
-
-    // time-based led modes
-
-    // ENDGAME trigger (timed 3s)
-    new Trigger(() -> ShiftUtil.getNextShift() == Constants.ShiftOwner.BOTH)
-        .onTrue(Commands.runOnce(() -> endgameStream.runForSeconds(2)));
-
-    // SHIFT warning (timed 3s when near shift)
-    new Trigger(ShiftUtil::nearNextShift)
-        .onTrue(Commands.runOnce(() -> shiftStream.runForSeconds(2)));
 
     // BUMP trigger (timed 1s when entering bump zone)
     driver.y().negate().and(inBumpZone).onTrue(Commands.runOnce(() -> bumpStream.runForSeconds(1)));
@@ -350,7 +340,7 @@ public class RobotContainer {
   /**
    * Creates an LEDStream that runs the auto animation 20 seconds and then is never accessed again.
    */
-  public void runAutoLeds() {
+  public void runAutoLEDs() {
     LEDStream autoStream = new LEDStream("auto", 100, () -> Constants.LEDMode.AUTO);
     leds.addStream(autoStream);
     autoStream.runForSeconds(20);

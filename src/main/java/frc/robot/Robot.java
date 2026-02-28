@@ -117,7 +117,7 @@ public class Robot extends LoggedRobot {
     autonomousCommand = robotContainer.getAutonomousCommand();
     if (autonomousCommand != null) CommandScheduler.getInstance().schedule(autonomousCommand);
 
-    robotContainer.runAutoLeds();
+    robotContainer.runAutoLEDs();
   }
 
   /** This function is called periodically during autonomous. */

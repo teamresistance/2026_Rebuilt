@@ -67,13 +67,13 @@ public final class Constants {
 
   public enum LEDMode {
     RAINBOW,
-    READY,
-    SHOOTING,
-    PASSING,
-    NOT_READY,
-    SHIFTING_US,
-    SHIFTING_THEM,
-    ENDGAME,
+    SHOOTING_CONFIDENT,
+    SHOOTING_DOUBTFUL,
+    PASSING_CONFIDENT,
+    PASSING_DOUBTFUL,
+    INTAKING,
+    ACTIVE,
+    INACTIVE,
     BUMP,
     AUTO
   }
@@ -83,30 +83,25 @@ public final class Constants {
 
   public static final RainbowAnimation LED_ANIMATION_RAINBOW =
       new RainbowAnimation(LED_START_INDEX, LED_END_INDEX).withFrameRate(60);
-  public static final StrobeAnimation LED_ANIMATION_SHOOTING =
+  public static final StrobeAnimation LED_ANIMATION_SHOOTING_CONFIDENT =
+      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX).withColor(new RGBWColor(50, 255, 50));
+  public static final StrobeAnimation LED_ANIMATION_SHOOTING_DOUBTFUL =
+      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX).withColor(new RGBWColor(255, 50, 50));
+  public static final StrobeAnimation LED_ANIMATION_PASSING_CONFIDENT =
+      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX).withColor(new RGBWColor(50, 50, 255));
+  public static final StrobeAnimation LED_ANIMATION_PASSING_DOUBTFUL =
+      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX).withColor(new RGBWColor(255, 50, 50));
+  public static final StrobeAnimation LED_ANIMATION_INTAKING =
       new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
-          .withFrameRate(10)
-          .withColor(new RGBWColor(100, 255, 100));
-  public static final StrobeAnimation LED_ANIMATION_PASSING =
-      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
-          .withFrameRate(10)
-          .withColor(new RGBWColor(100, 100, 255));
-  public static final SolidColor LED_ANIMATION_READY =
-      new SolidColor(LED_START_INDEX, LED_END_INDEX).withColor(new RGBWColor(100, 255, 100));
-  public static final SolidColor LED_ANIMATION_NOT_READY =
-      new SolidColor(LED_START_INDEX, LED_END_INDEX).withColor(new RGBWColor(255, 100, 100));
-  public static final StrobeAnimation LED_ANIMATION_SHIFTING_US =
-      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
-          .withFrameRate(10)
-          .withColor(new RGBWColor(255, 255, 0));
-  public static final StrobeAnimation LED_ANIMATION_SHIFTING_THEM =
-      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
-          .withFrameRate(10)
-          .withColor(new RGBWColor(255, 155, 0));
-  public static final StrobeAnimation LED_ANIMATION_ENDGAME =
-      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
-          .withFrameRate(10)
-          .withColor(new RGBWColor(255, 100, 255));
+          .withColor(new RGBWColor(255, 200, 0))
+          .withFrameRate(5);
+  public static final SolidColor LED_ANIMATION_ACTIVE =
+      new SolidColor(LED_START_INDEX, LED_END_INDEX).withColor(new RGBWColor(255, 0, 255));
+  public static final LarsonAnimation LED_ANIMATION_INACTIVE =
+      new LarsonAnimation(LED_START_INDEX, LED_END_INDEX)
+          .withColor(new RGBWColor(0, 100, 0))
+          .withFrameRate(8)
+          .withSize(6);
   public static final StrobeAnimation LED_ANIMATION_BUMP =
       new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
           .withFrameRate(10)
@@ -116,6 +111,9 @@ public final class Constants {
           .withFrameRate(10)
           .withColor(new RGBWColor(255, 150, 0))
           .withSize(10);
+
+  // at what confidence is it considered "confident" instead of "doubtful"
+  public static final double CONFIDENCE_THRESHOLD = 0.5;
 
   public enum ShiftOwner {
     BLUE,

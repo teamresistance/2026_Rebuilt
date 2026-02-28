@@ -1,7 +1,6 @@
 package frc.robot.subsystems.leds;
 
 import com.ctre.phoenix6.hardware.CANdle;
-import com.ctre.phoenix6.signals.RGBWColor;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import java.util.*;
@@ -34,6 +33,7 @@ public class LEDSubsystem extends SubsystemBase {
 
     if (highest != null && !highest.equals(lastMode)) {
       applyMode(highest);
+      Logger.recordOutput("LEDS/Active Stream", highest.name);
       lastMode = highest;
     }
   }
@@ -41,7 +41,7 @@ public class LEDSubsystem extends SubsystemBase {
   // TODO: find a better way to do the brightness and framerate suppliers in offseason
   private void applyMode(LEDStream mode) {
     Constants.LEDMode ledMode = mode.getLEDMode();
-    Logger.recordOutput("LED Mode", ledMode);
+    Logger.recordOutput("LEDS/Active Mode", ledMode);
 
     switch (ledMode) {
       case RAINBOW:
@@ -61,56 +61,27 @@ public class LEDSubsystem extends SubsystemBase {
           candle.setControl(Constants.LED_ANIMATION_RAINBOW);
         }
         break;
-      case SHOOTING:
-        if (mode.useFramerateSupplier) {
-          candle.setControl(
-              Constants.LED_ANIMATION_SHOOTING.withFrameRate(mode.framerateSupplier.getAsDouble()));
-        } else {
-          candle.setControl(Constants.LED_ANIMATION_SHOOTING);
-        }
+      case SHOOTING_CONFIDENT:
+        candle.setControl(
+            Constants.LED_ANIMATION_SHOOTING_CONFIDENT.withFrameRate(
+                mode.framerateSupplier.getAsDouble()));
+      case SHOOTING_DOUBTFUL:
+        candle.setControl(
+            Constants.LED_ANIMATION_SHOOTING_DOUBTFUL.withFrameRate(
+                mode.framerateSupplier.getAsDouble()));
         break;
-      case PASSING:
-        if (mode.useFramerateSupplier) {
-          candle.setControl(
-              Constants.LED_ANIMATION_PASSING.withFrameRate(mode.framerateSupplier.getAsDouble()));
-        } else {
-          candle.setControl(Constants.LED_ANIMATION_PASSING);
-        }
+      case PASSING_CONFIDENT:
+        candle.setControl(
+            Constants.LED_ANIMATION_PASSING_CONFIDENT.withFrameRate(
+                mode.framerateSupplier.getAsDouble()));
         break;
-      case READY:
-        if (mode.useFramerateSupplier) {
-          double brightness = mode.brightnessSupplier.getAsDouble();
-          RGBWColor modified =
-              new RGBWColor(
-                  (int) (Constants.LED_ANIMATION_READY.Color.Red * brightness),
-                  (int) (Constants.LED_ANIMATION_READY.Color.Green * brightness),
-                  (int) (Constants.LED_ANIMATION_READY.Color.Blue * brightness));
-          candle.setControl(Constants.LED_ANIMATION_READY.withColor(modified));
-        } else {
-          candle.setControl(Constants.LED_ANIMATION_READY);
-        }
+      case PASSING_DOUBTFUL:
+        candle.setControl(
+            Constants.LED_ANIMATION_PASSING_DOUBTFUL.withFrameRate(
+                mode.framerateSupplier.getAsDouble()));
         break;
-      case NOT_READY:
-        if (mode.useFramerateSupplier) {
-          double brightness = mode.brightnessSupplier.getAsDouble();
-          RGBWColor modified =
-              new RGBWColor(
-                  (int) (Constants.LED_ANIMATION_NOT_READY.Color.Red * brightness),
-                  (int) (Constants.LED_ANIMATION_NOT_READY.Color.Green * brightness),
-                  (int) (Constants.LED_ANIMATION_NOT_READY.Color.Blue * brightness));
-          candle.setControl(Constants.LED_ANIMATION_NOT_READY.withColor(modified));
-        } else {
-          candle.setControl(Constants.LED_ANIMATION_NOT_READY);
-        }
-        break;
-      case SHIFTING_US:
-        candle.setControl(Constants.LED_ANIMATION_SHIFTING_US);
-        break;
-      case SHIFTING_THEM:
-        candle.setControl(Constants.LED_ANIMATION_SHIFTING_THEM);
-        break;
-      case ENDGAME:
-        candle.setControl(Constants.LED_ANIMATION_ENDGAME);
+      case INTAKING:
+        candle.setControl(Constants.LED_ANIMATION_INTAKING);
         break;
       case BUMP:
         candle.setControl(Constants.LED_ANIMATION_BUMP);

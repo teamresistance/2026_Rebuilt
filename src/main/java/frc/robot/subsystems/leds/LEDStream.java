@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 //  Example: new LEDStream().withName(...).withPriority(...).withLEDModeSupplier(...)
 public class LEDStream {
 
-  private final String name;
+  public final String name;
   public final int priority;
   private final Supplier<Constants.LEDMode> ledModeSupplier;
   private final Supplier<Boolean> activeSupplier;
