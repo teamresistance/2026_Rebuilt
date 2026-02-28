@@ -120,14 +120,11 @@ public class ShootingUtil {
 
     Translation2d turretOffsetField =
         Constants.ROBOT_TO_TURRET.getTranslation().rotateBy(robotPose.getRotation());
-    Translation2d futureTurretPos =
-        robotPose
-            .getTranslation()
-            .plus(turretOffsetField)
-            .plus(fieldVelocity.times(estimatedAirtime));
+    Translation2d turretPos = robotPose.getTranslation().plus(turretOffsetField);
+
+    Translation2d futureTurretPos = turretPos.plus(fieldVelocity.times(estimatedAirtime));
 
     Translation2d toTarget = goalPose.getTranslation().minus(futureTurretPos);
-
     double turretAngleField = Math.atan2(toTarget.getY(), toTarget.getX());
     double turretAngleRobotRelative =
         MathUtil.angleModulus(turretAngleField - robotPose.getRotation().getRadians());
@@ -152,49 +149,23 @@ public class ShootingUtil {
     Pose2d goalPose = ShootingUtil.getShootingTarget(robotPose);
     Logger.recordOutput("Shooter/GoalPose", goalPose);
 
-    double estimatedAirtime =
-        ShootingConstants.getTimeOfFlight(
-            getApproximateVirtualDistanceToHub(
-                robotPose,
-                new Translation2d(robotSpeeds.vxMetersPerSecond, robotSpeeds.vyMetersPerSecond)));
-
     Translation2d fieldVelocity =
         new Translation2d(robotSpeeds.vxMetersPerSecond, robotSpeeds.vyMetersPerSecond)
             .rotateBy(robotPose.getRotation());
 
     Translation2d turretOffsetField =
         Constants.ROBOT_TO_TURRET.getTranslation().rotateBy(robotPose.getRotation());
-    Translation2d futureTurretPos =
-        robotPose
-            .getTranslation()
-            .plus(turretOffsetField)
-            .plus(fieldVelocity.times(estimatedAirtime));
+    Translation2d turretPos = robotPose.getTranslation().plus(turretOffsetField);
 
-    return futureTurretPos.getDistance(goalPose.getTranslation());
-  }
+    Translation2d futureTurretPos;
+    double lookaheadDistance = turretPos.getDistance(goalPose.getTranslation());
 
-  /**
-   * Gets the distance to hub based on an average time-of-flight, ignoring rotation. This makes it
-   * possible to take a "recursive" approach to calculating a perfect shot. Calculating a perfect
-   * moving shot requires distance, which requires time of flight, which requires distance. This
-   * skips the step of requiring an accurate time-of-flight and uses {@code
-   * Constants.SHOOTING_APPROXIMATE_TOF} to get a mostly-there number, which is good enough - any
-   * minor inaccuracy can be disregarded as the goal is very wide.
-   */
-  public static double getApproximateVirtualDistanceToHub(
-      Pose2d robotPose, Translation2d velocity) {
-    Pose2d goalPose = new Pose2d();
-    if (DriverStation.getAlliance().isPresent()) {
-      goalPose =
-          switch (DriverStation.getAlliance().get()) {
-            case Blue -> FieldConstants.BLUE_GOAL_CENTER;
-            case Red -> FieldConstants.RED_GOAL_CENTER;
-          };
+    for (int i = 0; i < 20; i++) {
+      double timeOfFlight = ShootingConstants.getTimeOfFlight(lookaheadDistance);
+      futureTurretPos = turretPos.plus(fieldVelocity.times(timeOfFlight));
+      lookaheadDistance = futureTurretPos.getDistance(goalPose.getTranslation());
     }
 
-    return goalPose
-        .getTranslation()
-        .getDistance(
-            robotPose.getTranslation().plus(velocity.times(Constants.SHOOTING_APPROXIMATE_TOF)));
+    return lookaheadDistance;
   }
 }
