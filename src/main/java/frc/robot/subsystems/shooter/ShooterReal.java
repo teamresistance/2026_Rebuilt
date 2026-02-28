@@ -2,7 +2,7 @@ package frc.robot.subsystems.shooter;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.*;
-import com.ctre.phoenix6.controls.PositionDutyCycle;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.StrictFollower;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -13,8 +13,6 @@ import frc.robot.util.ShootingUtil;
 import org.littletonrobotics.junction.Logger;
 
 public class ShooterReal implements ShooterIO {
-
-  // TODO: Will the thing that feeds balls go in here or in another subsystem?
 
   private final TalonFX hoodMotor = new TalonFX(Constants.SHOOTER_HOOD_ID, CANBus.roboRIO());
   private final TalonFX turretMotor = new TalonFX(Constants.SHOOTER_TURRET_ID, CANBus.roboRIO());
@@ -38,11 +36,14 @@ public class ShooterReal implements ShooterIO {
   /** Configures motors (control mode, pid, current limits) */
   public void configure() {
 
-    // TODO: motion magic or pid, for all
-
+    // TODO: tune me and get rid of the ultra slow starting values
     TalonFXConfiguration hoodConfig =
         new TalonFXConfiguration()
-            .withSlot0(new Slot0Configs().withKP(0).withKI(0).withKD(0).withKS(0))
+            .withSlot0(new Slot0Configs().withKP(1).withKI(0).withKD(0).withKS(0))
+            .withMotionMagic(
+                new MotionMagicConfigs()
+                    .withMotionMagicAcceleration(250)
+                    .withMotionMagicCruiseVelocity(10))
             .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
@@ -52,9 +53,14 @@ public class ShooterReal implements ShooterIO {
                     .withSupplyCurrentLimitEnable(true));
     hoodMotor.getConfigurator().apply(hoodConfig);
 
+    // TODO: tune me and get rid of the ultra slow starting values
     TalonFXConfiguration turretConfig =
         new TalonFXConfiguration()
-            .withSlot0(new Slot0Configs().withKP(0).withKI(0).withKD(0).withKS(0))
+            .withSlot0(new Slot0Configs().withKP(1).withKI(0).withKD(0).withKS(0))
+            .withMotionMagic(
+                new MotionMagicConfigs()
+                    .withMotionMagicAcceleration(50)
+                    .withMotionMagicCruiseVelocity(10))
             .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
@@ -63,12 +69,14 @@ public class ShooterReal implements ShooterIO {
                     .withSupplyCurrentLimit(0)
                     .withSupplyCurrentLimitEnable(true))
             .withFeedback(
-                new FeedbackConfigs().withRemoteCANcoder(turretEncoder).withRotorToSensorRatio(1));
+                new FeedbackConfigs()
+                    .withRemoteCANcoder(turretEncoder)
+                  .withRotorToSensorRatio(20));
     turretMotor.getConfigurator().apply(turretConfig);
 
     TalonFXConfiguration flywheelConfig =
         new TalonFXConfiguration()
-            .withSlot0(new Slot0Configs().withKP(0).withKI(0).withKD(0).withKS(0))
+            .withSlot0(new Slot0Configs().withKP(100).withKI(0).withKD(0).withKS(0))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
                     .withStatorCurrentLimit(0)
@@ -124,7 +132,7 @@ public class ShooterReal implements ShooterIO {
     if (angle < Constants.SHOOTER_HOOD_MAX_PITCH && angle > Constants.SHOOTER_HOOD_MIN_PITCH) {
       angle = angle - Constants.SHOOTER_HOOD_MIN_PITCH; // zero position is not zero degrees
       hoodTargetAngle = angle;
-      hoodMotor.setControl(new PositionDutyCycle(ShootingUtil.toHoodRevs(angle)));
+      hoodMotor.setControl(new MotionMagicVoltage(ShootingUtil.toHoodRevs(angle)));
     }
   }
 
@@ -136,7 +144,7 @@ public class ShooterReal implements ShooterIO {
   public void setTurretTarget(double angle) {
     if (angle < Constants.SHOOTER_TURRET_MAX_YAW && angle > Constants.SHOOTER_TURRET_MIN_YAW) {
       turretTargetAngle = angle;
-      turretMotor.setControl(new PositionDutyCycle(ShootingUtil.toTurretRevs(angle)));
+      turretMotor.setControl(new MotionMagicVoltage(ShootingUtil.toTurretRevs(angle)));
     }
   }
 
