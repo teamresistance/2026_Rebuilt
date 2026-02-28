@@ -133,7 +133,7 @@ public class RobotContainer {
     manualShiftAssigner.setDefaultOption("None", "");
     SmartDashboard.putData("Manual Shift Setup", manualShiftAssigner);
 
-    configureLEDS();
+    configureDriverFeedback();
     autoChooser = configureAutos();
     configureButtonBindings();
     cameraFailureAlert = new Alert("Camera system failure", Alert.AlertType.kError);
@@ -221,7 +221,8 @@ public class RobotContainer {
     };
   }
 
-  private void configureLEDS() {
+  /** Sets up LEDs and controller rumbles */
+  private void configureDriverFeedback() {
 
     // TODO: integrate confidence system
     // SHOOTING/PASSING (priority 4, determines confidence and passing/shooting, framerate based on
@@ -270,6 +271,15 @@ public class RobotContainer {
 
     // BUMP trigger (timed 1s when entering bump zone)
     driver.y().negate().and(inBumpZone).onTrue(Commands.runOnce(() -> bumpStream.runForSeconds(1)));
+
+    // RUMBLE when 5s from next shift
+    new Trigger(ShiftUtil::nearNextShift)
+        .onTrue(
+            Commands.runOnce(() -> driver.setRumble(GenericHID.RumbleType.kBothRumble, 1))
+                .andThen(new WaitCommand(1))
+                .andThen(
+                    Commands.runOnce(
+                        () -> driver.setRumble(GenericHID.RumbleType.kBothRumble, 0))));
   }
 
   /** Defines button bindings and control triggers */
