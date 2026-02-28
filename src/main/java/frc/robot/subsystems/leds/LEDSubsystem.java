@@ -65,6 +65,7 @@ public class LEDSubsystem extends SubsystemBase {
         candle.setControl(
             Constants.LED_ANIMATION_SHOOTING_CONFIDENT.withFrameRate(
                 mode.framerateSupplier.getAsDouble()));
+        break;
       case SHOOTING_DOUBTFUL:
         candle.setControl(
             Constants.LED_ANIMATION_SHOOTING_DOUBTFUL.withFrameRate(
@@ -88,6 +89,12 @@ public class LEDSubsystem extends SubsystemBase {
         break;
       case AUTO:
         candle.setControl(Constants.LED_ANIMATION_AUTO);
+        break;
+      case ACTIVE:
+        candle.setControl(Constants.LED_ANIMATION_ACTIVE);
+        break;
+      case INACTIVE:
+        candle.setControl(Constants.LED_ANIMATION_INACTIVE);
         break;
     }
   }
