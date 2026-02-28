@@ -12,8 +12,6 @@ public class LEDSubsystem extends SubsystemBase {
   private LEDStream lastMode = null;
   private final CANdle candle = new CANdle(60);
 
-  public LEDSubsystem() {}
-
   /** Adds an LEDStream to the list of periodically checked streams. */
   public void addStream(LEDStream stream) {
     streams.add(stream);
