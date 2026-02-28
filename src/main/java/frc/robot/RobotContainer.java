@@ -73,9 +73,9 @@ public class RobotContainer {
   private final SendableChooser<String> manualShiftAssigner = new SendableChooser<>();
 
   // bump zone and prebuilt commands
-  private Trigger inBumpZone;
-  private Command driveAtAngleForBump;
-  private Command driveAtLimitedSpeed;
+  private final Trigger inBumpZone;
+  private final Command driveAtAngleForBump;
+  private final Command driveAtLimitedSpeed;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
