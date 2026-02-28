@@ -16,10 +16,10 @@ public class LEDStream {
   private final Supplier<Boolean> activeSupplier;
 
   public boolean useBrightnessSupplier = false;
-  public DoubleSupplier brightnessSupplier = () -> 1;
+  public DoubleSupplier brightnessSupplier;
 
   public boolean useFramerateSupplier = false;
-  public DoubleSupplier framerateSupplier = () -> 10;
+  public DoubleSupplier framerateSupplier;
 
   private double expirationTime = -1;
   private boolean timedActive = false;

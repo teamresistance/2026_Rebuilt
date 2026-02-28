@@ -10,7 +10,7 @@ public class LEDSubsystem extends SubsystemBase {
 
   private final List<LEDStream> streams = new ArrayList<>();
   private LEDStream lastMode = null;
-  private final CANdle candle = new CANdle(60);
+  private final CANdle candle = new CANdle(Constants.CANDLE_ID);
 
   /** Adds an LEDStream to the list of periodically checked streams. */
   public void addStream(LEDStream stream) {

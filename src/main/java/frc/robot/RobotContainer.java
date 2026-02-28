@@ -231,16 +231,23 @@ public class RobotContainer {
         new LEDStream(
                 "shooting/passing",
                 4,
-                () ->
-                    ShootingUtil.getShootingType(drive::getPose) == 0
-                        ? true
-                            ? Constants.LEDMode.SHOOTING_CONFIDENT
-                            : Constants.LEDMode.SHOOTING_DOUBTFUL
-                        : true
-                            ? Constants.LEDMode.PASSING_CONFIDENT
-                            : Constants.LEDMode.PASSING_DOUBTFUL,
+                () -> {
+                  boolean isShooting = ShootingUtil.getShootingType(drive::getPose) == 0;
+                  boolean isConfident = true; // TODO: me
+
+                  if (isShooting) {
+                    return isConfident
+                        ? Constants.LEDMode.SHOOTING_CONFIDENT
+                        : Constants.LEDMode.SHOOTING_DOUBTFUL;
+                  } else {
+                    return isConfident
+                        ? Constants.LEDMode.PASSING_CONFIDENT
+                        : Constants.LEDMode.PASSING_DOUBTFUL;
+                  }
+                },
                 () -> driver.rightTrigger().getAsBoolean())
             .withFramerateSupplier(() -> 0);
+
     leds.addStream(shootingStream);
 
     // INTAKING (priority 2, flashing yellow)
@@ -266,7 +273,7 @@ public class RobotContainer {
 
     // BUMP (priority 5, timed 1s, cancels if leaving zone)
     LEDStream bumpStream =
-        new LEDStream("bump", 3, () -> Constants.LEDMode.BUMP, () -> inBumpZone.getAsBoolean());
+        new LEDStream("bump", 5, () -> Constants.LEDMode.BUMP, () -> inBumpZone.getAsBoolean());
     leds.addStream(bumpStream);
 
     // BUMP trigger (timed 1s when entering bump zone)

@@ -69,9 +69,7 @@ public class ShooterReal implements ShooterIO {
                     .withSupplyCurrentLimit(0)
                     .withSupplyCurrentLimitEnable(true))
             .withFeedback(
-                new FeedbackConfigs()
-                    .withRemoteCANcoder(turretEncoder)
-                  .withRotorToSensorRatio(20));
+                new FeedbackConfigs().withRemoteCANcoder(turretEncoder).withRotorToSensorRatio(20));
     turretMotor.getConfigurator().apply(turretConfig);
 
     TalonFXConfiguration flywheelConfig =
