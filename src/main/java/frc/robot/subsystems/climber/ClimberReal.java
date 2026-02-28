@@ -8,6 +8,7 @@ import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.wpilibj.Relay;
 import frc.robot.Constants;
@@ -27,6 +28,7 @@ public class ClimberReal implements ClimberIO {
     SparkMaxConfig config = new SparkMaxConfig();
     config.closedLoop.p(0).i(0).d(0); // TODO: tune me! tune me!
     config.closedLoop.allowedClosedLoopError(4, ClosedLoopSlot.kSlot0);
+    config.idleMode(SparkBaseConfig.IdleMode.kBrake);
     climber.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
