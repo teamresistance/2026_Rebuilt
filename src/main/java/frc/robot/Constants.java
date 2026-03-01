@@ -61,7 +61,7 @@ public final class Constants {
   public static final double SHOOTER_TURRET_MIN_YAW = -170;
 
   public static final Transform2d ROBOT_TO_TURRET =
-      new Transform2d(Units.inchesToMeters(-1.38), Units.inchesToMeters(3.8), Rotation2d.kPi);
+      new Transform2d(Units.inchesToMeters(1.38), Units.inchesToMeters(3.8), Rotation2d.kPi);
   public static final double SHOOTING_APPROXIMATE_TOF = 1;
 
   public static final int CANDLE_ID = 32;
