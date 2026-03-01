@@ -191,9 +191,9 @@ public final class FastBallisticCalculator {
    * <p>This method performs all calculations in the floor (field) reference frame. It first
    * computes the required floor-parallel projectile velocity assuming a stationary robot, then
    * applies a Galilean transformation by subtracting the robot's floor velocity. From the corrected
-   * velocity vector, it computes the required total launch speed and azimuth correction.
-   * This version also accounts for robot acceleration by estimating the robot's velocity at the time
-   * of projectile release.
+   * velocity vector, it computes the required total launch speed and azimuth correction. This
+   * version also accounts for robot acceleration by estimating the robot's velocity at the time of
+   * projectile release.
    *
    * <p>The computed values are stored in static state variables and printed to standard output.
    *
@@ -204,7 +204,8 @@ public final class FastBallisticCalculator {
    * @param a_x robot floor acceleration in the X direction (m/s²)
    * @param a_y robot floor acceleration in the Y direction (m/s²)
    */
-  public static void computeBallistics(double D, double floorAzimuthDeg, double v_x, double v_y, double a_x, double a_y) {
+  public static void computeBallistics(
+      double D, double floorAzimuthDeg, double v_x, double v_y, double a_x, double a_y) {
     long start = System.nanoTime();
 
     double azRad = floorAzimuthDeg * ShootingConstants.DEG_TO_RAD;
@@ -220,7 +221,7 @@ public final class FastBallisticCalculator {
     // Robot displacement
     double xRobot = v_xRelease * T;
     double yRobot = v_yRelease * T;
-    
+
     // Required relative displacement
     double xReq = xHub - xRobot;
     double yReq = yHub - yRobot;

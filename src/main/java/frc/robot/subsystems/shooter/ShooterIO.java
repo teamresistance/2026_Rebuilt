@@ -251,11 +251,13 @@ public class ShooterIO extends SubsystemBase {
 
   public boolean atTargetRPS() {
     return false;
-  };
+  }
+  ;
 
   public boolean isShooting() {
     return false;
-  };
+  }
+  ;
 
   void zeroHood(double newValue) {}
 }
