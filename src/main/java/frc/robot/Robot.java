@@ -159,7 +159,7 @@ public class Robot extends LoggedRobot {
     // Calculate and update the shot confidence value from the utility class and publish it to the
     // dashboard for operator awareness
     Logger.recordOutput(
-        "Shot Confidence", TurretConfidenceUtil.calculateConfidence(robotContainer.getDrive()));
+        "Shooter/Confidence", TurretConfidenceUtil.calculateConfidence(robotContainer.getDrive()));
   }
 
   /** This function is called once when test mode is enabled. */

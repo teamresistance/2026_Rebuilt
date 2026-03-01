@@ -11,7 +11,7 @@ public class TurretConfidenceUtil {
   // TODO: Tune the standard deviation to the robot's accuracy
   private static final double ERROR_STD_DEV = 1.0;
 
-  // Call this in Robot.java to update confidence
+  /** Call this in Robot.java to update confidence */
   public static double calculateConfidence(SwerveDriveIO drive) {
 
     // Get current robot pose and velocity
@@ -45,7 +45,7 @@ public class TurretConfidenceUtil {
     // Convert miss distance to probability (Gaussian curve equation)
     double probability = Math.exp(-Math.pow(totalError, 2) / (2 * Math.pow(ERROR_STD_DEV, 2)));
 
-    double confidence = probability * 100; // Scale to percentage for easier interpretation
-    return confidence;
+    // Scale to percentage for easier interpretation
+    return probability * 100;
   }
 }
