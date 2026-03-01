@@ -24,13 +24,14 @@ public class ShooterReal implements ShooterIO {
       new CANcoder(Constants.SHOOTER_TURRET_ENCODER_ID, CANBus.roboRIO());
 
   private double hoodTargetAngle = 0;
-  private double turretTargetAngle = 180;
+  private double turretTargetAngle = 0;
   private double flywheelTargetRPS = 0;
 
   /** Real implementation of a turret shooter. */
   public ShooterReal() {
     register();
     configure();
+    zeroHood(Constants.SHOOTER_HOOD_MIN_PITCH);
   }
 
   /** Configures motors (control mode, pid, current limits) */
@@ -50,7 +51,15 @@ public class ShooterReal implements ShooterIO {
                     .withStatorCurrentLimit(0)
                     .withStatorCurrentLimitEnable(true)
                     .withSupplyCurrentLimit(0)
-                    .withSupplyCurrentLimitEnable(true));
+                    .withSupplyCurrentLimitEnable(true))
+            .withSoftwareLimitSwitch(
+                new SoftwareLimitSwitchConfigs()
+                    .withForwardSoftLimitEnable(true)
+                    .withForwardSoftLimitThreshold(
+                        ShootingUtil.toHoodRevs(Constants.SHOOTER_HOOD_MAX_PITCH))
+                    .withReverseSoftLimitEnable(true)
+                    .withReverseSoftLimitThreshold(
+                        ShootingUtil.toHoodRevs(Constants.SHOOTER_HOOD_MIN_PITCH)));
     hoodMotor.getConfigurator().apply(hoodConfig);
 
     // TODO: tune me and get rid of the ultra slow starting values
