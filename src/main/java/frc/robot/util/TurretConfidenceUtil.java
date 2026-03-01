@@ -11,19 +11,17 @@ public class TurretConfidenceUtil {
   // TODO: Tune the standard deviation to the robot's accuracy
   private static final double ERROR_STD_DEV = 1.0;
 
-  /** Call this in Robot.java to update confidence */
   public static double calculateConfidence(SwerveDriveIO drive) {
-
     // Get current robot pose and velocity
     Pose2d pose = drive.getPose();
     ChassisSpeeds speeds = drive.getChassisSpeedsFieldRelative();
 
     // Update target position based on current robot pose
-    Translation2d TARGET_POSITION =
+    Translation2d targetPosition =
         ShootingUtil.getShootingTarget(drive.getPose()).getTranslation();
 
     // Distance to target calculated with field-relative coordinates
-    double distance = pose.getTranslation().getDistance(TARGET_POSITION);
+    double distance = pose.getTranslation().getDistance(targetPosition);
 
     // Time of flight calculation based on distance and current velocity
     double timeOfFlight =
