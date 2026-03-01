@@ -1,5 +1,6 @@
 package frc.robot.util;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import frc.robot.Constants.ShootingConstants;
 
 /**
@@ -41,6 +42,8 @@ public final class FastBallisticCalculator {
   /** Alpha constant for RK2 correction - derived from drag coefficient and mass */
   private static final double ALPHA = K / M;
 
+  private static final double zHub = 1.8288;
+
   /*
    * =======================
    * Output State Variables
@@ -64,6 +67,8 @@ public final class FastBallisticCalculator {
 
   public static double vyFloor;
 
+  public static Pose2d robotPose;
+
   /**
    * Computes the required projectile launch parameters while compensating for robot motion.
    *
@@ -84,102 +89,83 @@ public final class FastBallisticCalculator {
 
     double azRad = floorAzimuthDeg * ShootingConstants.DEG_TO_RAD;
 
-    // Hub position
+    // 1. Hub position is fixed in the Field Frame
     double xHub = D * Math.cos(azRad);
     double yHub = D * Math.sin(azRad);
 
-    // Robot displacement
-    double xRobot = v_x * T;
-    double yRobot = v_y * T;
+    // 2. ANALYTIC BASE (Initial guess to hit a stationary target distance D)
+    double vFloorField = (M / (K * T)) * (Math.exp((K * D) / M) - 1.0);
+    double vxGuess = vFloorField * Math.cos(azRad);
+    double vyGuess = vFloorField * Math.sin(azRad);
+    double vzGuess = (VY + 0.5 * 9.806 * T); // Initial vertical guess to counter gravity
 
-    // Required relative displacement
-    double xReq = xHub - xRobot;
-    double yReq = yHub - yRobot;
-    double dReq = Math.sqrt(xReq * xReq + yReq * yReq);
-    double azReq = Math.atan2(yReq, xReq);
-
-    // ================= ANALYTIC BASE =================
-    double vFloor = (M / (K * T)) * (Math.exp((K * dReq) / M) - 1.0);
-    double vx1 = vFloor * Math.cos(azReq);
-    double vy1 = vFloor * Math.sin(azReq);
-
-    vTotalNew = Math.sqrt(VY2 + vFloor * vFloor);
-    thetaDeg = Math.atan(VY / vFloor) * ShootingConstants.RAD_TO_DEG;
-    deltaFloorAngleDeg = (azReq - azRad) * ShootingConstants.RAD_TO_DEG;
-
-    // ================= ITERATIVE RK2 ROOT SOLVE =================
-
-    // Start from analytic guess
-    double vxGuess = vx1;
-    double vyGuess = vy1;
-
-    final int RK_STEPS = 20; // fixed integration resolution
-    final int SOLVE_ITERS = 3; // 3–4 is ideal
-    final double gain = 1.0; // Newton-like gain (usually stable)
-
-    // Precompute
-    double dt = T / RK_STEPS;
-
-    double errX = 0.0;
-    double errY = 0.0;
+    // 3. Optimized Iterative Solve
+    final int RK_STEPS = 25; // Slight increase for precision
+    final int SOLVE_ITERS = 3;
+    final double dt = T / RK_STEPS;
+    final double G = 9.806;
 
     for (int iter = 0; iter < SOLVE_ITERS; iter++) {
+      double x = 0.0, y = 0.0, z = 0.0;
+      double vx = vxGuess, vy = vyGuess, vz = vzGuess;
 
-      double x = 0.0;
-      double y = 0.0;
-      double vx = vxGuess;
-      double vy = vyGuess;
-
-      // ===== fixed RK2 forward integration =====
       for (int i = 0; i < RK_STEPS; i++) {
+        // Instantaneous 3D speed (The "True" Drag source)
+        double speed = Math.sqrt(vx * vx + vy * vy + vz * vz);
+        double dragFactor = -ALPHA * speed;
 
-        double speed = Math.sqrt(vx * vx + vy * vy);
-        double ax = -ALPHA * speed * vx;
-        double ay = -ALPHA * speed * vy;
+        // RK2 Midpoint
+        double vxMid = vx + 0.5 * dt * (dragFactor * vx);
+        double vyMid = vy + 0.5 * dt * (dragFactor * vy);
+        double vzMid = vz + 0.5 * dt * (dragFactor * vz - G);
 
-        // midpoint
-        double vxMid = vx + 0.5 * dt * ax;
-        double vyMid = vy + 0.5 * dt * ay;
-        double speedMid = Math.sqrt(vxMid * vxMid + vyMid * vyMid);
+        double speedMid = Math.sqrt(vxMid * vxMid + vyMid * vyMid + vzMid * vzMid);
+        double dragFactorMid = -ALPHA * speedMid;
 
-        double axMid = -ALPHA * speedMid * vxMid;
-        double ayMid = -ALPHA * speedMid * vyMid;
-
-        // update position
+        // State Update
         x += dt * vxMid;
         y += dt * vyMid;
+        z += dt * vzMid;
 
-        // update velocity
-        vx += dt * axMid;
-        vy += dt * ayMid;
+        vx += dt * (dragFactorMid * vxMid);
+        vy += dt * (dragFactorMid * vyMid);
+        vz += dt * (dragFactorMid * vzMid - G);
       }
 
-      // add robot motion
-      double xTotal = x + xRobot;
-      double yTotal = y + yRobot;
+      // Compute 3D Error
+      double errX = x - xHub;
+      double errY = y - yHub;
+      double errZ = z - zHub;
 
-      // compute error
-      errX = xTotal - xHub;
-      errY = yTotal - yHub;
-
-      // Newton-like correction
-      vxGuess -= gain * errX * invT;
-      vyGuess -= gain * errY * invT;
+      // Newton correction (using invT for horizontal,
+      // vertical requires less gain due to gravity's dominance)
+      vxGuess -= errX * invT;
+      vyGuess -= errY * invT;
+      vzGuess -= errZ * invT;
     }
 
-    // ===== final corrected values =====
+    // 4. GALILEAN TRANSFORMATION (The "Magic" Step)
+    // vxGuess is what the ball needs to be doing relative to the ground.
+    // The shooter only provides the difference between that and the robot's velocity.
+    double vxShooter = vxGuess - v_x;
+    double vyShooter = vyGuess - v_y;
 
-    double vFloorCorrected = Math.sqrt(vxGuess * vxGuess + vyGuess * vyGuess);
-    double azCorrected = Math.atan2(vyGuess, vxGuess);
+    double vFloorCorrected = Math.sqrt(vxShooter * vxShooter + vyShooter * vyShooter);
 
-    vTotalNew = Math.sqrt(VY2 + vFloorCorrected * vFloorCorrected);
-    thetaDeg = Math.atan(VY / vFloorCorrected) * ShootingConstants.RAD_TO_DEG;
-    deltaFloorAngleDeg = (azCorrected - azRad) * ShootingConstants.RAD_TO_DEG;
+    // vTotalNew now uses the specific vzGuess that hit the hub height
+    vTotalNew = Math.sqrt(vFloorCorrected * vFloorCorrected + vzGuess * vzGuess);
+    thetaDeg = Math.atan2(vzGuess, vFloorCorrected) * ShootingConstants.RAD_TO_DEG;
+    deltaFloorAngleDeg = (Math.atan2(vyShooter, vxShooter) - azRad) * ShootingConstants.RAD_TO_DEG;
 
-    long end = System.nanoTime();
-    double duration = (end - start) / 1_000_000_000.0;
-
-    double errMag = Math.sqrt(errX * errX + errY * errY);
+    // Debug: This should now point exactly at the Hub in your sim
+    double[] finalLanding =
+        predictLandingPose(vxGuess, vyGuess, VY, robotPose.getX(), robotPose.getY());
+    System.out.println(
+        (robotPose.getX() + finalLanding[0])
+            + " "
+            + (robotPose.getY() + finalLanding[1])
+            + " "
+            + finalLanding[2]);
   }
 
   /**
@@ -203,111 +189,138 @@ public final class FastBallisticCalculator {
    */
   public static void computeBallistics(
       double D, double floorAzimuthDeg, double v_x, double v_y, double a_x, double a_y) {
-    long start = System.nanoTime();
-
     double azRad = floorAzimuthDeg * ShootingConstants.DEG_TO_RAD;
 
-    // Hub position
-    double xHub = D * Math.cos(azRad);
-    double yHub = D * Math.sin(azRad);
+    // 1. PROJECT ROBOT AND TARGET RELATIVE TO RELEASE POINT
+    // Robot displacement from now until release (t=R)
+    double xRel = v_x * R + 0.5 * a_x * R * R;
+    double yRel = v_y * R + 0.5 * a_y * R * R;
 
-    // Compute velocity after reload time
-    double v_xRelease = v_x + a_x * R;
-    double v_yRelease = v_y + a_y * R;
+    // Robot velocity at release
+    double vxRobotRelease = v_x + a_x * R;
+    double vyRobotRelease = v_y + a_y * R;
 
-    // Robot displacement
-    double xRobot = v_xRelease * T + 0.5 * a_x * T * T;
-    double yRobot = v_yRelease * T + 0.5 * a_y * T * T;
+    // Hub position relative to the START position (field frame)
+    double xHubField = D * Math.cos(azRad);
+    double yHubField = D * Math.sin(azRad);
 
-    // Required relative displacement
-    double xReq = xHub - xRobot;
-    double yReq = yHub - yRobot;
-    double dReq = Math.sqrt(xReq * xReq + yReq * yReq);
-    double azReq = Math.atan2(yReq, xReq);
+    // Target displacement relative to the release point
+    double dxTarget = xHubField - xRel;
+    double dyTarget = yHubField - yRel;
+    double dRelative = Math.sqrt(dxTarget * dxTarget + dyTarget * dyTarget);
 
-    // ================= ANALYTIC BASE =================
-    double vFloor = (M / (K * T)) * (Math.exp((K * dReq) / M) - 1.0);
-    double vx1 = vFloor * Math.cos(azReq);
-    double vy1 = vFloor * Math.sin(azReq);
+    // 2. INITIAL GUESS (Field Frame)
+    // We use the relative distance to get a better starting ground-velocity guess
+    double vFloorGuess = (M / (K * T)) * (Math.exp((K * dRelative) / M) - 1.0);
+    double vxGuess = vFloorGuess * (dxTarget / dRelative);
+    double vyGuess = vFloorGuess * (dyTarget / dRelative);
+    double vzGuess = (zHub / T) + (0.5 * 9.806 * T); // Simple gravity compensation
 
-    vTotalNew = Math.sqrt(VY2 + vFloor * vFloor);
-    thetaDeg = Math.atan(VY / vFloor) * ShootingConstants.RAD_TO_DEG;
-    deltaFloorAngleDeg = (azReq - azRad) * ShootingConstants.RAD_TO_DEG;
+    // 3. SOLVE LOOP
+    final int RK_STEPS = 30; // Increased for sub-centimeter precision
+    final double dt = T / RK_STEPS;
+    final double G = 9.806;
 
-    // ================= ITERATIVE RK2 ROOT SOLVE =================
+    for (int iter = 0; iter < 4; iter++) { // 4 iterations to settle quadratic error
+      double x = 0.0, y = 0.0, z = 0.0;
+      double vx = vxGuess, vy = vyGuess, vz = vzGuess;
 
-    // Start from analytic guess
-    double vxGuess = vx1;
-    double vyGuess = vy1;
-
-    final int RK_STEPS = 20; // fixed integration resolution
-    final int SOLVE_ITERS = 3; // 3–4 is ideal
-    final double gain = 1.0; // Newton-like gain (usually stable)
-
-    // Precompute
-    double dt = T / RK_STEPS;
-
-    double errX = 0.0;
-    double errY = 0.0;
-
-    for (int iter = 0; iter < SOLVE_ITERS; iter++) {
-
-      double x = 0.0;
-      double y = 0.0;
-      double vx = vxGuess;
-      double vy = vyGuess;
-
-      // ===== fixed RK2 forward integration =====
       for (int i = 0; i < RK_STEPS; i++) {
+        double speed = Math.sqrt(vx * vx + vy * vy + vz * vz);
+        double dragFactor = -ALPHA * speed;
 
-        double speed = Math.sqrt(vx * vx + vy * vy);
-        double ax = -ALPHA * speed * vx;
-        double ay = -ALPHA * speed * vy;
+        // RK2 Midpoint
+        double vxMid = vx + 0.5 * dt * (dragFactor * vx);
+        double vyMid = vy + 0.5 * dt * (dragFactor * vy);
+        double vzMid = vz + 0.5 * dt * (dragFactor * vz - G);
 
-        // midpoint
-        double vxMid = vx + 0.5 * dt * ax;
-        double vyMid = vy + 0.5 * dt * ay;
-        double speedMid = Math.sqrt(vxMid * vxMid + vyMid * vyMid);
+        double speedMid = Math.sqrt(vxMid * vxMid + vyMid * vyMid + vzMid * vzMid);
+        double dragMid = -ALPHA * speedMid;
 
-        double axMid = -ALPHA * speedMid * vxMid;
-        double ayMid = -ALPHA * speedMid * vyMid;
-
-        // update position
         x += dt * vxMid;
         y += dt * vyMid;
-
-        // update velocity
-        vx += dt * axMid;
-        vy += dt * ayMid;
+        z += dt * vzMid;
+        vx += dt * (dragMid * vxMid);
+        vy += dt * (dragMid * vyMid);
+        vz += dt * (dragMid * vzMid - G);
       }
 
-      // add robot motion
-      double xTotal = x + xRobot;
-      double yTotal = y + yRobot;
+      // Error relative to the hub's position from the release point
+      double errX = x - dxTarget;
+      double errY = y - dyTarget;
+      double errZ = z - zHub;
 
-      // compute error
-      errX = xTotal - xHub;
-      errY = yTotal - yHub;
-
-      // Newton-like correction
-      vxGuess -= gain * errX * invT;
-      vyGuess -= gain * errY * invT;
+      // Apply corrections
+      vxGuess -= errX * invT;
+      vyGuess -= errY * invT;
+      vzGuess -= errZ * invT;
     }
 
-    // ===== final corrected values =====
+    // 4. TRANSFORM TO ROBOT FRAME
+    double vxShooter = vxGuess - vxRobotRelease;
+    double vyShooter = vyGuess - vyRobotRelease;
 
-    double vFloorCorrected = Math.sqrt(vxGuess * vxGuess + vyGuess * vyGuess);
-    double azCorrected = Math.atan2(vyGuess, vxGuess);
+    double vFloorFinal = Math.sqrt(vxShooter * vxShooter + vyShooter * vyShooter);
+    vTotalNew = Math.sqrt(vFloorFinal * vFloorFinal + vzGuess * vzGuess);
+    thetaDeg = Math.atan2(vzGuess, vFloorFinal) * ShootingConstants.RAD_TO_DEG;
 
-    vTotalNew = Math.sqrt(VY2 + vFloorCorrected * vFloorCorrected);
-    thetaDeg = Math.atan(VY / vFloorCorrected) * ShootingConstants.RAD_TO_DEG;
-    deltaFloorAngleDeg = (azCorrected - azRad) * ShootingConstants.RAD_TO_DEG;
+    // Azimuth is the angle the shooter must face relative to the field 0
+    double azimuthShooter = Math.atan2(vyShooter, vxShooter);
+    deltaFloorAngleDeg = (azimuthShooter - azRad) * ShootingConstants.RAD_TO_DEG;
 
-    long end = System.nanoTime();
-    double duration = (end - start) / 1_000_000_000.0;
+    /**
+     * // DEBUG: Validate by simulating from field origin double[] landing =
+     * predictLandingPose(xRel, yRel, vxGuess, vyGuess, vzGuess); // These should now be nearly
+     * identical to xHubField, yHubField, zHub System.out.println( (robotPose.getX() + xRel +
+     * landing[0]) + " " + (robotPose.getY() + yRel + landing[1]) + " " + landing[2]);
+     */
+  }
 
-    double errMag = Math.sqrt(errX * errX + errY * errY);
+  /**
+   * Calculates the predicted landing position of the projectile after time T, accounting for 3D
+   * drag (horizontal + vertical components). * @param vxLaunch Initial horizontal X velocity (m/s)
+   *
+   * @param vyLaunch Initial horizontal Y velocity (m/s)
+   * @param vzLaunch Initial vertical velocity (m/s)
+   * @return double[] {finalX, finalY, finalZ}
+   */
+  public static double[] predictLandingPose(
+      double xStart, double yStart, double vxLaunch, double vyLaunch, double vzLaunch) {
+    final int RK_STEPS = 25;
+    final double dt = T / RK_STEPS;
+    final double G = 9.806;
 
-    System.out.println(errMag);
+    double x = xStart; // Start from where the robot will be at release
+    double y = yStart;
+    double z = 0.0;
+
+    double vx = vxLaunch;
+    double vy = vyLaunch;
+    double vz = vzLaunch;
+
+    for (int i = 0; i < RK_STEPS; i++) {
+      double speed = Math.sqrt(vx * vx + vy * vy + vz * vz);
+
+      // Midpoint accelerations
+      double ax = -ALPHA * speed * vx;
+      double ay = -ALPHA * speed * vy;
+      double az = -ALPHA * speed * vz - G;
+
+      // RK2 Midpoint velocity
+      double vxMid = vx + 0.5 * dt * ax;
+      double vyMid = vy + 0.5 * dt * ay;
+      double vzMid = vz + 0.5 * dt * az;
+      double speedMid = Math.sqrt(vxMid * vxMid + vyMid * vyMid + vzMid * vzMid);
+
+      // Update state
+      x += dt * vxMid;
+      y += dt * vyMid;
+      z += dt * vzMid;
+
+      vx += dt * (-ALPHA * speedMid * vxMid);
+      vy += dt * (-ALPHA * speedMid * vyMid);
+      vz += dt * (-ALPHA * speedMid * vzMid - G);
+    }
+    return new double[] {x, y, z};
   }
 }

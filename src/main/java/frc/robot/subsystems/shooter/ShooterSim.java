@@ -3,6 +3,7 @@ package frc.robot.subsystems.shooter;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
@@ -30,6 +31,7 @@ public class ShooterSim extends ShooterIO {
   private double hoodAngleDegs = 13;
   private double turretTargetDegs = 180.0;
   private double hoodTargetDegs = 13.0;
+  Transform2d acceleration = new Transform2d();
 
   private final PIDController turretPID = new PIDController(0.5, 0.0, 0);
   private final PIDController hoodPID = new PIDController(0.8, 0.0, 0);
@@ -94,6 +96,7 @@ public class ShooterSim extends ShooterIO {
     double error = angleDifferenceDeg(turretTargetDegs, turretAngleDegs);
     double turretOutput = turretPID.calculate(0, error); // PID expects setpoint=0 for error
     double hoodOutput = hoodPID.calculate(hoodAngleDegs, hoodTargetDegs);
+    acceleration = ShooterIO.getAcceleration();
 
     turretOutput = MathUtil.clamp(turretOutput, -3.0, 3.0);
     hoodOutput = MathUtil.clamp(hoodOutput, -2.0, 2.0);
@@ -135,7 +138,8 @@ public class ShooterSim extends ShooterIO {
         Logger.recordOutput(
             "Shooter/Sim InputFieldRelativeAngleToHub", Math.toDegrees(fieldRelativeAngleToHub));
 
-        updateShootingParameters(distanceToHub, fieldRelativeAngleToHub, speeds, pose);
+        updateShootingParameters(
+            distanceToHub, fieldRelativeAngleToHub, speeds, acceleration, pose);
         // Safely wrap the visualization angle
         double totalHorizDeg = MathUtil.inputModulus(getHorizontalTotalShootingAngle(), 0.0, 360.0);
         totalHorizontal.setAngle(totalHorizDeg);

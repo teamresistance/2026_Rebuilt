@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.ShootingConstants;
 import frc.robot.subsystems.drive.SwerveDriveIO;
@@ -22,61 +23,51 @@ public class IdleShooterCommand extends Command {
 
   @Override
   public void execute() {
-    // 1. Get current robot state and shooter angles (Field-Relative)
     Pose2d robotPose = drive.getPose();
-    double hoodAngleRad = Math.toRadians(ShooterIO.getVerticalShootingAngle());
-    double turretAngleRad = Math.toRadians(ShooterIO.getHorizontalTotalShootingAngle());
     double launchSpeed = ShooterIO.getLaunchVelocity();
+    double turretAngleRad = Math.toRadians(ShooterIO.getHorizontalTotalShootingAngle());
+    double hoodAngleRad = Math.toRadians(ShooterIO.getVerticalShootingAngle());
+    Transform2d accel = drive.getAcceleration();
 
-    // 2. Calculate horizontal velocity relative to the robot
-    double vHorizontalRelative = launchSpeed * Math.cos(hoodAngleRad);
-    double vxRelative = vHorizontalRelative * Math.cos(turretAngleRad);
-    double vyRelative = vHorizontalRelative * Math.sin(turretAngleRad);
-
-    // 3. Add robot's field-relative velocity to get the true initial floor velocity
-    // (Assuming drive.getVelocity() returns a Transform2d representing velocity in m/s)
+    // 1. PREDICT RELEASE POSE (The "Muzzle" position)
     double vxRobot = drive.getVelocity().getX();
     double vyRobot = drive.getVelocity().getY();
+    double ax = accel.getX();
+    double ay = accel.getY();
+    double R = ShootingConstants.RELOAD_TIME;
 
-    double vxFloor = vxRelative + vxRobot;
-    double vyFloor = vyRelative + vyRobot;
+    double xRelease = robotPose.getX() + (vxRobot * R + 0.5 * ax * R * R);
+    double yRelease = robotPose.getY() + (vyRobot * R + 0.5 * ay * R * R);
+    double vxRobotAtRelease = vxRobot + ax * R;
+    double vyRobotAtRelease = vyRobot + ay * R;
 
-    // Total initial horizontal speed and direction relative to the floor
-    double vFloorInitial = Math.sqrt(vxFloor * vxFloor + vyFloor * vyFloor);
-    double floorAzimuth = Math.atan2(vyFloor, vxFloor);
+    Pose2d releasePose = new Pose2d(xRelease, yRelease, robotPose.getRotation());
+    Logger.recordOutput("Shooter/Visuals/ReleasePose", releasePose);
 
-    // 4. Apply 1D Analytic Quadratic Drag to find actual travel distance
-    // Derivation of velocity decay integrated over time: D = (M / K) * ln(1 + (K / M) * v0 * T)
-    double m = FastBallisticCalculator.M;
-    double k = ShootingConstants.QUADRATIC_DRAG_COEFFICIENT;
-    double t = ShootingConstants.MINIMUM_TIME_OF_FLIGHT;
+    // 2. CALCULATE INITIAL FIELD VELOCITY AT RELEASE
+    double vFloorRelative = launchSpeed * Math.cos(hoodAngleRad);
+    double vzInitial = launchSpeed * Math.sin(hoodAngleRad);
 
-    // This prevents division-by-zero or log errors if the shooter is off/idle
-    double actualTravelDistance = 0.0;
-    if (vFloorInitial > 0.1) {
-      actualTravelDistance = (m / k) * Math.log(1.0 + (k / m) * vFloorInitial * t);
-    }
+    double vxField = vFloorRelative * Math.cos(turretAngleRad) + vxRobotAtRelease;
+    double vyField = vFloorRelative * Math.sin(turretAngleRad) + vyRobotAtRelease;
 
-    // 5. Calculate final predicted landing pose
-    Pose2d landingAt =
-        new Pose2d(
-            robotPose.getX() + actualTravelDistance * Math.cos(floorAzimuth),
-            robotPose.getY() + actualTravelDistance * Math.sin(floorAzimuth),
-            Rotation2d.fromRadians(floorAzimuth));
+    // 3. USE THE SOLVER'S OWN RK2 FOR THE PREDICTION
+    // This ensures the green dot on the map is exactly where the solver THINKS it's going.
+    double[] landing =
+        FastBallisticCalculator.predictLandingPose(xRelease, yRelease, vxField, vyField, vzInitial);
 
-    // Log the corrected predicted landing position
-    Logger.recordOutput("Shooter/LandingAt", landingAt);
+    Pose2d predictedLanding =
+        new Pose2d(landing[0], landing[1], Rotation2d.fromRadians(Math.atan2(vyField, vxField)));
 
-    // Log the raw turret direction for debugging aim
-    Pose2d lookingAt =
-        new Pose2d(robotPose.getTranslation(), Rotation2d.fromRadians(turretAngleRad));
-    Logger.recordOutput("Shooter/AimingAt", lookingAt);
+    // 4. LOGGING & MARKERS
+    Logger.recordOutput("Shooter/Visuals/PredictedLanding", predictedLanding);
 
-    // Set hardware targets
-    double distance = ShooterIO.getPredictedDistanceToHubAfterReload();
+    // "Aim Line" from the future release point to the landing spot
+    Logger.recordOutput(
+        "Shooter/Visuals/ShotTrajectoryLine", new Pose2d[] {releasePose, predictedLanding});
+
+    // Existing hardware targets
     shooter.setTurretTarget(Math.toDegrees(turretAngleRad));
     shooter.setHoodTarget(Math.toDegrees(hoodAngleRad));
-
-    Logger.recordOutput("Shooter/Virtual Distance to Hub", distance);
   }
 }

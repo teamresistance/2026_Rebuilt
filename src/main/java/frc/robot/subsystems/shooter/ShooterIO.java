@@ -71,6 +71,8 @@ public class ShooterIO extends SubsystemBase {
   // 20ms loop
   private static final double LOOP_DT = 0.02;
 
+  private static Transform2d acceleration = new Transform2d();
+
   // Maximum allowed change per second
   private static final double MAX_HOOD_RATE_DEG_PER_SEC = 180.0;
   private static final double MAX_TURRET_RATE_DEG_PER_SEC = 360.0;
@@ -118,6 +120,7 @@ public class ShooterIO extends SubsystemBase {
     Rotation2d robotRotation = robotPose.getRotation();
     double cos = Math.cos(robotRotation.getRadians());
     double sin = Math.sin(robotRotation.getRadians());
+    FastBallisticCalculator.robotPose = robotPose;
 
     // Robot-relative velocities (vx, vy) are rotated into the field frame.
     double vxField = chassisSpeeds.vxMetersPerSecond * cos - chassisSpeeds.vyMetersPerSecond * sin;
@@ -184,6 +187,7 @@ public class ShooterIO extends SubsystemBase {
     Rotation2d robotRotation = robotPose.getRotation();
     double cos = Math.cos(robotRotation.getRadians());
     double sin = Math.sin(robotRotation.getRadians());
+    FastBallisticCalculator.robotPose = robotPose;
 
     // Robot-relative velocities (vx, vy) are rotated into the field frame.
     double vxField = chassisSpeeds.vxMetersPerSecond * cos - chassisSpeeds.vyMetersPerSecond * sin;
@@ -246,6 +250,14 @@ public class ShooterIO extends SubsystemBase {
    */
   public static double getVerticalShootingAngle() {
     return verticalShootingAngle;
+  }
+
+  public static void setAcceleration(Transform2d accel) {
+    acceleration = accel;
+  }
+
+  public static Transform2d getAcceleration() {
+    return acceleration;
   }
 
   /**
