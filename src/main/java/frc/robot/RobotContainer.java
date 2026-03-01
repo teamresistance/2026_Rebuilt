@@ -38,7 +38,6 @@ import frc.robot.util.OtherUtil;
 import frc.robot.util.ShiftUtil;
 import frc.robot.util.ShootingUtil;
 import frc.robot.util.TurretConfidenceUtil;
-
 import java.io.IOException;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -235,7 +234,9 @@ public class RobotContainer {
                 4,
                 () -> {
                   boolean isShooting = ShootingUtil.getShootingType(drive::getPose) == 0;
-                  boolean isConfident = TurretConfidenceUtil.calculateConfidence(drive) > 75.0; // confidence threshold is greater than 75%
+                  boolean isConfident =
+                      TurretConfidenceUtil.calculateConfidence(drive)
+                          > 75.0; // confidence threshold is greater than 75%
 
                   if (isShooting) {
                     return isConfident
@@ -247,16 +248,21 @@ public class RobotContainer {
                         : Constants.LEDMode.PASSING_DOUBTFUL;
                   }
                 },
-          
                 () -> driver.rightTrigger().getAsBoolean())
-            .withFramerateSupplier(() -> {
-              double confidence = TurretConfidenceUtil.calculateConfidence(drive);
-              int framerate = (confidence > 75.0) ? 6 // higher confidence = lower framerate
-                        : (confidence > 50.0) ? 8 // medium framerate for medium confidence
-                        : (confidence > 25.0) ? 9 // low framerate for low confidence
-                        : 10; // higher framerate for lower confidence (up to 9 for very low confidence)
-              return framerate;
-              });
+            .withFramerateSupplier(
+                () -> {
+                  double confidence = TurretConfidenceUtil.calculateConfidence(drive);
+                  int framerate =
+                      (confidence > 75.0)
+                          ? 6 // higher confidence = lower framerate
+                          : (confidence > 50.0)
+                              ? 8 // medium framerate for medium confidence
+                              : (confidence > 25.0)
+                                  ? 9 // low framerate for low confidence
+                                  : 10; // higher framerate for lower confidence (up to 9 for very
+                  // low confidence)
+                  return framerate;
+                });
 
     leds.addStream(shootingStream);
 
@@ -390,6 +396,7 @@ public class RobotContainer {
 
   /**
    * Gets the drive subsystem for use in other classes
+   *
    * @return the drive subsystem instance
    */
   public SwerveDriveIO getDrive() {

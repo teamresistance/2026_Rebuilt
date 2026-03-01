@@ -9,7 +9,7 @@ import frc.robot.subsystems.shooter.ShootingConstants;
 public class TurretConfidenceUtil {
 
   // TODO: Tune the standard deviation to the robot's accuracy
-  private final static double ERROR_STD_DEV = 1.0;
+  private static final double ERROR_STD_DEV = 1.0;
 
   // Call this in Robot.java to update confidence
   public static double calculateConfidence(SwerveDriveIO drive) {
