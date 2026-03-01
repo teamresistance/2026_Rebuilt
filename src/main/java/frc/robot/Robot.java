@@ -158,7 +158,7 @@ public class Robot extends LoggedRobot {
     if (!shiftsAssigned) {
       ShiftUtil.assignShifts(robotContainer.getShiftChosen());
     }
-    
+
     // Calculate and update the shot confidence value from the utility class
     SmartDashboard.putNumber("Shot Confidence", turretConfidenceUtil.calculateConfidence());
   }

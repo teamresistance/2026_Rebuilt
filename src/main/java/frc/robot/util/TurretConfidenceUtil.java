@@ -11,12 +11,11 @@ public class TurretConfidenceUtil {
   private SwerveDriveIO drive; // Default to real drive, can be overridden for testing
 
   public void instantiateDrive(SwerveDriveIO drive) {
-    this.drive = drive;  // instantiate the drive subsystem for use in confidence calculations
+    this.drive = drive; // instantiate the drive subsystem for use in confidence calculations
   }
 
   // TODO: Tune the standard deviation to the robot's accuracy
-  private final double ERROR_STD_DEV =
-      1.0; 
+  private final double ERROR_STD_DEV = 1.0;
 
   // Call this in Robot.java to update confidence
   public double calculateConfidence() {
@@ -26,7 +25,8 @@ public class TurretConfidenceUtil {
     ChassisSpeeds speeds = drive.getChassisSpeeds();
 
     // Update target position based on current robot pose
-    Translation2d TARGET_POSITION = ShootingUtil.getShootingTarget(drive.getPose()).getTranslation();
+    Translation2d TARGET_POSITION =
+        ShootingUtil.getShootingTarget(drive.getPose()).getTranslation();
 
     // Distance to target calculated with field-relative coordinates
     double distance = pose.getTranslation().getDistance(TARGET_POSITION);
@@ -35,9 +35,8 @@ public class TurretConfidenceUtil {
     double timeOfFlight =
         ShootingConstants.getTimeOfFlight(
             ShootingUtil.getApproximateVirtualDistanceToHub(
-                pose,
-                new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond)));
-                
+                pose, new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond)));
+
     // Calculate lateral velocity of the robot with the x and y velocity
     double lateralVelocity = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
 
@@ -54,7 +53,7 @@ public class TurretConfidenceUtil {
     // Convert miss distance to probability (Gaussian curve equation)
     double probability = Math.exp(-Math.pow(totalError, 2) / (2 * Math.pow(ERROR_STD_DEV, 2)));
 
-    double confidence = probability*100; // Scale to percentage for easier interpretation
+    double confidence = probability * 100; // Scale to percentage for easier interpretation
     return confidence;
   }
 }
