@@ -15,23 +15,26 @@ public class CameraPoses {
                 Units.inchesToMeters(12.34),
                 Units.inchesToMeters(10.83)),
             new Rotation3d(0.0, Units.degreesToRadians(-30), Units.degreesToRadians(35.5))),
-        // TODO: rest of me
         // Front Right
         new Pose3d(
-            new Translation3d(0.268, -0.213, 0.267),
-            new Rotation3d(
-                0.0,
-                Units.degreesToRadians(-12.63),
-                Units.degreesToRadians(45.0))), // in radians btw
+            new Translation3d(
+                Units.inchesToMeters(-12.13),
+                Units.inchesToMeters(12.34),
+                Units.inchesToMeters(10.83)),
+            new Rotation3d(0.0, Units.degreesToRadians(-30), Units.degreesToRadians(-35.5))),
         // Back Right
         new Pose3d(
-            new Translation3d(-0.235, -0.235, 0.267),
-            new Rotation3d(
-                0.0, Units.degreesToRadians(-12.63), Units.degreesToRadians(-45.0 - 90.0))),
+            new Translation3d(
+                Units.inchesToMeters(-12.13),
+                Units.inchesToMeters(-12.34),
+                Units.inchesToMeters(10.83)),
+            new Rotation3d(0.0, Units.degreesToRadians(30), Units.degreesToRadians(-35.5))),
         // Back Left
         new Pose3d(
-            new Translation3d(-0.235, 0.235, 0.267),
-            new Rotation3d(
-                0.0, Units.degreesToRadians(-12.63), Units.degreesToRadians(45.0 + 90.0))),
+            new Translation3d(
+                Units.inchesToMeters(12.13),
+                Units.inchesToMeters(-12.34),
+                Units.inchesToMeters(10.83)),
+            new Rotation3d(0.0, Units.degreesToRadians(30), Units.degreesToRadians(35.5))),
       };
 }
