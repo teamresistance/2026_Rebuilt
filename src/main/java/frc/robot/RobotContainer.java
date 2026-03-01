@@ -37,6 +37,7 @@ import frc.robot.util.BumpUtil;
 import frc.robot.util.OtherUtil;
 import frc.robot.util.ShiftUtil;
 import frc.robot.util.ShootingUtil;
+import frc.robot.util.TurretConfidenceUtil;
 import java.io.IOException;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -233,7 +234,9 @@ public class RobotContainer {
                 4,
                 () -> {
                   boolean isShooting = ShootingUtil.getShootingType(drive::getPose) == 0;
-                  boolean isConfident = true; // TODO: me
+                  boolean isConfident =
+                      TurretConfidenceUtil.calculateConfidence(drive)
+                          > 75.0; // confidence threshold is greater than 75%
 
                   if (isShooting) {
                     return isConfident
@@ -246,7 +249,17 @@ public class RobotContainer {
                   }
                 },
                 () -> driver.rightTrigger().getAsBoolean())
-            .withFramerateSupplier(() -> 0);
+            .withFramerateSupplier(
+                () -> {
+                  double confidence = TurretConfidenceUtil.calculateConfidence(drive);
+                  int framerate =
+                      (confidence > 90.0)
+                          ? 10 // very high framerate for very high confidence
+                          : (confidence > 80.0)
+                              ? 9
+                              : (confidence > 70.0) ? 8 : (confidence > 60.0) ? 7 : 6;
+                  return framerate;
+                });
 
     leds.addStream(shootingStream);
 
@@ -376,5 +389,14 @@ public class RobotContainer {
     }
 
     return autoCommand;
+  }
+
+  /**
+   * Gets the drive subsystem for use in other classes
+   *
+   * @return the drive subsystem instance
+   */
+  public SwerveDriveIO getDrive() {
+    return drive;
   }
 }
