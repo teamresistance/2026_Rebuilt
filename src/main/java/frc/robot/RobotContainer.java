@@ -30,6 +30,8 @@ import frc.robot.subsystems.hoppert.HoppertSim;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeReal;
 import frc.robot.subsystems.intake.IntakeSim;
+import frc.robot.subsystems.leds.LEDStream;
+import frc.robot.subsystems.leds.LEDSubsystem;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterReal;
 import frc.robot.subsystems.shooter.ShooterSim;
@@ -84,9 +86,16 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     ShootingMaps.configureShootingMaps();
+  private final Trigger inBumpZone;
+  private final Command driveAtAngleForBump;
+  private final Command driveAtLimitedSpeed;
+
+  /** The container for the robot. Contains subsystems, OI devices, and commands. */
+  public RobotContainer() {
     drive = configureDrive();
     vision = configureAprilTagVision();
     configureNamedCommands();
+    ShootingConstants.configureShootingConstants();
 
     switch (Constants.CURRENT_MODE) {
       case REAL:
@@ -97,6 +106,7 @@ public class RobotContainer {
         break;
       case SIM:
         shooter = new ShooterSim(drive::getPose, drive::getChassisSpeeds);
+        shooter = new ShooterSim();
         hoppert = new HoppertSim();
         climber = new ClimberSim();
         intake = new IntakeSim();
@@ -136,7 +146,7 @@ public class RobotContainer {
     manualShiftAssigner.setDefaultOption("None", "");
     SmartDashboard.putData("Manual Shift Setup", manualShiftAssigner);
 
-    configureLEDS();
+    configureDriverFeedback();
     autoChooser = configureAutos();
     configureButtonBindings();
     cameraFailureAlert = new Alert("Camera system failure", Alert.AlertType.kError);
@@ -240,9 +250,66 @@ public class RobotContainer {
         .and(() -> SimulationAndState.getShootingType(drive::getPose) == 1)
         .whileTrue(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.PASSING, true)));
     driver.rightTrigger().onFalse(Commands.runOnce(leds::unlock));
+  /** Sets up LEDs and controller rumbles */
+  private void configureDriverFeedback() {
 
-    // when endgame begins, endgame LED animation for 3 seconds
-    new Trigger(() -> ShiftUtil.getNextShift() == Constants.ShiftOwner.BOTH)
+    // TODO: integrate confidence system
+    // SHOOTING/PASSING (priority 4, determines confidence and passing/shooting, framerate based on
+    // confidence)
+    LEDStream shootingStream =
+        new LEDStream(
+                "shooting/passing",
+                4,
+                () -> {
+                  boolean isShooting = ShootingUtil.getShootingType(drive::getPose) == 0;
+                  boolean isConfident = true; // TODO: me
+
+                  if (isShooting) {
+                    return isConfident
+                        ? Constants.LEDMode.SHOOTING_CONFIDENT
+                        : Constants.LEDMode.SHOOTING_DOUBTFUL;
+                  } else {
+                    return isConfident
+                        ? Constants.LEDMode.PASSING_CONFIDENT
+                        : Constants.LEDMode.PASSING_DOUBTFUL;
+                  }
+                },
+                () -> driver.rightTrigger().getAsBoolean())
+            .withFramerateSupplier(() -> 0);
+
+    leds.addStream(shootingStream);
+
+    // INTAKING (priority 2, flashing yellow)
+    LEDStream intakeStream =
+        new LEDStream(
+            "intake",
+            2,
+            () -> Constants.LEDMode.INTAKING,
+            () -> driver.rightTrigger().getAsBoolean());
+    leds.addStream(intakeStream);
+
+    // ACTIVE/INACTIVE
+    LEDStream activeInactiveStream =
+        new LEDStream(
+            "active/inactive",
+            1,
+            () ->
+                ShiftUtil.isOurs(ShiftUtil.getShift())
+                    ? Constants.LEDMode.ACTIVE
+                    : Constants.LEDMode.INACTIVE,
+            () -> true);
+    leds.addStream(activeInactiveStream);
+
+    // BUMP (priority 5, timed 1s, cancels if leaving zone)
+    LEDStream bumpStream =
+        new LEDStream("bump", 5, () -> Constants.LEDMode.BUMP, () -> inBumpZone.getAsBoolean());
+    leds.addStream(bumpStream);
+
+    // BUMP trigger (timed 1s when entering bump zone)
+    driver.y().negate().and(inBumpZone).onTrue(Commands.runOnce(() -> bumpStream.runForSeconds(1)));
+
+    // RUMBLE when 5s from next shift
+    new Trigger(ShiftUtil::nearNextShift)
         .onTrue(
             new WaitCommand(3)
                 .andThen(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.ENDGAME, true)))
@@ -283,6 +350,11 @@ public class RobotContainer {
         .negate()
         .and(() -> leds.getMode() == Constants.LEDMode.BUMP)
         .onTrue(Commands.runOnce(leds::unlock));
+            Commands.runOnce(() -> driver.setRumble(GenericHID.RumbleType.kBothRumble, 1))
+                .andThen(new WaitCommand(1))
+                .andThen(
+                    Commands.runOnce(
+                        () -> driver.setRumble(GenericHID.RumbleType.kBothRumble, 0))));
   }
 
   /** Defines button bindings and control triggers */
@@ -296,6 +368,9 @@ public class RobotContainer {
             () -> Math.max(-1.0, Math.min(1.0, -driver.getLeftY() + keyboard.getRawAxis(0))),
             () -> Math.max(-1.0, Math.min(1.0, -driver.getLeftX() + keyboard.getRawAxis(1))),
             () -> Math.max(-1.0, Math.min(1.0, -driver.getRightX() + keyboard.getRawAxis(2)))));
+
+    // have hopper automatically deciding when to run or not to run
+    hoppert.setDefaultCommand(new HoppertCommand(hoppert, shooter));
 
     // have hopper automatically deciding when to run or not to run
     hoppert.setDefaultCommand(new HoppertCommand(hoppert, shooter));
@@ -352,6 +427,15 @@ public class RobotContainer {
             Commands.runOnce(ShiftUtil::startShiftTimer)
                 .andThen(new WaitCommand(1))
                 .andThen(Commands.runOnce(ShiftUtil::assignShifts)));
+  }
+
+  /**
+   * Creates an LEDStream that runs the auto animation 20 seconds and then is never accessed again.
+   */
+  public void runAutoLEDs() {
+    LEDStream autoStream = new LEDStream("auto", 100, () -> Constants.LEDMode.AUTO);
+    leds.addStream(autoStream);
+    autoStream.runForSeconds(20);
   }
 
   public String getShiftChosen() {

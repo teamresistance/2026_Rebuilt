@@ -21,6 +21,7 @@ public class ShootCommand extends Command {
 
     shooter.runFlywheelAtRPS(Units.radiansToRotations(ShooterIO.getDesiredAngularVelocity()));
 
+
     Logger.recordOutput("Shooter/Desired Angular Velocity", ShooterIO.getDesiredAngularVelocity());
 
     // TODO: all of these
@@ -35,5 +36,8 @@ public class ShootCommand extends Command {
     //                        in under any circumstances), some way to stop shooting.
     // However: the virtual pose represents the pose after about 0.07s. At a maximum of 5 ft/s, the
     // robot only moves about 10cm.
+
+    Logger.recordOutput("Shooter/Virtual Distance to Hub", distance);
+
   }
 }
