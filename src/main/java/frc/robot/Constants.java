@@ -195,6 +195,10 @@ public final class Constants {
     // consistent shooting performance
     public static final double FREE_ANGULAR_VELOCITY = 0;
 
+    public static final double MIN_TURRET_ANGLE = -135;
+
+    public static final double MAX_TURRET_ANGLE = 135;
+
     /** Conversion factor from radians to degrees */
     public static final double RAD_TO_DEG = 180.0 / Math.PI;
 

@@ -216,8 +216,8 @@ public final class FastBallisticCalculator {
     double v_yRelease = v_y + a_y * R;
 
     // Robot displacement
-    double xRobot = v_xRelease * T;
-    double yRobot = v_yRelease * T;
+    double xRobot = v_xRelease * T + 0.5 * a_x * T * T;
+    double yRobot = v_yRelease * T + 0.5 * a_y * T * T;
 
     // Required relative displacement
     double xReq = xHub - xRobot;
@@ -307,5 +307,7 @@ public final class FastBallisticCalculator {
     double duration = (end - start) / 1_000_000_000.0;
 
     double errMag = Math.sqrt(errX * errX + errY * errY);
+
+    System.out.println(errMag);
   }
 }

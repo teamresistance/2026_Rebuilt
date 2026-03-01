@@ -77,9 +77,22 @@ public class ShooterSim extends ShooterIO {
     SmartDashboard.putData("Turret Mechanism2d", mech);
   }
 
+  // Keep turret/robot angles continuous across 0/360 boundary
+  private double lastOriginalAngleDeg = 0;
+
+  private double unwrapAngle(double angleDeg) {
+    double delta = angleDeg - lastOriginalAngleDeg;
+    if (delta > 180.0) delta -= 360.0;
+    if (delta < -180.0) delta += 360.0;
+    lastOriginalAngleDeg += delta;
+    return lastOriginalAngleDeg;
+  }
+
   @Override
   public void periodic() {
-    double turretOutput = turretPID.calculate(turretAngleDegs, turretTargetDegs);
+    // Compute shortest-path turret rotation
+    double error = angleDifferenceDeg(turretTargetDegs, turretAngleDegs);
+    double turretOutput = turretPID.calculate(0, error); // PID expects setpoint=0 for error
     double hoodOutput = hoodPID.calculate(hoodAngleDegs, hoodTargetDegs);
 
     turretOutput = MathUtil.clamp(turretOutput, -3.0, 3.0);
@@ -88,65 +101,49 @@ public class ShooterSim extends ShooterIO {
     turretAngleDegs += turretOutput;
     hoodAngleDegs += hoodOutput;
 
+    // Wrap turret angle safely to [0,360) for visualization and consistency
+    turretAngleDegs = MathUtil.inputModulus(turretAngleDegs, 0.0, 360.0);
+
     turretBase.setAngle(turretAngleDegs);
-    ;
+
+    // Wrap turret angle to [0,360) for visualization and consistency
+    turretAngleDegs = (turretAngleDegs + 360.0) % 360.0;
+
+    turretBase.setAngle(turretAngleDegs);
 
     Logger.recordOutput("Shooter/Sim Turret Angle", turretAngleDegs);
     Logger.recordOutput("Shooter/Sim Hood Angle", hoodAngleDegs);
     Logger.recordOutput("Shooter/Sim Turret Target", turretTargetDegs);
     Logger.recordOutput("Shooter/Sim Hood Target", hoodTargetDegs);
 
-    // If simulation data suppliers are available, use them to update shooting
-    // parameters with real sim pose and chassis speeds. This drives the
-    // ShootingManager with the same inputs the real robot code would use.
+    // Existing simulation visualization updates remain unchanged
     if (poseSupplier != null && speedsSupplier != null) {
       try {
         Pose2d pose = poseSupplier.get();
         ChassisSpeeds speeds = speedsSupplier.get();
 
-        // Determine the target pose based on the current robot pose and alliance
-        // settings. Compute the straight-line distance to the hub and the angle
-        // between the vector to the hub and the +X direction at the robot
-        // (i.e., the three points: hub, robot, robot+(1,0)).
         var targetPose = SimulationAndState.getShootingTarget(pose);
-
         Translation2d hub = targetPose.getTranslation();
         Translation2d robot = pose.getTranslation();
 
-        // Distance from robot to hub
         double dx = hub.getX() - robot.getX();
         double dy = hub.getY() - robot.getY();
         double distanceToHub = Math.hypot(dx, dy);
+        double fieldRelativeAngleToHub = Math.atan2(dy, dx);
 
-        // Angle between vector robot->hub and robot->(robot + (1,0)). For the
-        // +X direction the second vector is (1,0), so the signed angle is
-        // atan2(cross, dot) = atan2(-dy, dx) == -atan2(dy, dx).
-        double fieldRelativeAngleToHub = 0.0;
-        double denom = Math.hypot(dx, dy);
-        if (denom > 1e-9) {
-          fieldRelativeAngleToHub = Math.atan2(dy, dx);
-        }
-
-        // Record the computed inputs so we can trace where a zero angle might
-        // originate (helps debugging in simulation/AdvantageScope).
         Logger.recordOutput("Shooter/Sim Input DistanceToHub", distanceToHub);
         Logger.recordOutput(
             "Shooter/Sim InputFieldRelativeAngleToHub", Math.toDegrees(fieldRelativeAngleToHub));
 
-        // Update the ShootingManager with the latest inputs so ballistic
-        // parameters are available for visualization below.
         updateShootingParameters(distanceToHub, fieldRelativeAngleToHub, speeds, pose);
+        // Safely wrap the visualization angle
+        double totalHorizDeg = MathUtil.inputModulus(getHorizontalTotalShootingAngle(), 0.0, 360.0);
+        totalHorizontal.setAngle(totalHorizDeg);
 
-        // --- Visualization updates ---
-        // Show the desired absolute shooting angle computed by the manager
-        // (total horizontal) and the original raw angle to the hub so you can
-        // visually compare them.
-        totalHorizontal.setAngle(getHorizontalTotalShootingAngle());
+        double rawAngleDeg = Math.toDegrees(fieldRelativeAngleToHub);
+        double smoothAngleDeg = unwrapAngle(rawAngleDeg);
+        originalHorizontal.setAngle(smoothAngleDeg);
 
-        // original angle to hub (field-relative) in degrees
-        originalHorizontal.setAngle(Math.toDegrees(fieldRelativeAngleToHub));
-
-        // Compute robot field-frame velocity (match ShootingManager conversion).
         var robotRotation = pose.getRotation();
         double cosR = Math.cos(robotRotation.getRadians());
         double sinR = Math.sin(robotRotation.getRadians());
@@ -154,21 +151,23 @@ public class ShooterSim extends ShooterIO {
         double vyField = speeds.vxMetersPerSecond * sinR + speeds.vyMetersPerSecond * cosR;
 
         double robotSpeed = Math.hypot(vxField, vyField);
-        double robotAngleDeg = Math.toDegrees(Math.atan2(vyField, vxField));
+        double robotAngleDeg = (Math.toDegrees(Math.atan2(vyField, vxField)) + 360) % 360;
         robotVel.setAngle(robotAngleDeg);
-        // Scale the length for visualization (clamp to a reasonable size)
         robotVel.setLength(Math.min(1.5, robotSpeed * 0.25));
 
-        // Shot velocity vector: angle uses the manager's total horizontal angle,
-        // length is proportional to computed launch velocity.
         double launch = getLaunchVelocity();
         shotVel.setAngle(getHorizontalTotalShootingAngle());
         shotVel.setLength(Math.min(1.5, Math.abs(launch) * 0.075));
       } catch (Exception ex) {
-        // Defensive: do not let simulation UI break on unexpected errors. Log and continue.
         Logger.recordOutput("Shooter/Sim Error", ex.toString());
       }
     }
+  }
+
+  /** Computes the shortest angular difference from current to target in degrees [-180,180] */
+  /** Computes the shortest angular difference from current to target in degrees [-180,180] */
+  private double angleDifferenceDeg(double target, double current) {
+    return MathUtil.inputModulus(target - current, -180.0, 180.0);
   }
 
   @Override
