@@ -31,11 +31,9 @@ public class TurretConfidenceUtil {
     // Distance to target calculated with field-relative coordinates
     double distance = pose.getTranslation().getDistance(TARGET_POSITION);
 
-    // Time of flight (simple model, no air resistance, shot is flat, shooter velocity is constant)
+    // Time of flight calculation based on distance and current velocity
     double timeOfFlight =
-        ShootingConstants.getTimeOfFlight(
-            ShootingUtil.getApproximateVirtualDistanceToHub(
-                pose, new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond)));
+        ShootingConstants.getTimeOfFlight(ShootingUtil.getVirtualDistanceToTarget(pose, speeds));
 
     // Calculate lateral velocity of the robot with the x and y velocity
     double lateralVelocity = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
