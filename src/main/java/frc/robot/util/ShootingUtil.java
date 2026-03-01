@@ -161,7 +161,7 @@ public class ShootingUtil {
     double lookaheadDistance = turretPos.getDistance(goalPose.getTranslation());
 
     for (int i = 0; i < 20; i++) {
-      double timeOfFlight = ShootingConstants.getTimeOfFlight(lookaheadDistance);
+      double timeOfFlight = ShootingMaps.getTimeOfFlight(lookaheadDistance);
       futureTurretPos = turretPos.plus(fieldVelocity.times(timeOfFlight));
       lookaheadDistance = futureTurretPos.getDistance(goalPose.getTranslation());
     }

@@ -51,15 +51,6 @@ public final class Constants {
 
   public static final int INTAKE_MOTOR_ID = 16;
 
-  // TODO: correct numbers with real hardware
-  public static final double SHOOTER_HOOD_REVS_PER_DEG = 1;
-  public static final double SHOOTER_TURRET_REVS_PER_DEG = 1;
-  public static final double SHOOTER_HOOD_REVS_TOLERANCE = 0;
-  public static final double SHOOTER_TURRET_REVS_TOLERANCE = 0;
-  public static final double SHOOTER_RPS_TOLERANCE = 0;
-
-  public static final int INTAKE_MOTOR_ID = 16;
-
   public static final double SHOOTER_HOOD_REVS_PER_DEG =
       (4.0 * (24.0 / 15.0) * (175.0 / 10.0)) / 360.0; // TODO: confirm
   public static final double SHOOTER_TURRET_REVS_PER_DEG =
@@ -129,6 +120,23 @@ public final class Constants {
   // at what confidence is it considered "confident" instead of "doubtful"
   public static final double CONFIDENCE_THRESHOLD = 0.5;
 
+  public enum ShiftOwner {
+    BLUE,
+    RED,
+    BOTH,
+  }
+
+  public enum Mode {
+    /** Running on a real robot. */
+    REAL,
+
+    /** Running a physics simulator. */
+    SIM,
+
+    /** Replaying from a log file. */
+    REPLAY
+  }
+
   public class ShootingConstants {
 
     /*
@@ -192,22 +200,5 @@ public final class Constants {
 
     /** Conversion factor from degrees to radians */
     public static final double DEG_TO_RAD = Math.PI / 180.0;
-  }
-
-  public enum ShiftOwner {
-    BLUE,
-    RED,
-    BOTH,
-  }
-
-  public enum Mode {
-    /** Running on a real robot. */
-    REAL,
-
-    /** Running a physics simulator. */
-    SIM,
-
-    /** Replaying from a log file. */
-    REPLAY
   }
 }

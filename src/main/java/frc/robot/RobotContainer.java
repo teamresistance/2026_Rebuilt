@@ -10,16 +10,12 @@ import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.Constants;
-import frc.robot.Constants.ShootingConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.HoppertCommand;
 import frc.robot.commands.IdleShooterCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.commands.ToggleIntakeCommand;
 import frc.robot.generated.TunerConstants;
-import frc.robot.input.KeyboardHID;
-import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.climber.ClimberReal;
 import frc.robot.subsystems.climber.ClimberSim;
@@ -40,7 +36,7 @@ import frc.robot.subsystems.vision.*;
 import frc.robot.util.BumpUtil;
 import frc.robot.util.OtherUtil;
 import frc.robot.util.ShiftUtil;
-import frc.robot.util.SimulationAndState;
+import frc.robot.util.ShootingUtil;
 import java.io.IOException;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -71,31 +67,23 @@ public class RobotContainer {
 
   // Controller
   private final CommandXboxController driver = new CommandXboxController(0);
-  // Optional keyboard HID (captures global key events). Intended for SIM.
-  private final KeyboardHID keyboard = new KeyboardHID(0);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
   private final SendableChooser<String> manualShiftAssigner = new SendableChooser<>();
 
   // bump zone and prebuilt commands
-  private Trigger inBumpZone;
-  private Command driveAtAngleForBump;
-  private Command driveAtLimitedSpeed;
-
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
-  public RobotContainer() {
-    ShootingMaps.configureShootingMaps();
   private final Trigger inBumpZone;
   private final Command driveAtAngleForBump;
   private final Command driveAtLimitedSpeed;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+
     drive = configureDrive();
     vision = configureAprilTagVision();
     configureNamedCommands();
-    ShootingConstants.configureShootingConstants();
+    ShootingMaps.configureShootingMaps();
 
     switch (Constants.CURRENT_MODE) {
       case REAL:
@@ -106,7 +94,6 @@ public class RobotContainer {
         break;
       case SIM:
         shooter = new ShooterSim(drive::getPose, drive::getChassisSpeeds);
-        shooter = new ShooterSim();
         hoppert = new HoppertSim();
         climber = new ClimberSim();
         intake = new IntakeSim();
@@ -234,22 +221,6 @@ public class RobotContainer {
     };
   }
 
-  private void configureLEDS() {
-    // ready / not ready leds, does not lock
-    new Trigger(() -> !shooter.atShootingSetpoints())
-        .whileFalse(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.NOT_READY, false)))
-        .whileTrue(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.READY, false)));
-
-    // shooting / passing indicators, unlocks when unpressed
-    driver
-        .rightTrigger()
-        .and(() -> SimulationAndState.getShootingType(drive::getPose) == 0)
-        .whileTrue(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.SHOOTING, true)));
-    driver
-        .rightTrigger()
-        .and(() -> SimulationAndState.getShootingType(drive::getPose) == 1)
-        .whileTrue(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.PASSING, true)));
-    driver.rightTrigger().onFalse(Commands.runOnce(leds::unlock));
   /** Sets up LEDs and controller rumbles */
   private void configureDriverFeedback() {
 
@@ -311,45 +282,6 @@ public class RobotContainer {
     // RUMBLE when 5s from next shift
     new Trigger(ShiftUtil::nearNextShift)
         .onTrue(
-            new WaitCommand(3)
-                .andThen(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.ENDGAME, true)))
-                .andThen(new WaitCommand(3))
-                .andThen(Commands.runOnce(leds::unlock)));
-
-    // when shift is 5s from now, shift LED animation for 3 seconds, color depends on who gets it
-    // will be ours
-    new Trigger(() -> ShiftUtil.isOurs(ShiftUtil.getNextShift()) && ShiftUtil.nearNextShift())
-        .onTrue(
-            Commands.runOnce(leds::unlock)
-                .andThen(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.SHIFTING_US, true)))
-                .andThen(new WaitCommand(3))
-                .andThen(Commands.runOnce(leds::unlock)));
-
-    // will not be ours
-    new Trigger(() -> !ShiftUtil.isOurs(ShiftUtil.getNextShift()) && ShiftUtil.nearNextShift())
-        .onTrue(
-            Commands.runOnce(leds::unlock)
-                .andThen(
-                    Commands.runOnce(() -> leds.setMode(Constants.LEDMode.SHIFTING_THEM, true)))
-                .andThen(new WaitCommand(3))
-                .andThen(Commands.runOnce(leds::unlock)));
-
-    // bump rotate indicator, will stay on for 1 second OR instantly stop if you leave the bump zone
-    driver
-        .y()
-        .negate()
-        .and(inBumpZone)
-        .onTrue(
-            Commands.runOnce(leds::unlock)
-                .andThen(Commands.runOnce(() -> leds.setMode(Constants.LEDMode.BUMP, true)))
-                .andThen(new WaitCommand(1).andThen(Commands.runOnce(leds::unlock))));
-
-    // when not in bump zone BUT bump leds are on, unlock leds. prevents unlocking other states when
-    // leaving bump zone
-    inBumpZone
-        .negate()
-        .and(() -> leds.getMode() == Constants.LEDMode.BUMP)
-        .onTrue(Commands.runOnce(leds::unlock));
             Commands.runOnce(() -> driver.setRumble(GenericHID.RumbleType.kBothRumble, 1))
                 .andThen(new WaitCommand(1))
                 .andThen(
@@ -361,16 +293,9 @@ public class RobotContainer {
   private void configureButtonBindings() {
 
     // Normal field-relative drive
-    // Combine controller and keyboard inputs so both can drive the robot simultaneously.
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
-            drive,
-            () -> Math.max(-1.0, Math.min(1.0, -driver.getLeftY() + keyboard.getRawAxis(0))),
-            () -> Math.max(-1.0, Math.min(1.0, -driver.getLeftX() + keyboard.getRawAxis(1))),
-            () -> Math.max(-1.0, Math.min(1.0, -driver.getRightX() + keyboard.getRawAxis(2)))));
-
-    // have hopper automatically deciding when to run or not to run
-    hoppert.setDefaultCommand(new HoppertCommand(hoppert, shooter));
+            drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
 
     // have hopper automatically deciding when to run or not to run
     hoppert.setDefaultCommand(new HoppertCommand(hoppert, shooter));

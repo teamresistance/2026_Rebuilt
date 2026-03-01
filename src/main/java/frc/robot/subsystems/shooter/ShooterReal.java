@@ -10,6 +10,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import frc.robot.Constants;
 import frc.robot.util.Conversions;
+import frc.robot.util.ShootingUtil;
 import org.littletonrobotics.junction.Logger;
 
 public class ShooterReal extends ShooterIO {

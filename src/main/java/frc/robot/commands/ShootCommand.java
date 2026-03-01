@@ -24,20 +24,5 @@ public class ShootCommand extends Command {
 
     Logger.recordOutput("Shooter/Desired Angular Velocity", ShooterIO.getDesiredAngularVelocity());
 
-    // TODO: all of these
-    //
-    // It was initially said: Control the feeder based on the RPS being good/bad and the turret and
-    // hood being ready
-    // However: maximum RPS is calculated to be about 100 rad/s, about 955 RPM, which << 5000 RPM,
-    // the maximum sustained flywheel speed.
-    //
-    // It was initially said: if the virtual pose is FAR out of the alliance zone (aka the balls
-    // will NOT make it
-    //                        in under any circumstances), some way to stop shooting.
-    // However: the virtual pose represents the pose after about 0.07s. At a maximum of 5 ft/s, the
-    // robot only moves about 10cm.
-
-    Logger.recordOutput("Shooter/Virtual Distance to Hub", distance);
-
   }
 }
