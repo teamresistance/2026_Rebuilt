@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.drive.SwerveDriveIO;
 import frc.robot.util.ShiftUtil;
 import frc.robot.util.TurretConfidenceUtil;
 import org.littletonrobotics.junction.LogFileUtil;
@@ -159,8 +160,8 @@ public class Robot extends LoggedRobot {
       ShiftUtil.assignShifts(robotContainer.getShiftChosen());
     }
 
-    // Calculate and update the shot confidence value from the utility class
-    SmartDashboard.putNumber("Shot Confidence", turretConfidenceUtil.calculateConfidence());
+    // Calculate and update the shot confidence value from the utility class and publish it to the dashboard for operator awareness
+    SmartDashboard.putNumber("Shot Confidence", TurretConfidenceUtil.calculateConfidence(robotContainer.getDrive()));
   }
 
   /** This function is called once when test mode is enabled. */

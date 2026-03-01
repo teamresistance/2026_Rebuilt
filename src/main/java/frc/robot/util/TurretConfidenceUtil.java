@@ -8,21 +8,15 @@ import frc.robot.subsystems.shooter.ShootingConstants;
 
 public class TurretConfidenceUtil {
 
-  private SwerveDriveIO drive; // Default to real drive, can be overridden for testing
-
-  public void instantiateDrive(SwerveDriveIO drive) {
-    this.drive = drive; // instantiate the drive subsystem for use in confidence calculations
-  }
-
   // TODO: Tune the standard deviation to the robot's accuracy
-  private final double ERROR_STD_DEV = 1.0;
+  private final static double ERROR_STD_DEV = 1.0;
 
   // Call this in Robot.java to update confidence
-  public double calculateConfidence() {
+  public static double calculateConfidence(SwerveDriveIO drive) {
 
     // Get current robot pose and velocity
     Pose2d pose = drive.getPose();
-    ChassisSpeeds speeds = drive.getChassisSpeeds();
+    ChassisSpeeds speeds = drive.getChassisSpeedsFieldRelative();
 
     // Update target position based on current robot pose
     Translation2d TARGET_POSITION =
