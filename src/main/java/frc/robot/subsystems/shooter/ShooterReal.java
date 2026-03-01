@@ -68,14 +68,14 @@ public class ShooterReal implements ShooterIO {
             .withSlot0(new Slot0Configs().withKP(1).withKI(0).withKD(0).withKS(0))
             .withMotionMagic(
                 new MotionMagicConfigs()
-                    .withMotionMagicAcceleration(50)
-                    .withMotionMagicCruiseVelocity(10))
+                    .withMotionMagicAcceleration(150)
+                    .withMotionMagicCruiseVelocity(1000))
             .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
-                    .withStatorCurrentLimit(0)
+                    .withStatorCurrentLimit(40)
                     .withStatorCurrentLimitEnable(true)
-                    .withSupplyCurrentLimit(0)
+                    .withSupplyCurrentLimit(40)
                     .withSupplyCurrentLimitEnable(true))
             .withFeedback(
                 new FeedbackConfigs().withRemoteCANcoder(turretEncoder).withRotorToSensorRatio(20));
