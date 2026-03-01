@@ -253,14 +253,19 @@ public class RobotContainer {
                 () -> {
                   double confidence = TurretConfidenceUtil.calculateConfidence(drive);
                   int framerate =
-                      (confidence > 75.0)
-                          ? 6 // higher confidence = lower framerate
-                          : (confidence > 50.0)
-                              ? 8 // medium framerate for medium confidence
-                              : (confidence > 25.0)
-                                  ? 9 // low framerate for low confidence
-                                  : 10; // higher framerate for lower confidence (up to 9 for very
-                  // low confidence)
+                      (confidence > 90.0)
+                          ? 10 // very high framerate for very high confidence
+                          : (confidence > 80.0)
+                              ? 9
+                              : (confidence > 70.0)
+                                  ? 8
+                                  : (confidence > 60.0)
+                                      ? 7
+                                      : (confidence > 50.0)
+                                          ? 6
+                                          : (confidence > 40.0)
+                                              ? 5
+                                              : 4; // very low framerate for very low confidence
                   return framerate;
                 });
 
