@@ -26,6 +26,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
  */
 public class Robot extends LoggedRobot {
   private final RobotContainer robotContainer;
+  private final TurretConfidenceUtil turretConfidenceUtil;
   private Command autonomousCommand;
 
   public Robot() {
@@ -76,6 +77,7 @@ public class Robot extends LoggedRobot {
     }
 
     robotContainer = new RobotContainer();
+    turretConfidenceUtil = new TurretConfidenceUtil();
   }
 
   @Override
@@ -156,10 +158,9 @@ public class Robot extends LoggedRobot {
     if (!shiftsAssigned) {
       ShiftUtil.assignShifts(robotContainer.getShiftChosen());
     }
-
-    TurretConfidenceUtil.confidence = TurretConfidenceUtil.calculateConfidence();
+    
     // Calculate and update the shot confidence value from the utility class
-    SmartDashboard.putNumber("Shot Confidence", TurretConfidenceUtil.confidence);
+    SmartDashboard.putNumber("Shot Confidence", turretConfidenceUtil.calculateConfidence());
   }
 
   /** This function is called once when test mode is enabled. */
