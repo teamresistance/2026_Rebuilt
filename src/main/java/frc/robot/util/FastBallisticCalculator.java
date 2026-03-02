@@ -21,9 +21,6 @@ public final class FastBallisticCalculator {
   /** Vertical velocity component (m/s) - gravitational component of projectile */
   private static final double VY = ShootingConstants.VERTICAL_VELOCITY_COMPONENT;
 
-  /** Square of vertical velocity component (VY^2) - used for total velocity calculations */
-  private static final double VY2 = ShootingConstants.VERTICAL_VELOCITY_COMPONENT_SQUARED;
-
   /** Mass coefficient (kg) - affects drag acceleration calculations */
   public static final double M = ShootingConstants.FUEL_MASS;
 
@@ -50,17 +47,8 @@ public final class FastBallisticCalculator {
    * =======================
    */
 
-  /** Final total launch velocity magnitude (m/s) */
-  public static double vTotalNew;
-
-  /** Vertical elevation angle above the floor (degrees) */
-  public static double thetaDeg;
-
   /** Floor azimuth (degrees) - absolute angle of the target in the floor frame */
   public static double floorAzimuthDeg;
-
-  /** Required correction to the floor azimuth (degrees) */
-  public static double deltaFloorAngleDeg;
 
   /** For debug checking */
   public static double vxFloor;
@@ -68,6 +56,17 @@ public final class FastBallisticCalculator {
   public static double vyFloor;
 
   public static Pose2d robotPose;
+
+  private static final int RK_STEPS = 30; // Increased for sub-centimeter precision
+  private static final int SOLVE_ITERS = 3;
+   private static final double dt = T / RK_STEPS;
+   private static final double G = 9.806;
+
+  public record BallisticSolution(
+    double launchSpeed,
+    double hoodAngleDeg,
+    double deltaAzimuthDeg
+) {}
 
   /**
    * Computes the required projectile launch parameters while compensating for robot motion.
@@ -84,7 +83,7 @@ public final class FastBallisticCalculator {
    * @param v_x robot floor velocity in the X direction (m/s)
    * @param v_y robot floor velocity in the Y direction (m/s)
    */
-  public static void computeBallistics(double D, double floorAzimuthDeg, double v_x, double v_y) {
+  public static BallisticSolution computeBallistics(double D, double floorAzimuthDeg, double v_x, double v_y) {
     long start = System.nanoTime();
 
     double azRad = floorAzimuthDeg * ShootingConstants.DEG_TO_RAD;
@@ -100,10 +99,7 @@ public final class FastBallisticCalculator {
     double vzGuess = (VY + 0.5 * 9.806 * T); // Initial vertical guess to counter gravity
 
     // 3. Optimized Iterative Solve
-    final int RK_STEPS = 25; // Slight increase for precision
-    final int SOLVE_ITERS = 3;
     final double dt = T / RK_STEPS;
-    final double G = 9.806;
 
     for (int iter = 0; iter < SOLVE_ITERS; iter++) {
       double x = 0.0, y = 0.0, z = 0.0;
@@ -153,19 +149,11 @@ public final class FastBallisticCalculator {
     double vFloorCorrected = Math.sqrt(vxShooter * vxShooter + vyShooter * vyShooter);
 
     // vTotalNew now uses the specific vzGuess that hit the hub height
-    vTotalNew = Math.sqrt(vFloorCorrected * vFloorCorrected + vzGuess * vzGuess);
-    thetaDeg = Math.atan2(vzGuess, vFloorCorrected) * ShootingConstants.RAD_TO_DEG;
-    deltaFloorAngleDeg = (Math.atan2(vyShooter, vxShooter) - azRad) * ShootingConstants.RAD_TO_DEG;
+    double vTotalNew = Math.sqrt(vFloorCorrected * vFloorCorrected + vzGuess * vzGuess);
+    double thetaDeg = Math.atan2(vzGuess, vFloorCorrected) * ShootingConstants.RAD_TO_DEG;
+    double deltaFloorAngleDeg = (Math.atan2(vyShooter, vxShooter) - azRad) * ShootingConstants.RAD_TO_DEG;
 
-    // Debug: This should now point exactly at the Hub in your sim
-    double[] finalLanding =
-        predictLandingPose(vxGuess, vyGuess, VY, robotPose.getX(), robotPose.getY());
-    System.out.println(
-        (robotPose.getX() + finalLanding[0])
-            + " "
-            + (robotPose.getY() + finalLanding[1])
-            + " "
-            + finalLanding[2]);
+    return new BallisticSolution(vTotalNew, thetaDeg, deltaFloorAngleDeg);
   }
 
   /**
@@ -187,7 +175,7 @@ public final class FastBallisticCalculator {
    * @param a_x robot floor acceleration in the X direction (m/s²)
    * @param a_y robot floor acceleration in the Y direction (m/s²)
    */
-  public static void computeBallistics(
+  public static BallisticSolution computeBallistics(
       double D, double floorAzimuthDeg, double v_x, double v_y, double a_x, double a_y) {
     double azRad = floorAzimuthDeg * ShootingConstants.DEG_TO_RAD;
 
@@ -217,10 +205,6 @@ public final class FastBallisticCalculator {
     double vzGuess = (zHub / T) + (0.5 * 9.806 * T); // Simple gravity compensation
 
     // 3. SOLVE LOOP
-    final int RK_STEPS = 30; // Increased for sub-centimeter precision
-    final double dt = T / RK_STEPS;
-    final double G = 9.806;
-
     for (int iter = 0; iter < 4; iter++) { // 4 iterations to settle quadratic error
       double x = 0.0, y = 0.0, z = 0.0;
       double vx = vxGuess, vy = vyGuess, vz = vzGuess;
@@ -261,19 +245,14 @@ public final class FastBallisticCalculator {
     double vyShooter = vyGuess - vyRobotRelease;
 
     double vFloorFinal = Math.sqrt(vxShooter * vxShooter + vyShooter * vyShooter);
-    vTotalNew = Math.sqrt(vFloorFinal * vFloorFinal + vzGuess * vzGuess);
-    thetaDeg = Math.atan2(vzGuess, vFloorFinal) * ShootingConstants.RAD_TO_DEG;
+    double vTotalNew = Math.sqrt(vFloorFinal * vFloorFinal + vzGuess * vzGuess);
+    double thetaDeg = Math.atan2(vzGuess, vFloorFinal) * ShootingConstants.RAD_TO_DEG;
 
     // Azimuth is the angle the shooter must face relative to the field 0
     double azimuthShooter = Math.atan2(vyShooter, vxShooter);
-    deltaFloorAngleDeg = (azimuthShooter - azRad) * ShootingConstants.RAD_TO_DEG;
+    double deltaFloorAngleDeg = (azimuthShooter - azRad) * ShootingConstants.RAD_TO_DEG;
 
-    /**
-     * // DEBUG: Validate by simulating from field origin double[] landing =
-     * predictLandingPose(xRel, yRel, vxGuess, vyGuess, vzGuess); // These should now be nearly
-     * identical to xHubField, yHubField, zHub System.out.println( (robotPose.getX() + xRel +
-     * landing[0]) + " " + (robotPose.getY() + yRel + landing[1]) + " " + landing[2]);
-     */
+    return new BallisticSolution(vTotalNew, thetaDeg, deltaFloorAngleDeg);
   }
 
   /**

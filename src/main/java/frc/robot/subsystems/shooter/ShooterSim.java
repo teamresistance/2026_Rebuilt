@@ -96,7 +96,7 @@ public class ShooterSim extends ShooterIO {
     double error = angleDifferenceDeg(turretTargetDegs, turretAngleDegs);
     double turretOutput = turretPID.calculate(0, error); // PID expects setpoint=0 for error
     double hoodOutput = hoodPID.calculate(hoodAngleDegs, hoodTargetDegs);
-    acceleration = ShooterIO.getAcceleration();
+    acceleration = getAcceleration();
 
     turretOutput = MathUtil.clamp(turretOutput, -3.0, 3.0);
     hoodOutput = MathUtil.clamp(hoodOutput, -2.0, 2.0);
@@ -168,7 +168,6 @@ public class ShooterSim extends ShooterIO {
     }
   }
 
-  /** Computes the shortest angular difference from current to target in degrees [-180,180] */
   /** Computes the shortest angular difference from current to target in degrees [-180,180] */
   private double angleDifferenceDeg(double target, double current) {
     return MathUtil.inputModulus(target - current, -180.0, 180.0);

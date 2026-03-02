@@ -9,6 +9,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ShootingConstants;
 import frc.robot.util.FastBallisticCalculator;
 import frc.robot.util.MotorAdjustmentCalculator;
+import frc.robot.util.FastBallisticCalculator.BallisticSolution;
+
 import org.littletonrobotics.junction.Logger;
 
 public class ShooterIO extends SubsystemBase {
@@ -17,73 +19,73 @@ public class ShooterIO extends SubsystemBase {
    * Vertical (elevation) angle to set the shooter to, in degrees. Updated by {@link
    * #updateShootingParameters} after ballistic calculation.
    */
-  private static double verticalShootingAngle = 0;
+  private double verticalShootingAngle = 0;
 
   /**
    * Horizontal offset angle (floor-plane) to aim the shooter, in degrees. Accounts for lateral
    * offsets between robot heading and target after predicting motion during reload.
    */
-  private static double horizontalOffsetShootingAngle = 0;
+  private double horizontalOffsetShootingAngle = 0;
 
   /**
    * Total horizontal shooting angle (floor-plane) in degrees, combining the robot's current heading
    * and the required offset to aim at the target. This is the absolute angle the shooter should be
    * set to in the floor frame.
    */
-  private static double horizontalTotalShootingAngle = 0;
+  private double horizontalTotalShootingAngle = 0;
 
   /**
    * Computed launch velocity (m/s) required to reach the target using the current predicted range
    * and offsets. Obtained from {@code FastBallisticCalculator}.
    */
-  private static double launchVelocity = 0;
+  private double launchVelocity = 0;
 
   /**
    * Desired angular acceleration (rad/s^2) the shooter motor should apply to compensate for energy
    * lost during a shot. Computed by {@code MotorAdjustmentCalculator}.
    */
-  private static double desiredAngularAcceleration = 0;
+  private double desiredAngularAcceleration = 0;
 
   /**
    * Desired angular velocity of the shooter wheel after adjustment (rad/s) - target speed
    * post-launch. Computed by {@code MotorAdjustmentCalculator}.
    */
-  private static double desiredAngularVelocity = 0;
+  private double desiredAngularVelocity = 0;
 
   /**
    * Predicted straight-line distance (meters) to the hub after the reload delay. Used as an input
    * to ballistic calculations. Updated by {@link #predictDistanceAndAngleAfterReload}.
    */
-  private static double predictedDistanceToHubAfterReload = 0;
+  private double predictedDistanceToHubAfterReload = 0;
 
   /**
    * Predicted field-relative angle (radians) to the hub after the reload delay. This is the angle
    * in the robot's field coordinate frame and is used by the ballistic solver.
    */
-  private static double predictedFieldRelativeAngleToHubAfterReload = 0;
+  private double predictedFieldRelativeAngleToHubAfterReload = 0;
 
   /**
    * Time delay (seconds) from when a shot starts until the next ball is ready to be launched
    * (reload time). Used to predict where the robot/target will be at the time of the next shot.
    */
-  private static final double reloadTime = ShootingConstants.RELOAD_TIME;
+  private final double reloadTime = ShootingConstants.RELOAD_TIME;
 
   // 20ms loop
-  private static final double LOOP_DT = 0.02;
+  private final double LOOP_DT = 0.02;
 
-  private static Transform2d acceleration = new Transform2d();
+  private Transform2d acceleration = new Transform2d();
 
   // Maximum allowed change per second
-  private static final double MAX_HOOD_RATE_DEG_PER_SEC = 180.0;
-  private static final double MAX_TURRET_RATE_DEG_PER_SEC = 360.0;
-  private static final double MAX_LAUNCH_VELOCITY_RATE_MPS = 15.0;
+  private final double MAX_HOOD_RATE_DEG_PER_SEC = 180.0;
+  private final double MAX_TURRET_RATE_DEG_PER_SEC = 360.0;
+  private final double MAX_LAUNCH_VELOCITY_RATE_MPS = 15.0;
 
   // Derived per-cycle limits
-  private static final double MAX_HOOD_DELTA = MAX_HOOD_RATE_DEG_PER_SEC * LOOP_DT;
+  private final double MAX_HOOD_DELTA = MAX_HOOD_RATE_DEG_PER_SEC * LOOP_DT;
 
-  private static final double MAX_TURRET_DELTA = MAX_TURRET_RATE_DEG_PER_SEC * LOOP_DT;
+  private final double MAX_TURRET_DELTA = MAX_TURRET_RATE_DEG_PER_SEC * LOOP_DT;
 
-  private static final double MAX_LAUNCH_VELOCITY_DELTA = MAX_LAUNCH_VELOCITY_RATE_MPS * LOOP_DT;
+  private final double MAX_LAUNCH_VELOCITY_DELTA = MAX_LAUNCH_VELOCITY_RATE_MPS * LOOP_DT;
 
   private static double rateLimit(double current, double target, double maxDelta) {
     double delta = MathUtil.inputModulus(target - current, -180.0, 180.0);
@@ -107,7 +109,7 @@ public class ShooterIO extends SubsystemBase {
    * @param fieldRelativeAngleToHub current field-relative angle (radians) to the hub
    * @param chassisSpeeds current robot chassis speeds (m/s)
    */
-  public static void updateShootingParameters(
+  public void updateShootingParameters(
       double distanceToHub,
       double fieldRelativeAngleToHub,
       ChassisSpeeds chassisSpeeds,
@@ -133,20 +135,20 @@ public class ShooterIO extends SubsystemBase {
 
     // Compute ballistic solution for predicted range/angle using current robot
     // velocity in the field frame.
-    FastBallisticCalculator.computeBallistics(
+    BallisticSolution calculation = FastBallisticCalculator.computeBallistics(
         predictedDistanceToHubAfterReload,
         Math.toDegrees(predictedFieldRelativeAngleToHubAfterReload),
         vxField,
         vyField);
 
     // Compute the motor adjustment required to restore wheel energy after firing.
-    MotorAdjustmentCalculator.computeMotorAdjustment();
+    MotorAdjustmentCalculator.computeMotorAdjustment(calculation.launchSpeed());
 
     // Store outputs from the calculators into this manager's public fields.
-    double newVertical = FastBallisticCalculator.thetaDeg;
-    double newOffset = FastBallisticCalculator.deltaFloorAngleDeg;
+    double newVertical = calculation.hoodAngleDeg();
+    double newOffset = calculation.deltaAzimuthDeg();
     double newTotal = newOffset + Math.toDegrees(predictedFieldRelativeAngleToHubAfterReload);
-    double newLaunchVelocity = FastBallisticCalculator.vTotalNew;
+    double newLaunchVelocity = calculation.launchSpeed();
 
     // Apply rate limiting
     verticalShootingAngle = rateLimit(verticalShootingAngle, newVertical, MAX_HOOD_DELTA);
@@ -173,7 +175,7 @@ public class ShooterIO extends SubsystemBase {
     Logger.recordOutput("Shooting/DesiredAngularAcceleration", desiredAngularAcceleration);
   }
 
-  public static void updateShootingParameters(
+  public void updateShootingParameters(
       double distanceToHub,
       double fieldRelativeAngleToHub,
       ChassisSpeeds chassisSpeeds,
@@ -194,7 +196,7 @@ public class ShooterIO extends SubsystemBase {
     double vyField = chassisSpeeds.vxMetersPerSecond * sin + chassisSpeeds.vyMetersPerSecond * cos;
 
     double axField = acceleration.getX() * cos - acceleration.getY() * sin;
-    double ayField = acceleration.getY() * sin + acceleration.getX() * cos;
+    double ayField = acceleration.getX() * sin + acceleration.getY() * cos;
 
     // Predict where the robot/target will be after the reload delay so ballistic
     // calculations account for robot motion during the reload. Use the field
@@ -203,7 +205,7 @@ public class ShooterIO extends SubsystemBase {
 
     // Compute ballistic solution for predicted range/angle using current robot
     // velocity in the field frame.
-    FastBallisticCalculator.computeBallistics(
+    BallisticSolution calculation = FastBallisticCalculator.computeBallistics(
         predictedDistanceToHubAfterReload,
         Math.toDegrees(predictedFieldRelativeAngleToHubAfterReload),
         vxField,
@@ -212,13 +214,13 @@ public class ShooterIO extends SubsystemBase {
         ayField);
 
     // Compute the motor adjustment required to restore wheel energy after firing.
-    MotorAdjustmentCalculator.computeMotorAdjustment();
+    MotorAdjustmentCalculator.computeMotorAdjustment(calculation.launchSpeed());
 
     // Store outputs from the calculators into this manager's public fields.
-    double newVertical = FastBallisticCalculator.thetaDeg;
-    double newOffset = FastBallisticCalculator.deltaFloorAngleDeg;
+    double newVertical = calculation.hoodAngleDeg();
+    double newOffset = calculation.deltaAzimuthDeg();
     double newTotal = newOffset + Math.toDegrees(predictedFieldRelativeAngleToHubAfterReload);
-    double newLaunchVelocity = FastBallisticCalculator.vTotalNew;
+    double newLaunchVelocity = calculation.launchSpeed();
 
     // Apply rate limiting
     verticalShootingAngle = rateLimit(verticalShootingAngle, newVertical, MAX_HOOD_DELTA);
@@ -248,43 +250,43 @@ public class ShooterIO extends SubsystemBase {
   /**
    * @return most recently computed vertical shooting angle (degrees)
    */
-  public static double getVerticalShootingAngle() {
+  public double getVerticalShootingAngle() {
     return verticalShootingAngle;
   }
 
-  public static void setAcceleration(Transform2d accel) {
+  public void setAcceleration(Transform2d accel) {
     acceleration = accel;
   }
 
-  public static Transform2d getAcceleration() {
+  public Transform2d getAcceleration() {
     return acceleration;
   }
 
   /**
    * @return most recently computed horizontal offset shooting angle (degrees)
    */
-  public static double getHorizontalOffsetShootingAngle() {
+  public double getHorizontalOffsetShootingAngle() {
     return horizontalOffsetShootingAngle;
   }
 
   /**
    * @return most recently computed launch velocity (m/s)
    */
-  public static double getLaunchVelocity() {
+  public double getLaunchVelocity() {
     return launchVelocity;
   }
 
   /**
    * @return most recently computed desired angular acceleration for the shooter motor (rad/s^2)
    */
-  public static double getDesiredAngularAcceleration() {
+  public double getDesiredAngularAcceleration() {
     return desiredAngularAcceleration;
   }
 
   /**
    * @return most recently computed desired angular velocity for the shooter motor (rad/s)
    */
-  public static double getDesiredAngularVelocity() {
+  public double getDesiredAngularVelocity() {
     return desiredAngularVelocity;
   }
 
@@ -301,7 +303,7 @@ public class ShooterIO extends SubsystemBase {
    * @param currentDistanceToHub current straight-line distance to the hub (meters)
    * @param currentAngleToHub current field-relative angle to the hub (radians)
    */
-  public static void predictDistanceAndAngleAfterReload(
+  public void predictDistanceAndAngleAfterReload(
       double vxField, double vyField, double currentDistanceToHub, double currentAngleToHub) {
     // Represent the current hub position in the field frame using the
     // provided distance and field-relative angle. From there, apply the robot's
@@ -333,21 +335,21 @@ public class ShooterIO extends SubsystemBase {
   /**
    * @return the predicted distance to the hub after reload (meters)
    */
-  public static double getPredictedDistanceToHubAfterReload() {
+  public double getPredictedDistanceToHubAfterReload() {
     return predictedDistanceToHubAfterReload;
   }
 
   /**
    * @return the predicted field-relative angle to the hub after reload (radians)
    */
-  public static double getPredictedFieldRelativeAngleToHubAfterReload() {
+  public double getPredictedFieldRelativeAngleToHubAfterReload() {
     return predictedFieldRelativeAngleToHubAfterReload;
   }
 
   /**
    * @return the total horizontal shooting angle (degrees)
    */
-  public static double getHorizontalTotalShootingAngle() {
+  public double getHorizontalTotalShootingAngle() {
     return horizontalTotalShootingAngle;
   }
 

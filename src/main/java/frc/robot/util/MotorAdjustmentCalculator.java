@@ -59,8 +59,8 @@ public class MotorAdjustmentCalculator {
    * <p>The computed angular acceleration is stored in {@link #desiredAngularAcceleration} and
    * relevant metrics are printed to standard output.
    */
-  public static void computeMotorAdjustment() {
-    v_out = FastBallisticCalculator.vTotalNew;
+  public static void computeMotorAdjustment(double launchSpeed) {
+    v_out = launchSpeed;
 
     long start = System.nanoTime();
 

@@ -19,8 +19,8 @@ public class ShootCommand extends Command {
   @Override
   public void execute() {
 
-    shooter.runFlywheelAtRPS(Units.radiansToRotations(ShooterIO.getDesiredAngularVelocity()));
+    shooter.runFlywheelAtRPS(Units.radiansToRotations(shooter.getDesiredAngularVelocity()));
 
-    Logger.recordOutput("Shooter/Desired Angular Velocity", ShooterIO.getDesiredAngularVelocity());
+    Logger.recordOutput("Shooter/Desired Angular Velocity", shooter.getDesiredAngularVelocity());
   }
 }

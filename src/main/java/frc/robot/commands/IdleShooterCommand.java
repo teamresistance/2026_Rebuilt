@@ -24,9 +24,10 @@ public class IdleShooterCommand extends Command {
   @Override
   public void execute() {
     Pose2d robotPose = drive.getPose();
-    double launchSpeed = ShooterIO.getLaunchVelocity();
-    double turretAngleRad = Math.toRadians(ShooterIO.getHorizontalTotalShootingAngle());
-    double hoodAngleRad = Math.toRadians(ShooterIO.getVerticalShootingAngle());
+    double launchSpeed = shooter.getLaunchVelocity();
+    double turretAngleDeg = shooter.getHorizontalTotalShootingAngle();
+double turretAngleRad = Math.toRadians(turretAngleDeg);
+    double hoodAngleRad = Math.toRadians(shooter.getVerticalShootingAngle());
     Transform2d accel = drive.getAcceleration();
 
     // 1. PREDICT RELEASE POSE (The "Muzzle" position)
@@ -67,7 +68,7 @@ public class IdleShooterCommand extends Command {
         "Shooter/Visuals/ShotTrajectoryLine", new Pose2d[] {releasePose, predictedLanding});
 
     // Existing hardware targets
-    shooter.setTurretTarget(Math.toDegrees(turretAngleRad));
+    shooter.setTurretTarget(turretAngleDeg);
     shooter.setHoodTarget(Math.toDegrees(hoodAngleRad));
   }
 }
