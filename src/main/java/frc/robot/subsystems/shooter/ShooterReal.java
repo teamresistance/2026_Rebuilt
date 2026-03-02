@@ -78,7 +78,11 @@ public class ShooterReal implements ShooterIO {
                     .withSupplyCurrentLimit(40)
                     .withSupplyCurrentLimitEnable(true))
             .withFeedback(
-                new FeedbackConfigs().withRemoteCANcoder(turretEncoder).withRotorToSensorRatio(20));
+                new FeedbackConfigs()
+                    .withFusedCANcoder(turretEncoder)
+                    .withRotorToSensorRatio(5 * 5) // 5:1 and 5:1 planetary to where the encoder
+                    .withSensorToMechanismRatio(
+                        1 / 3.2)); // turret azimuth is a 25:80, encoder on smaller gear
     turretMotor.getConfigurator().apply(turretConfig);
 
     TalonFXConfiguration flywheelConfig =
