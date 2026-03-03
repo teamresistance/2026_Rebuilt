@@ -337,7 +337,6 @@ public class RobotContainer {
 
     driver.rightTrigger().whileTrue(new ShootCommand(drive, shooter));
     driver.rightTrigger().whileTrue(driveAtLimitedSpeed);
-
     // left trigger toggles intake
     driver.leftTrigger().onTrue(new ToggleIntakeCommand(intake));
   }

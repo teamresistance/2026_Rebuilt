@@ -26,7 +26,7 @@ public class IdleShooterCommand extends Command {
     Pose2d robotPose = drive.getPose();
     double launchSpeed = shooter.getLaunchVelocity();
     double turretAngleDeg = shooter.getHorizontalTotalShootingAngle();
-double turretAngleRad = Math.toRadians(turretAngleDeg);
+    double turretAngleRad = Math.toRadians(turretAngleDeg);
     double hoodAngleRad = Math.toRadians(shooter.getVerticalShootingAngle());
     Transform2d accel = drive.getAcceleration();
 

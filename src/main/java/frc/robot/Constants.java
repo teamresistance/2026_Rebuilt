@@ -189,6 +189,9 @@ public final class Constants {
     // adjust wheel speed after a shot
     public static final double SHOOTER_MOMENT_OF_INERTIA = 0.00126;
 
+    public static final double SHOOTER_RADIUS = 0.05; // (meters) TODO: actually measure the radius
+    public static final double SHOOTER_EFFICIENCY = 0.60; // worst-case placeholder. TODO: empirically calculate
+
     // TODO: correct numbers with real hardware
     // Resting angular velocity of the shooter wheel (rad/s) - target steady-state
     // speed for

@@ -8,36 +8,18 @@ import frc.robot.Constants.ShootingConstants;
  *
  * <p>This class calculates the required angular acceleration of the launcher wheel needed to
  * maintain consistent performance after each projectile is fired, accounting for: - Energy lost
- * from fuel ejection - Moment of inertia of the launcher mechanism - Required upswing velocity
- * before launch - Resting angular velocity of the wheel
- *
- * <p>The computation uses rotational dynamics equations to determine the motor acceleration
- * required to restore the wheel to its resting speed within a specified time interval.
+ * from fuel ejection
  */
 public class MotorAdjustmentCalculator {
 
-  // Constants
-  /** Moment of inertia of launcher wheel (kg·m²) - rotational mass property */
-  private static final double I = ShootingConstants.SHOOTER_MOMENT_OF_INERTIA;
-
-  /** Mass of projectile fuel (kg) - affects energy loss calculations */
-  private static final double m = ShootingConstants.FUEL_MASS;
-
-  /** Time interval for motor adjustment (seconds) - time to recover from launch */
-  public static final double t = ShootingConstants.RELOAD_TIME;
-
-  /** Upswing velocity of projectile before launch (m/s) - pre-launch speed requirement */
-  private static final double v_up = ShootingConstants.UPSWING_VELOCITY;
-
-  /** Resting angular velocity of launcher wheel (rad/s) - target steady-state speed */
-  private static final double restingAngularVelocity = 0;
+  public static double restingAngularVelocity = ShootingConstants.FREE_ANGULAR_VELOCITY;
+  public static double R = ShootingConstants.SHOOTER_RADIUS;
+  public static double E = ShootingConstants.SHOOTER_EFFICIENCY;
+  public static double T = ShootingConstants.RELOAD_TIME;
 
   /* =======================
    * Output State Variables
    * ======================= */
-
-  /** Launch velocity of projectile (m/s) - received from ballistic calculator */
-  private static double v_out = 0;
 
   /** Required angular acceleration of launcher motor (rad/s²) - compensates for energy loss */
   public static double desiredAngularAcceleration = 0;
@@ -60,16 +42,12 @@ public class MotorAdjustmentCalculator {
    * relevant metrics are printed to standard output.
    */
   public static void computeMotorAdjustment(double launchSpeed) {
-    v_out = launchSpeed;
 
     long start = System.nanoTime();
 
-    desiredAngularVelocity =
-        Math.sqrt(
-            restingAngularVelocity * restingAngularVelocity
-                + m / I * (v_out * v_out - v_up * v_up));
+    desiredAngularVelocity = launchSpeed / (E * R) / 2 / Math.PI;
 
-    desiredAngularAcceleration = (desiredAngularVelocity - restingAngularVelocity) / t;
+    desiredAngularAcceleration = (desiredAngularVelocity - restingAngularVelocity) / T;
 
     long end = System.nanoTime();
     // TODO: Log start/end times

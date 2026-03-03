@@ -59,14 +59,11 @@ public final class FastBallisticCalculator {
 
   private static final int RK_STEPS = 30; // Increased for sub-centimeter precision
   private static final int SOLVE_ITERS = 3;
-   private static final double dt = T / RK_STEPS;
-   private static final double G = 9.806;
+  private static final double dt = T / RK_STEPS;
+  private static final double G = 9.806;
 
   public record BallisticSolution(
-    double launchSpeed,
-    double hoodAngleDeg,
-    double deltaAzimuthDeg
-) {}
+      double launchSpeed, double hoodAngleDeg, double deltaAzimuthDeg) {}
 
   /**
    * Computes the required projectile launch parameters while compensating for robot motion.
@@ -83,7 +80,8 @@ public final class FastBallisticCalculator {
    * @param v_x robot floor velocity in the X direction (m/s)
    * @param v_y robot floor velocity in the Y direction (m/s)
    */
-  public static BallisticSolution computeBallistics(double D, double floorAzimuthDeg, double v_x, double v_y) {
+  public static BallisticSolution computeBallistics(
+      double D, double floorAzimuthDeg, double v_x, double v_y) {
     long start = System.nanoTime();
 
     double azRad = floorAzimuthDeg * ShootingConstants.DEG_TO_RAD;
@@ -151,7 +149,8 @@ public final class FastBallisticCalculator {
     // vTotalNew now uses the specific vzGuess that hit the hub height
     double vTotalNew = Math.sqrt(vFloorCorrected * vFloorCorrected + vzGuess * vzGuess);
     double thetaDeg = Math.atan2(vzGuess, vFloorCorrected) * ShootingConstants.RAD_TO_DEG;
-    double deltaFloorAngleDeg = (Math.atan2(vyShooter, vxShooter) - azRad) * ShootingConstants.RAD_TO_DEG;
+    double deltaFloorAngleDeg =
+        (Math.atan2(vyShooter, vxShooter) - azRad) * ShootingConstants.RAD_TO_DEG;
 
     return new BallisticSolution(vTotalNew, thetaDeg, deltaFloorAngleDeg);
   }

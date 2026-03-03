@@ -8,9 +8,8 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ShootingConstants;
 import frc.robot.util.FastBallisticCalculator;
-import frc.robot.util.MotorAdjustmentCalculator;
 import frc.robot.util.FastBallisticCalculator.BallisticSolution;
-
+import frc.robot.util.MotorAdjustmentCalculator;
 import org.littletonrobotics.junction.Logger;
 
 public class ShooterIO extends SubsystemBase {
@@ -135,11 +134,12 @@ public class ShooterIO extends SubsystemBase {
 
     // Compute ballistic solution for predicted range/angle using current robot
     // velocity in the field frame.
-    BallisticSolution calculation = FastBallisticCalculator.computeBallistics(
-        predictedDistanceToHubAfterReload,
-        Math.toDegrees(predictedFieldRelativeAngleToHubAfterReload),
-        vxField,
-        vyField);
+    BallisticSolution calculation =
+        FastBallisticCalculator.computeBallistics(
+            predictedDistanceToHubAfterReload,
+            Math.toDegrees(predictedFieldRelativeAngleToHubAfterReload),
+            vxField,
+            vyField);
 
     // Compute the motor adjustment required to restore wheel energy after firing.
     MotorAdjustmentCalculator.computeMotorAdjustment(calculation.launchSpeed());
@@ -205,13 +205,14 @@ public class ShooterIO extends SubsystemBase {
 
     // Compute ballistic solution for predicted range/angle using current robot
     // velocity in the field frame.
-    BallisticSolution calculation = FastBallisticCalculator.computeBallistics(
-        predictedDistanceToHubAfterReload,
-        Math.toDegrees(predictedFieldRelativeAngleToHubAfterReload),
-        vxField,
-        vyField,
-        axField,
-        ayField);
+    BallisticSolution calculation =
+        FastBallisticCalculator.computeBallistics(
+            predictedDistanceToHubAfterReload,
+            Math.toDegrees(predictedFieldRelativeAngleToHubAfterReload),
+            vxField,
+            vyField,
+            axField,
+            ayField);
 
     // Compute the motor adjustment required to restore wheel energy after firing.
     MotorAdjustmentCalculator.computeMotorAdjustment(calculation.launchSpeed());
