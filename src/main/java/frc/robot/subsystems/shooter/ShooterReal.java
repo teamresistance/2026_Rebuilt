@@ -49,9 +49,9 @@ public class ShooterReal implements ShooterIO {
             .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
-                    .withStatorCurrentLimit(0)
+                    .withStatorCurrentLimit(10)
                     .withStatorCurrentLimitEnable(true)
-                    .withSupplyCurrentLimit(0)
+                    .withSupplyCurrentLimit(10)
                     .withSupplyCurrentLimitEnable(true))
             .withSoftwareLimitSwitch(
                 new SoftwareLimitSwitchConfigs()
