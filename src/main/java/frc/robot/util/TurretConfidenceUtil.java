@@ -4,7 +4,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.subsystems.drive.SwerveDriveIO;
-import frc.robot.subsystems.shooter.ShootingConstants;
+import frc.robot.subsystems.shooter.ShootingMaps;
 
 public class TurretConfidenceUtil {
 
@@ -24,7 +24,7 @@ public class TurretConfidenceUtil {
 
     // Time of flight calculation based on distance and current velocity
     double timeOfFlight =
-        ShootingConstants.getTimeOfFlight(ShootingUtil.getVirtualDistanceToTarget(pose, speeds));
+        ShootingMaps.getTimeOfFlight(ShootingUtil.getVirtualDistanceToTarget(pose, speeds));
 
     // Calculate lateral velocity of the robot with the x and y velocity
     double lateralVelocity = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
