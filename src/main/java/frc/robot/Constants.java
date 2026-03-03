@@ -51,10 +51,9 @@ public final class Constants {
 
   public static final int INTAKE_MOTOR_ID = 16;
 
-  public static final double SHOOTER_HOOD_REVS_PER_DEG =
-      (4.0 * (24.0 / 15.0) * (175.0 / 10.0)) / 360.0; // TODO: confirm
+  public static final double SHOOTER_HOOD_REVS_PER_DEG = (4.0 * (175.0 / 10.0)) / 360.0;
   public static final double SHOOTER_TURRET_REVS_PER_DEG =
-      (5 * 4 * 3.2) / 360.0; // TODO: confirm planetary are correct
+      (5 * 5 * 3.2) / 360.0; // TODO: confirm planetary are correct
   public static final double SHOOTER_HOOD_REVS_TOLERANCE = 0.5; // TODO: better numbers
   public static final double SHOOTER_TURRET_REVS_TOLERANCE = 0.5;
   public static final double SHOOTER_RPS_TOLERANCE = 2;
@@ -65,7 +64,7 @@ public final class Constants {
   public static final double SHOOTER_TURRET_MIN_YAW = -170;
 
   public static final Transform2d ROBOT_TO_TURRET =
-      new Transform2d(Units.inchesToMeters(-1.38), Units.inchesToMeters(3.8), Rotation2d.kPi);
+      new Transform2d(Units.inchesToMeters(1.38), Units.inchesToMeters(3.8), Rotation2d.kPi);
   public static final double SHOOTING_APPROXIMATE_TOF = 1;
 
   public static final int CANDLE_ID = 32;
