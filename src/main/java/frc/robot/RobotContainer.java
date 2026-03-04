@@ -93,7 +93,9 @@ public class RobotContainer {
         intake = new IntakeReal();
         break;
       case SIM:
-        shooter = new ShooterSimCalc(drive::getPose, drive::getChassisSpeeds, Constants.CURRENT_SHOT_STYLE);
+        shooter =
+            new ShooterSimCalc(
+                drive::getPose, drive::getChassisSpeeds, Constants.CURRENT_SHOT_STYLE);
         hoppert = new HoppertSim();
         climber = new ClimberSim();
         intake = new IntakeSim();
@@ -227,7 +229,8 @@ public class RobotContainer {
                 "shooting/passing",
                 4,
                 () -> {
-                  boolean isShooting = ShootingUtil.SimulationAndState.getShootingType(drive::getPose) == 0;
+                  boolean isShooting =
+                      ShootingUtil.SimulationAndState.getShootingType(drive::getPose) == 0;
                   boolean isConfident =
                       TurretConfidenceUtil.calculateConfidence(drive)
                           > 75.0; // confidence threshold is greater than 75%
@@ -337,7 +340,8 @@ public class RobotContainer {
         .whileTrue(DriveCommands.goToTransform(drive, OtherUtil.getClimberAlignPos(false)));
 
     // auto-aim hood and turret always
-    shooter.setDefaultCommand(new IdleShooterCalcCommand(drive, shooter, Constants.CURRENT_SHOT_STYLE));
+    shooter.setDefaultCommand(
+        new IdleShooterCalcCommand(drive, shooter, Constants.CURRENT_SHOT_STYLE));
 
     // Switch to X pattern when X button is pressed
     driver.x().onTrue(Commands.runOnce(drive::stopWithX, drive));

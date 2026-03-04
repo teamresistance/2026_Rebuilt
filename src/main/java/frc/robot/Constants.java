@@ -18,7 +18,6 @@ import frc.robot.generated.TunerConstants;
  * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
  * on a roboRIO. Change the value of "simMode" to switch between "sim" (physics sim) and "replay"
  * (log replay from a file).
- *
  */
 public final class Constants {
 
@@ -175,7 +174,11 @@ public final class Constants {
     // motion
 
     private static double root_mg_over_k = Math.sqrt(FUEL_MASS * G / QUADRATIC_DRAG_COEFFICIENT);
-    public static final double VERTICAL_VELOCITY_COMPONENT = root_mg_over_k * (Math.exp(QUADRATIC_DRAG_COEFFICIENT * (HUB_HEIGHT - TURRET_HEIGHT) / FUEL_MASS) - Math.cos((1 / root_mg_over_k) * G * MINIMUM_TIME_OF_FLIGHT)) / (Math.sin((1 / root_mg_over_k) * G * MINIMUM_TIME_OF_FLIGHT));
+    public static final double VERTICAL_VELOCITY_COMPONENT =
+        root_mg_over_k
+            * (Math.exp(QUADRATIC_DRAG_COEFFICIENT * (HUB_HEIGHT - TURRET_HEIGHT) / FUEL_MASS)
+                - Math.cos((1 / root_mg_over_k) * G * MINIMUM_TIME_OF_FLIGHT))
+            / (Math.sin((1 / root_mg_over_k) * G * MINIMUM_TIME_OF_FLIGHT));
 
     // TODO: correct numbers with real hardware
     // Square of vertical velocity component (m^2/s^2) - used in total velocity
@@ -207,7 +210,8 @@ public final class Constants {
     public static final double SHOOTER_MOMENT_OF_INERTIA = 0.00126;
 
     public static final double SHOOTER_RADIUS = 0.05; // (meters) TODO: actually measure the radius
-    public static final double SHOOTER_EFFICIENCY = 0.60; // worst-case placeholder. TODO: empirically calculate
+    public static final double SHOOTER_EFFICIENCY =
+        0.60; // worst-case placeholder. TODO: empirically calculate
 
     // TODO: correct numbers with real hardware
     // Resting angular velocity of the shooter wheel (rad/s) - target steady-state

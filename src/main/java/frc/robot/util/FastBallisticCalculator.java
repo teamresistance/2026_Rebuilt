@@ -336,5 +336,4 @@ public final class FastBallisticCalculator {
     return desiredAngularVelocity;
     // TODO: Log start/end times
   }
-
 }

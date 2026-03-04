@@ -17,7 +17,8 @@ public class TurretConfidenceUtil {
     ChassisSpeeds speeds = drive.getChassisSpeedsFieldRelative();
 
     // Update target position based on current robot pose
-    Translation2d targetPosition = ShootingUtil.SimulationAndState.getShootingTarget(drive.getPose()).getTranslation();
+    Translation2d targetPosition =
+        ShootingUtil.SimulationAndState.getShootingTarget(drive.getPose()).getTranslation();
 
     // Distance to target calculated with field-relative coordinates
     double distance = pose.getTranslation().getDistance(targetPosition);

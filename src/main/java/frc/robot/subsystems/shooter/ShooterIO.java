@@ -1,12 +1,12 @@
 package frc.robot.subsystems.shooter;
 
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 
 public interface ShooterIO extends Subsystem {
 
   /**
-   * This is the instance of {@code ShootingPredictions} that should be referenced by other shooter classes.
+   * This is the instance of {@code ShootingPredictions} that should be referenced by other shooter
+   * classes.
    */
   static ShootingPredictions calculator = new ShootingPredictions();
 

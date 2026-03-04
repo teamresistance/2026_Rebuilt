@@ -1,7 +1,5 @@
 package frc.robot.subsystems.shooter;
 
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -10,10 +8,11 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.Constants.ShootingConstants;
 import frc.robot.util.FastBallisticCalculator;
 import frc.robot.util.FastBallisticCalculator.BallisticSolution;
+import org.littletonrobotics.junction.Logger;
 
 public class ShootingPredictions {
 
-      /**
+  /**
    * Vertical (elevation) angle to set the shooter to, in degrees. Updated by {@link
    * #updateShootingParameters} after ballistic calculation.
    */
@@ -108,11 +107,7 @@ public class ShootingPredictions {
       Pose2d robotPose) {
     // Call the master method with zero acceleration
     updateShootingParameters(
-        distanceToHub, 
-        fieldRelativeAngleToHub, 
-        chassisSpeeds, 
-        new Transform2d(), 
-        robotPose);
+        distanceToHub, fieldRelativeAngleToHub, chassisSpeeds, new Transform2d(), robotPose);
   }
 
   public void updateShootingParameters(
@@ -171,7 +166,8 @@ public class ShootingPredictions {
     // Keep offset consistent with total
     horizontalOffsetShootingAngle =
         horizontalTotalShootingAngle - Math.toDegrees(predictedFieldRelativeAngleToHubAfterReload);
-    desiredAngularVelocity = FastBallisticCalculator.computeMotorAdjustment(calculation.launchSpeed());
+    desiredAngularVelocity =
+        FastBallisticCalculator.computeMotorAdjustment(calculation.launchSpeed());
 
     // Record outputs for logging and tuning/debugging purposes.
     Logger.recordOutput("Shooting/VerticalShootingAngle", verticalShootingAngle);

@@ -4,7 +4,6 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
@@ -12,7 +11,6 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
-import frc.robot.subsystems.shooter.ShootingPredictions;
 import frc.robot.Constants.ShootingStyle;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -46,7 +44,10 @@ public class ShooterSimCalc implements ShooterIO {
   private Supplier<Pose2d> poseSupplier = null;
   private Supplier<ChassisSpeeds> speedsSupplier = null;
 
-  public ShooterSimCalc(Supplier<Pose2d> poseSupplier, Supplier<ChassisSpeeds> speedsSupplier, ShootingStyle calcMode) {
+  public ShooterSimCalc(
+      Supplier<Pose2d> poseSupplier,
+      Supplier<ChassisSpeeds> speedsSupplier,
+      ShootingStyle calcMode) {
     register();
 
     this.calcMode = calcMode;
@@ -107,73 +108,74 @@ public class ShooterSimCalc implements ShooterIO {
     switch (calcMode) {
       case MAPS:
         turretOutput = turretPID.calculate(turretAngleDegs, turretTargetDegs);
-    hoodOutput = hoodPID.calculate(hoodAngleDegs, hoodTargetDegs);
+        hoodOutput = hoodPID.calculate(hoodAngleDegs, hoodTargetDegs);
 
-    turretOutput = MathUtil.clamp(turretOutput, -3.0, 3.0);
-    hoodOutput = MathUtil.clamp(hoodOutput, -2.0, 2.0);
+        turretOutput = MathUtil.clamp(turretOutput, -3.0, 3.0);
+        hoodOutput = MathUtil.clamp(hoodOutput, -2.0, 2.0);
 
-    turretAngleDegs += turretOutput;
-    hoodAngleDegs += hoodOutput;
+        turretAngleDegs += turretOutput;
+        hoodAngleDegs += hoodOutput;
 
-    turretBase.setAngle(turretAngleDegs);
-    hood.setAngle(hoodAngleDegs);
-    break;
-    case CALC:
-      // Compute shortest-path turret rotation
-    double error = angleDifferenceDeg(turretTargetDegs, turretAngleDegs);
-    turretOutput = turretPID.calculate(0, error); // PID expects setpoint=0 for error
-    hoodOutput = hoodPID.calculate(hoodAngleDegs, hoodTargetDegs);
-    // acceleration = ;
+        turretBase.setAngle(turretAngleDegs);
+        hood.setAngle(hoodAngleDegs);
+        break;
+      case CALC:
+        // Compute shortest-path turret rotation
+        double error = angleDifferenceDeg(turretTargetDegs, turretAngleDegs);
+        turretOutput = turretPID.calculate(0, error); // PID expects setpoint=0 for error
+        hoodOutput = hoodPID.calculate(hoodAngleDegs, hoodTargetDegs);
+        // acceleration = ;
 
-    turretOutput = MathUtil.clamp(turretOutput, -3.0, 3.0);
-    hoodOutput = MathUtil.clamp(hoodOutput, -2.0, 2.0);
+        turretOutput = MathUtil.clamp(turretOutput, -3.0, 3.0);
+        hoodOutput = MathUtil.clamp(hoodOutput, -2.0, 2.0);
 
-    turretAngleDegs += turretOutput;
-    hoodAngleDegs += hoodOutput;
+        turretAngleDegs += turretOutput;
+        hoodAngleDegs += hoodOutput;
 
-    // Wrap turret angle safely to [0,360) for visualization and consistency
-    turretAngleDegs = MathUtil.inputModulus(turretAngleDegs, 0.0, 360.0);
+        // Wrap turret angle safely to [0,360) for visualization and consistency
+        turretAngleDegs = MathUtil.inputModulus(turretAngleDegs, 0.0, 360.0);
 
-    turretBase.setAngle(turretAngleDegs);
+        turretBase.setAngle(turretAngleDegs);
 
-    // Wrap turret angle to [0,360) for visualization and consistency
-    turretAngleDegs = (turretAngleDegs + 360.0) % 360.0;
+        // Wrap turret angle to [0,360) for visualization and consistency
+        turretAngleDegs = (turretAngleDegs + 360.0) % 360.0;
 
-    turretBase.setAngle(turretAngleDegs);
+        turretBase.setAngle(turretAngleDegs);
 
-    // Existing simulation visualization updates remain unchanged
-    if (poseSupplier != null && speedsSupplier != null) {
-      try {
-        Pose2d pose = poseSupplier.get();
-        ChassisSpeeds speeds = speedsSupplier.get();
-        double fieldRelativeAngleToHub = calculator.getPredictedFieldRelativeAngleToHubAfterReload();
-        double totalHorizDeg = MathUtil.inputModulus(calculator.getHorizontalTotalShootingAngle(), 0.0, 360.0);
-        totalHorizontal.setAngle(totalHorizDeg);
+        // Existing simulation visualization updates remain unchanged
+        if (poseSupplier != null && speedsSupplier != null) {
+          try {
+            Pose2d pose = poseSupplier.get();
+            ChassisSpeeds speeds = speedsSupplier.get();
+            double fieldRelativeAngleToHub =
+                calculator.getPredictedFieldRelativeAngleToHubAfterReload();
+            double totalHorizDeg =
+                MathUtil.inputModulus(calculator.getHorizontalTotalShootingAngle(), 0.0, 360.0);
+            totalHorizontal.setAngle(totalHorizDeg);
 
-        double rawAngleDeg = Math.toDegrees(fieldRelativeAngleToHub);
-        double smoothAngleDeg = unwrapAngle(rawAngleDeg);
-        originalHorizontal.setAngle(smoothAngleDeg);
+            double rawAngleDeg = Math.toDegrees(fieldRelativeAngleToHub);
+            double smoothAngleDeg = unwrapAngle(rawAngleDeg);
+            originalHorizontal.setAngle(smoothAngleDeg);
 
-        var robotRotation = pose.getRotation();
-        double cosR = Math.cos(robotRotation.getRadians());
-        double sinR = Math.sin(robotRotation.getRadians());
-        double vxField = speeds.vxMetersPerSecond * cosR - speeds.vyMetersPerSecond * sinR;
-        double vyField = speeds.vxMetersPerSecond * sinR + speeds.vyMetersPerSecond * cosR;
+            var robotRotation = pose.getRotation();
+            double cosR = Math.cos(robotRotation.getRadians());
+            double sinR = Math.sin(robotRotation.getRadians());
+            double vxField = speeds.vxMetersPerSecond * cosR - speeds.vyMetersPerSecond * sinR;
+            double vyField = speeds.vxMetersPerSecond * sinR + speeds.vyMetersPerSecond * cosR;
 
-        double robotSpeed = Math.hypot(vxField, vyField);
-        double robotAngleDeg = (Math.toDegrees(Math.atan2(vyField, vxField)) + 360) % 360;
-        robotVel.setAngle(robotAngleDeg);
-        robotVel.setLength(Math.min(1.5, robotSpeed * 0.25));
+            double robotSpeed = Math.hypot(vxField, vyField);
+            double robotAngleDeg = (Math.toDegrees(Math.atan2(vyField, vxField)) + 360) % 360;
+            robotVel.setAngle(robotAngleDeg);
+            robotVel.setLength(Math.min(1.5, robotSpeed * 0.25));
 
-        double launch = calculator.getLaunchVelocity();
-        shotVel.setAngle(calculator.getHorizontalTotalShootingAngle());
-        shotVel.setLength(Math.min(1.5, Math.abs(launch) * 0.075));
-      } catch (Exception ex) {
-        Logger.recordOutput("Shooter/Sim Error", ex.toString());
-      }
-      break;
-    }
-
+            double launch = calculator.getLaunchVelocity();
+            shotVel.setAngle(calculator.getHorizontalTotalShootingAngle());
+            shotVel.setLength(Math.min(1.5, Math.abs(launch) * 0.075));
+          } catch (Exception ex) {
+            Logger.recordOutput("Shooter/Sim Error", ex.toString());
+          }
+          break;
+        }
     }
 
     Logger.recordOutput("Shooter/Sim Turret Angle", turretAngleDegs);
