@@ -37,6 +37,10 @@ import org.littletonrobotics.junction.Logger;
 
 public interface SwerveDriveIO extends Subsystem {
 
+  // For acceleration estimation: store previous chassis speeds and latest accel
+  static ChassisSpeeds previousChassisSpeeds = new ChassisSpeeds();
+  static Transform2d acceleration = new Transform2d();
+
   // Drive Constants
 
   double DRIVE_BASE_RADIUS =
@@ -130,6 +134,30 @@ public interface SwerveDriveIO extends Subsystem {
   ChassisSpeeds getChassisSpeeds();
 
   Transform2d getVelocity();
+
+  static Transform2d setAcceleration(ChassisSpeeds current, ChassisSpeeds previousChassisSpeeds) {
+    // TODO: Replace this with TalonFX's own methods
+    // --- Acceleration estimation ---
+    // Compute current chassis speeds from module states and estimate linear/angular
+    // acceleration by differencing with the previous stored speeds and dividing
+    // by the period (20ms). Store the result for callers of getAcceleration().
+    try {
+      double dt = 0.02; // periodic loop at 20ms
+      double ax = (current.vxMetersPerSecond - previousChassisSpeeds.vxMetersPerSecond) / dt;
+      double ay = (current.vyMetersPerSecond - previousChassisSpeeds.vyMetersPerSecond) / dt;
+      double aomega =
+          (current.omegaRadiansPerSecond - previousChassisSpeeds.omegaRadiansPerSecond) / dt;
+      Transform2d accel = new Transform2d(ax, ay, new Rotation2d(aomega));
+      previousChassisSpeeds = current;
+      Logger.recordOutput("Drive/EstimatedAcceleration", acceleration);
+
+      return accel;
+    } catch (Exception ex) {
+      // Defensive: do not let acceleration estimation break periodic
+      Logger.recordOutput("Drive/AccelerationError", ex.toString());
+      return new Transform2d();
+    }
+  }
 
   Transform2d getAcceleration();
 
