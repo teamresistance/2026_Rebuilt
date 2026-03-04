@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.HoppertCommand;
-import frc.robot.commands.IdleShooterCommand;
+import frc.robot.commands.IdleShooterCalcCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.commands.ToggleIntakeCommand;
 import frc.robot.generated.TunerConstants;
@@ -30,7 +30,7 @@ import frc.robot.subsystems.leds.LEDStream;
 import frc.robot.subsystems.leds.LEDSubsystem;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterReal;
-import frc.robot.subsystems.shooter.ShooterSim;
+import frc.robot.subsystems.shooter.ShooterSimCalc;
 import frc.robot.subsystems.shooter.ShootingMaps;
 import frc.robot.subsystems.vision.*;
 import frc.robot.util.BumpUtil;
@@ -93,7 +93,7 @@ public class RobotContainer {
         intake = new IntakeReal();
         break;
       case SIM:
-        shooter = new ShooterSim(drive::getPose, drive::getChassisSpeeds);
+        shooter = new ShooterSimCalc(drive::getPose, drive::getChassisSpeeds, Constants.CURRENT_SHOT_STYLE);
         hoppert = new HoppertSim();
         climber = new ClimberSim();
         intake = new IntakeSim();
@@ -337,12 +337,12 @@ public class RobotContainer {
         .whileTrue(DriveCommands.goToTransform(drive, OtherUtil.getClimberAlignPos(false)));
 
     // auto-aim hood and turret always
-    shooter.setDefaultCommand(new IdleShooterCommand(drive, shooter));
+    shooter.setDefaultCommand(new IdleShooterCalcCommand(drive, shooter, Constants.CURRENT_SHOT_STYLE));
 
     // Switch to X pattern when X button is pressed
     driver.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
-    driver.rightTrigger().whileTrue(new ShootCommand(drive, shooter));
+    driver.rightTrigger().whileTrue(new ShootCommand(shooter, drive, Constants.CURRENT_SHOT_STYLE));
     driver.rightTrigger().whileTrue(driveAtLimitedSpeed);
 
     // left trigger toggles intake

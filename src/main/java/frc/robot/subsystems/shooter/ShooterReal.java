@@ -9,11 +9,11 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import frc.robot.Constants;
-import frc.robot.util.Conversions;
+import frc.robot.util.ShootingUtil.Conversions;
 import frc.robot.util.ShootingUtil;
 import org.littletonrobotics.junction.Logger;
 
-public class ShooterReal extends ShooterIO {
+public class ShooterReal implements ShooterIO {
 
   private final TalonFX hoodMotor = new TalonFX(Constants.SHOOTER_HOOD_ID, CANBus.roboRIO());
   private final TalonFX turretMotor = new TalonFX(Constants.SHOOTER_TURRET_ID, CANBus.roboRIO());

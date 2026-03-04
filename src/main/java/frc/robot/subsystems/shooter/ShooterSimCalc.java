@@ -12,11 +12,12 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
-import frc.robot.util.SimulationAndState;
+import frc.robot.subsystems.shooter.ShootingPredictions;
+import frc.robot.Constants.ShootingStyle;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
-public class ShooterSim extends ShooterIO {
+public class ShooterSimCalc implements ShooterIO {
 
   private final Mechanism2d mech;
   private final MechanismRoot2d root;
@@ -26,6 +27,7 @@ public class ShooterSim extends ShooterIO {
   private final MechanismLigament2d originalHorizontal; // original angle to hub
   private final MechanismLigament2d robotVel;
   private final MechanismLigament2d shotVel;
+  private final MechanismLigament2d hood;
 
   private double turretAngleDegs = 180;
   private double hoodAngleDegs = 13;
@@ -36,15 +38,18 @@ public class ShooterSim extends ShooterIO {
   private final PIDController turretPID = new PIDController(0.5, 0.0, 0);
   private final PIDController hoodPID = new PIDController(0.8, 0.0, 0);
 
+  private final ShootingStyle calcMode;
+
   // Optional suppliers to obtain real simulation pose and chassis speeds from the
   // drive subsystem. When set by RobotContainer (in SIM mode), these will be used
   // to provide real simulation inputs to the ShootingManager.
   private Supplier<Pose2d> poseSupplier = null;
   private Supplier<ChassisSpeeds> speedsSupplier = null;
 
-  public ShooterSim(Supplier<Pose2d> poseSupplier, Supplier<ChassisSpeeds> speedsSupplier) {
+  public ShooterSimCalc(Supplier<Pose2d> poseSupplier, Supplier<ChassisSpeeds> speedsSupplier, ShootingStyle calcMode) {
     register();
 
+    this.calcMode = calcMode;
     this.poseSupplier = poseSupplier;
     this.speedsSupplier = speedsSupplier;
 
@@ -77,6 +82,9 @@ public class ShooterSim extends ShooterIO {
         turretBase.append(
             new MechanismLigament2d("ShotVel", 0.8, 0, 5, new Color8Bit(Color.kPurple)));
     SmartDashboard.putData("Turret Mechanism2d", mech);
+
+    hood = turretBase.append(new MechanismLigament2d("Hood", 0.4, 0, 6, new Color8Bit(Color.kRed)));
+    SmartDashboard.putData("Turret Mechanism2d", mech);
   }
 
   // Keep turret/robot angles continuous across 0/360 boundary
@@ -92,11 +100,30 @@ public class ShooterSim extends ShooterIO {
 
   @Override
   public void periodic() {
-    // Compute shortest-path turret rotation
+
+    double turretOutput;
+    double hoodOutput;
+
+    switch (calcMode) {
+      case MAPS:
+        turretOutput = turretPID.calculate(turretAngleDegs, turretTargetDegs);
+    hoodOutput = hoodPID.calculate(hoodAngleDegs, hoodTargetDegs);
+
+    turretOutput = MathUtil.clamp(turretOutput, -3.0, 3.0);
+    hoodOutput = MathUtil.clamp(hoodOutput, -2.0, 2.0);
+
+    turretAngleDegs += turretOutput;
+    hoodAngleDegs += hoodOutput;
+
+    turretBase.setAngle(turretAngleDegs);
+    hood.setAngle(hoodAngleDegs);
+    break;
+    case CALC:
+      // Compute shortest-path turret rotation
     double error = angleDifferenceDeg(turretTargetDegs, turretAngleDegs);
-    double turretOutput = turretPID.calculate(0, error); // PID expects setpoint=0 for error
-    double hoodOutput = hoodPID.calculate(hoodAngleDegs, hoodTargetDegs);
-    acceleration = getAcceleration();
+    turretOutput = turretPID.calculate(0, error); // PID expects setpoint=0 for error
+    hoodOutput = hoodPID.calculate(hoodAngleDegs, hoodTargetDegs);
+    // acceleration = ;
 
     turretOutput = MathUtil.clamp(turretOutput, -3.0, 3.0);
     hoodOutput = MathUtil.clamp(hoodOutput, -2.0, 2.0);
@@ -114,34 +141,13 @@ public class ShooterSim extends ShooterIO {
 
     turretBase.setAngle(turretAngleDegs);
 
-    Logger.recordOutput("Shooter/Sim Turret Angle", turretAngleDegs);
-    Logger.recordOutput("Shooter/Sim Hood Angle", hoodAngleDegs);
-    Logger.recordOutput("Shooter/Sim Turret Target", turretTargetDegs);
-    Logger.recordOutput("Shooter/Sim Hood Target", hoodTargetDegs);
-
     // Existing simulation visualization updates remain unchanged
     if (poseSupplier != null && speedsSupplier != null) {
       try {
         Pose2d pose = poseSupplier.get();
         ChassisSpeeds speeds = speedsSupplier.get();
-
-        var targetPose = SimulationAndState.getShootingTarget(pose);
-        Translation2d hub = targetPose.getTranslation();
-        Translation2d robot = pose.getTranslation();
-
-        double dx = hub.getX() - robot.getX();
-        double dy = hub.getY() - robot.getY();
-        double distanceToHub = Math.hypot(dx, dy);
-        double fieldRelativeAngleToHub = Math.atan2(dy, dx);
-
-        Logger.recordOutput("Shooter/Sim Input DistanceToHub", distanceToHub);
-        Logger.recordOutput(
-            "Shooter/Sim InputFieldRelativeAngleToHub", Math.toDegrees(fieldRelativeAngleToHub));
-
-        updateShootingParameters(
-            distanceToHub, fieldRelativeAngleToHub, speeds, acceleration, pose);
-        // Safely wrap the visualization angle
-        double totalHorizDeg = MathUtil.inputModulus(getHorizontalTotalShootingAngle(), 0.0, 360.0);
+        double fieldRelativeAngleToHub = calculator.getPredictedFieldRelativeAngleToHubAfterReload();
+        double totalHorizDeg = MathUtil.inputModulus(calculator.getHorizontalTotalShootingAngle(), 0.0, 360.0);
         totalHorizontal.setAngle(totalHorizDeg);
 
         double rawAngleDeg = Math.toDegrees(fieldRelativeAngleToHub);
@@ -159,13 +165,21 @@ public class ShooterSim extends ShooterIO {
         robotVel.setAngle(robotAngleDeg);
         robotVel.setLength(Math.min(1.5, robotSpeed * 0.25));
 
-        double launch = getLaunchVelocity();
-        shotVel.setAngle(getHorizontalTotalShootingAngle());
+        double launch = calculator.getLaunchVelocity();
+        shotVel.setAngle(calculator.getHorizontalTotalShootingAngle());
         shotVel.setLength(Math.min(1.5, Math.abs(launch) * 0.075));
       } catch (Exception ex) {
         Logger.recordOutput("Shooter/Sim Error", ex.toString());
       }
+      break;
     }
+
+    }
+
+    Logger.recordOutput("Shooter/Sim Turret Angle", turretAngleDegs);
+    Logger.recordOutput("Shooter/Sim Hood Angle", hoodAngleDegs);
+    Logger.recordOutput("Shooter/Sim Turret Target", turretTargetDegs);
+    Logger.recordOutput("Shooter/Sim Hood Target", hoodTargetDegs);
   }
 
   /** Computes the shortest angular difference from current to target in degrees [-180,180] */

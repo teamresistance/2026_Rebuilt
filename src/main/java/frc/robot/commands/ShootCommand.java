@@ -2,25 +2,39 @@ package frc.robot.commands;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.shooter.ShootingMaps;
+import frc.robot.Constants.ShootingStyle;
 import frc.robot.subsystems.drive.SwerveDriveIO;
 import frc.robot.subsystems.shooter.ShooterIO;
+import frc.robot.util.ShootingUtil;
+
 import org.littletonrobotics.junction.Logger;
 
 public class ShootCommand extends Command {
 
-  private final SwerveDriveIO drive;
   private final ShooterIO shooter;
+  private final SwerveDriveIO drive;
+  private final ShootingStyle calcMode;
 
-  public ShootCommand(SwerveDriveIO _drive, ShooterIO _shooter) {
-    drive = _drive;
+  public ShootCommand(ShooterIO _shooter, SwerveDriveIO _drive, ShootingStyle _calcMode) {
     shooter = _shooter;
+    drive = _drive;
+    calcMode = _calcMode;
   }
 
   @Override
   public void execute() {
+    switch (calcMode) {
+      case CALC:
+        shooter.runFlywheelAtRPS(Units.radiansToRotations(ShooterIO.calculator.getDesiredAngularVelocity()));
+        Logger.recordOutput("Shooter/Desired Angular Velocity", ShooterIO.calculator.getDesiredAngularVelocity());
+        break;
+      case MAPS:
+        double distance =
+        ShootingUtil.getVirtualDistanceToTarget(drive.getPose(), drive.getChassisSpeeds());
+    shooter.runFlywheelAtRPS(ShootingMaps.getRPS(distance));
 
-    shooter.runFlywheelAtRPS(Units.radiansToRotations(shooter.getDesiredAngularVelocity()));
-
-    Logger.recordOutput("Shooter/Desired Angular Velocity", shooter.getDesiredAngularVelocity());
+    Logger.recordOutput("Shooter/Virtual Distance to Hub", distance);
+    }
   }
 }

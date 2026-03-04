@@ -79,6 +79,7 @@ public class SwerveDriveSim implements SwerveDriveIO {
     field2d.getObject("odometry").setPose(getPose());
     Logger.recordOutput("Drive/Robot Pose", getPose());
 
+    // TODO: Replace this with TalonFX's own methods
     // --- Acceleration estimation ---
     // Compute current chassis speeds from module states and estimate linear/angular
     // acceleration by differencing with the previous stored speeds and dividing
@@ -99,6 +100,7 @@ public class SwerveDriveSim implements SwerveDriveIO {
     }
   }
 
+  // TODO: Replace this with TalonFX's own methods
   public Transform2d getAcceleration() {
     return acceleration;
   }

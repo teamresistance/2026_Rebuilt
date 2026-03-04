@@ -39,7 +39,7 @@ public final class FastBallisticCalculator {
   /** Alpha constant for RK2 correction - derived from drag coefficient and mass */
   private static final double ALPHA = K / M;
 
-  private static final double zHub = 1.8288;
+  private static final double HUB_HEIGHT = ShootingConstants.HUB_HEIGHT;
 
   /*
    * =======================
@@ -129,7 +129,7 @@ public final class FastBallisticCalculator {
       // Compute 3D Error
       double errX = x - xHub;
       double errY = y - yHub;
-      double errZ = z - zHub;
+      double errZ = z - HUB_HEIGHT;
 
       // Newton correction (using invT for horizontal,
       // vertical requires less gain due to gravity's dominance)
@@ -201,7 +201,7 @@ public final class FastBallisticCalculator {
     double vFloorGuess = (M / (K * T)) * (Math.exp((K * dRelative) / M) - 1.0);
     double vxGuess = vFloorGuess * (dxTarget / dRelative);
     double vyGuess = vFloorGuess * (dyTarget / dRelative);
-    double vzGuess = (zHub / T) + (0.5 * 9.806 * T); // Simple gravity compensation
+    double vzGuess = (HUB_HEIGHT / T) + (0.5 * 9.806 * T); // Simple gravity compensation
 
     // 3. SOLVE LOOP
     for (int iter = 0; iter < 4; iter++) { // 4 iterations to settle quadratic error
@@ -231,7 +231,7 @@ public final class FastBallisticCalculator {
       // Error relative to the hub's position from the release point
       double errX = x - dxTarget;
       double errY = y - dyTarget;
-      double errZ = z - zHub;
+      double errZ = z - HUB_HEIGHT;
 
       // Apply corrections
       vxGuess -= errX * invT;
@@ -301,4 +301,40 @@ public final class FastBallisticCalculator {
     }
     return new double[] {x, y, z};
   }
+
+  public static double restingAngularVelocity = ShootingConstants.FREE_ANGULAR_VELOCITY;
+  public static double RADIUS = ShootingConstants.SHOOTER_RADIUS;
+  public static double E = ShootingConstants.SHOOTER_EFFICIENCY;
+
+  /* =======================
+   * Output State Variables
+   * ======================= */
+
+  /**
+   * Desired angular velocity of launcher wheel after adjustment (rad/s) - target speed post-launch
+   */
+  public static double desiredAngularVelocity = 0;
+
+  /**
+   * Computes the required motor angular acceleration to restore launcher wheel speed.
+   *
+   * <p>This method calculates the angular acceleration needed to compensate for energy lost when
+   * the projectile is launched. It retrieves the actual launch velocity from the ballistic
+   * calculator, then uses rotational dynamics to determine the motor adjustment required to return
+   * the wheel from its post-launch state back to resting angular velocity within the specified time
+   * interval.
+   *
+   * <p>The computed angular acceleration is stored in {@link #desiredAngularAcceleration} and
+   * relevant metrics are printed to standard output.
+   */
+  public static double computeMotorAdjustment(double launchSpeed) {
+
+    long start = System.nanoTime();
+
+    desiredAngularVelocity = launchSpeed / (E * RADIUS) / 2 / Math.PI;
+    long end = System.nanoTime();
+    return desiredAngularVelocity;
+    // TODO: Log start/end times
+  }
+
 }

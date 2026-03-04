@@ -19,13 +19,12 @@ import frc.robot.generated.TunerConstants;
  * on a roboRIO. Change the value of "simMode" to switch between "sim" (physics sim) and "replay"
  * (log replay from a file).
  *
- * <p>NOTE: This class should only contain constants used by multiple subsystems. Place
- * single-subsystem constants in the respective subsystem's folder.
  */
 public final class Constants {
 
   public static boolean TEST_MODE = false;
   public static final Mode CURRENT_MODE = RobotBase.isReal() ? Mode.REAL : Mode.SIM;
+  public static final ShootingStyle CURRENT_SHOT_STYLE = ShootingStyle.CALC;
   public static final boolean TUNING_MODE = false;
   public static final PathConstraints PATH_CONSTRAINTS =
       new PathConstraints(
@@ -126,7 +125,7 @@ public final class Constants {
   }
 
   public enum Mode {
-    /** Running on a real robot. */
+    /** Running on a real robot */
     REAL,
 
     /** Running a physics simulator. */
@@ -134,6 +133,14 @@ public final class Constants {
 
     /** Replaying from a log file. */
     REPLAY
+  }
+
+  public enum ShootingStyle {
+    /** Using interpolation maps for shooting */
+    MAPS,
+
+    /** Using drag calculations for shooting */
+    CALC
   }
 
   public class ShootingConstants {
@@ -147,22 +154,33 @@ public final class Constants {
     /// Mass of the projectile fuel (kg) - affects drag and energy loss calculations
     public static final double FUEL_MASS = 0.227;
 
+    // Hub height (m) specifically to the top of the polycarbonate edges
+    public static final double HUB_HEIGHT = 1.8288;
+
+    // Turret height (m)
+    public static final double TURRET_HEIGHT = 0.7112;
+
+    // Acceleration due to gravity (m/s^2)
+    public static final double G = 9.80665;
+
+    // Fixed flight time (seconds) - predetermined projectile flight duration used
+    // in calculations
+    public static final double MINIMUM_TIME_OF_FLIGHT = 1.2;
+
+    // Drag coefficient - exponential factor in air resistance equation
+    public static final double QUADRATIC_DRAG_COEFFICIENT = 0.004997;
+
     // TODO: correct numbers with real hardware
     // Vertical velocity component (m/s) - gravitational component of projectile
     // motion
-    public static final double VERTICAL_VELOCITY_COMPONENT = 6.92858460962;
+
+    private static double root_mg_over_k = Math.sqrt(FUEL_MASS * G / QUADRATIC_DRAG_COEFFICIENT);
+    public static final double VERTICAL_VELOCITY_COMPONENT = root_mg_over_k * (Math.exp(QUADRATIC_DRAG_COEFFICIENT * (HUB_HEIGHT - TURRET_HEIGHT) / FUEL_MASS) - Math.cos((1 / root_mg_over_k) * G * MINIMUM_TIME_OF_FLIGHT)) / (Math.sin((1 / root_mg_over_k) * G * MINIMUM_TIME_OF_FLIGHT));
 
     // TODO: correct numbers with real hardware
     // Square of vertical velocity component (m^2/s^2) - used in total velocity
     // calculations
     public static final double VERTICAL_VELOCITY_COMPONENT_SQUARED = 48.0052946927;
-
-    // Drag coefficient - exponential factor in air resistance equation
-    public static final double QUADRATIC_DRAG_COEFFICIENT = 0.004997;
-
-    // Fixed flight time (seconds) - predetermined projectile flight duration used
-    // in calculations
-    public static final double MINIMUM_TIME_OF_FLIGHT = 1.15;
 
     /*
      * ===============
@@ -196,10 +214,6 @@ public final class Constants {
     // speed for
     // consistent shooting performance
     public static final double FREE_ANGULAR_VELOCITY = 0;
-
-    public static final double MIN_TURRET_ANGLE = -135;
-
-    public static final double MAX_TURRET_ANGLE = 135;
 
     /** Conversion factor from radians to degrees */
     public static final double RAD_TO_DEG = 180.0 / Math.PI;

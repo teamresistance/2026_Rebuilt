@@ -168,4 +168,101 @@ public class ShootingUtil {
 
     return lookaheadDistance;
   }
+
+public class SimulationAndState {
+
+  public static Pose2d getShootingTarget(Pose2d pose) {
+    var allianceOpt = DriverStation.getAlliance();
+    if (allianceOpt.isEmpty()) {
+      return Pose2d.kZero;
+    }
+
+    boolean isTop = pose.getY() >= FieldConstants.TOP_BOTTOM_SPLIT_Y;
+
+    if (allianceOpt.get() == DriverStation.Alliance.Blue) {
+      if (pose.getX() <= FieldConstants.BLUE_SHOOTING_ZONE_END) {
+        return FieldConstants.BLUE_GOAL_CENTER;
+      }
+      if (pose.getX() > FieldConstants.NEUTRAL_ZONE_BLUESIDE) {
+        return isTop
+            ? FieldConstants.BLUE_TOP_FERRY_TARGET
+            : FieldConstants.BLUE_BOTTOM_FERRY_TARGET;
+      }
+    } else {
+      if (pose.getX() >= FieldConstants.RED_SHOOTING_ZONE_START) {
+        return FieldConstants.RED_GOAL_CENTER;
+      }
+      if (pose.getX() < FieldConstants.NEUTRAL_ZONE_REDSIDE) {
+        return isTop ? FieldConstants.RED_TOP_FERRY_TARGET : FieldConstants.RED_BOTTOM_FERRY_TARGET;
+      }
+    }
+
+    return Pose2d.kZero;
+  }
+
+  /** Returns a 0 if shooting to hub and a 1 if ferrying. */
+  public static int getShootingType(Supplier<Pose2d> poseSupplier) {
+    Pose2d pose = poseSupplier.get();
+    var allianceOpt = DriverStation.getAlliance();
+    if (allianceOpt.isEmpty()) {
+      return 0;
+    }
+
+    // TODO: Uncomment if the variable is needed, otherwise delete
+    // boolean isTop = pose.getY() >= FieldConstants.TOP_BOTTOM_SPLIT_Y;
+
+    if (allianceOpt.get() == DriverStation.Alliance.Blue
+        && pose.getX() <= FieldConstants.BLUE_SHOOTING_ZONE_END) {
+      return 0;
+    }
+    if (allianceOpt.get() == DriverStation.Alliance.Red
+        && pose.getX() >= FieldConstants.RED_SHOOTING_ZONE_START) {
+      return 0;
+    }
+    return 1;
+  }
+}
+/**
+ * Utility methods for converting between motor revolutions and shooter angles, based on the known
+ * gear ratios of the shooter mechanism. These methods allow commands and subsystems to work in
+ * intuitive angle units while the ShooterIO implementation can work in motor revolutions,
+ * abstracting away the conversion details. The conversion factors are defined in {@code Constants}
+ * and are based on the physical design of the shooter mechanisms, (e.g., how many motor revolutions
+ * correspond to one degree of hood pitch or turret yaw).
+ */
+public class Conversions {
+  /**
+   * Returns the motor revolutions converted to an equal angle. There are {@code
+   * Constants.SHOOTER_HOOD_REVS_PER_DEG} motor shaft revolutions per one degree of pitch.
+   */
+  public static double toHoodDegrees(double motorRevs) {
+    return motorRevs / Constants.SHOOTER_HOOD_REVS_PER_DEG;
+  }
+
+  /**
+   * Returns the angle converted to an equal amount of motor revolutions. There are {@code
+   * Constants.SHOOTER_HOOD_REVS_PER_DEG} motor shaft revolutions per one degree of pitch.
+   */
+  public static double toHoodRevs(double degrees) {
+    return degrees * Constants.SHOOTER_HOOD_REVS_PER_DEG;
+  }
+
+  /**
+   * Returns the motor revolutions converted to an equal angle. There are {@code
+   * Constants.SHOOTER_TURRET_REVS_PER_DEG} motor shaft revolutions per one degree of yaw.
+   */
+  public static double toTurretDegrees(double motorRevs) {
+    return motorRevs / Constants.SHOOTER_TURRET_REVS_PER_DEG;
+  }
+
+  /**
+   * Returns the angle converted to an equal amount of motor revolutions. There are {@code
+   * Constants.SHOOTER_TURRET_REVS_PER_DEG} motor shaft revolutions per one degree of yaw.
+   */
+  public static double toTurretRevs(double degrees) {
+    return degrees * Constants.SHOOTER_TURRET_REVS_PER_DEG;
+  }
+}
+
+
 }
