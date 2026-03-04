@@ -54,7 +54,7 @@ public final class Constants {
   public static final double SHOOTER_TURRET_REVS_TOLERANCE = 0.5;
   public static final double SHOOTER_RPS_TOLERANCE = 2;
 
-  public static final double SHOOTER_HOOD_MAX_PITCH = 45;
+  public static final double SHOOTER_HOOD_MAX_PITCH = 43;
   public static final double SHOOTER_HOOD_MIN_PITCH = 17.5;
   public static final double SHOOTER_TURRET_MAX_YAW = 170; // TODO: max min yaw
   public static final double SHOOTER_TURRET_MIN_YAW = -170;
