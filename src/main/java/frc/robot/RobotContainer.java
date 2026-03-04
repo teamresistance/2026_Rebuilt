@@ -227,7 +227,7 @@ public class RobotContainer {
                 "shooting/passing",
                 4,
                 () -> {
-                  boolean isShooting = ShootingUtil.getShootingType(drive::getPose) == 0;
+                  boolean isShooting = ShootingUtil.SimulationAndState.getShootingType(drive::getPose) == 0;
                   boolean isConfident =
                       TurretConfidenceUtil.calculateConfidence(drive)
                           > 75.0; // confidence threshold is greater than 75%

@@ -106,62 +106,13 @@ public class ShootingPredictions {
       double fieldRelativeAngleToHub,
       ChassisSpeeds chassisSpeeds,
       Pose2d robotPose) {
-
-    // Convert the supplied robot-relative chassis speeds into field-relative
-    // components before using them for prediction and in the ballistic solver.
-    // This matches the expectations of FastBallisticCalculator which assumes
-    // vx/vy are expressed in the field (floor) frame.
-    Rotation2d robotRotation = robotPose.getRotation();
-    double cos = Math.cos(robotRotation.getRadians());
-    double sin = Math.sin(robotRotation.getRadians());
-    FastBallisticCalculator.robotPose = robotPose;
-
-    // Robot-relative velocities (vx, vy) are rotated into the field frame.
-    double vxField = chassisSpeeds.vxMetersPerSecond * cos - chassisSpeeds.vyMetersPerSecond * sin;
-    double vyField = chassisSpeeds.vxMetersPerSecond * sin + chassisSpeeds.vyMetersPerSecond * cos;
-
-    // Predict where the robot/target will be after the reload delay so ballistic
-    // calculations account for robot motion during the reload. Use the field
-    // frame velocities for that prediction.
-    predictDistanceAndAngleAfterReload(vxField, vyField, distanceToHub, fieldRelativeAngleToHub);
-
-    // Compute ballistic solution for predicted range/angle using current robot
-    // velocity in the field frame.
-    BallisticSolution calculation =
-        FastBallisticCalculator.computeBallistics(
-            predictedDistanceToHubAfterReload,
-            Math.toDegrees(predictedFieldRelativeAngleToHubAfterReload),
-            vxField,
-            vyField);
-
-    // Store outputs from the calculators into this manager's public fields.
-    double newVertical = calculation.hoodAngleDeg();
-    double newOffset = calculation.deltaAzimuthDeg();
-    double newTotal = newOffset + Math.toDegrees(predictedFieldRelativeAngleToHubAfterReload);
-    double newLaunchVelocity = calculation.launchSpeed();
-
-    // Apply rate limiting
-    verticalShootingAngle = rateLimit(verticalShootingAngle, newVertical, MAX_HOOD_DELTA);
-
-    horizontalTotalShootingAngle =
-        rateLimit(horizontalTotalShootingAngle, newTotal, MAX_TURRET_DELTA);
-
-    launchVelocity = rateLimit(launchVelocity, newLaunchVelocity, MAX_LAUNCH_VELOCITY_DELTA);
-
-    // Keep offset consistent with total
-    horizontalOffsetShootingAngle =
-        horizontalTotalShootingAngle - Math.toDegrees(predictedFieldRelativeAngleToHubAfterReload);
-    desiredAngularVelocity = FastBallisticCalculator.computeMotorAdjustment(calculation.launchSpeed());
-
-    // Record outputs for logging and tuning/debugging purposes.
-    Logger.recordOutput("Shooting/VerticalShootingAngle", verticalShootingAngle);
-    Logger.recordOutput(
-        "Shooting/PredictedFieldRelativeAngleToHubAfterReload",
-        Math.toDegrees(predictedFieldRelativeAngleToHubAfterReload));
-    Logger.recordOutput("Shooting/HorizontalOffsetShootingAngle", horizontalOffsetShootingAngle);
-    Logger.recordOutput("Shooting/HorizontalTotalShootingAngle", horizontalTotalShootingAngle);
-    Logger.recordOutput("Shooting/LaunchVelocity", launchVelocity);
-
+    // Call the master method with zero acceleration
+    updateShootingParameters(
+        distanceToHub, 
+        fieldRelativeAngleToHub, 
+        chassisSpeeds, 
+        new Transform2d(), 
+        robotPose);
   }
 
   public void updateShootingParameters(
