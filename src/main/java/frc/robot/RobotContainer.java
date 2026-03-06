@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.commands.DeferredCommand;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.HoppertCommand;
 import frc.robot.commands.IdleShooterCommand;
@@ -33,11 +34,7 @@ import frc.robot.subsystems.shooter.ShooterReal;
 import frc.robot.subsystems.shooter.ShooterSim;
 import frc.robot.subsystems.shooter.ShootingConstants;
 import frc.robot.subsystems.vision.*;
-import frc.robot.util.BumpUtil;
-import frc.robot.util.OtherUtil;
-import frc.robot.util.ShiftUtil;
-import frc.robot.util.ShootingUtil;
-import frc.robot.util.TurretConfidenceUtil;
+import frc.robot.util.*;
 import java.io.IOException;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -141,7 +138,19 @@ public class RobotContainer {
   }
 
   private void configureNamedCommands() {
+    NamedCommands.registerCommand("Climb Up", Commands.runOnce(climber::unbrake)
+      .andThen(climber::up)
+      .andThen(new WaitUntilCommand(climber::atTarget))
+      .andThen(climber::brake));
     NamedCommands.registerCommand("Stop", Commands.runOnce(drive::stop, drive));
+    NamedCommands.registerCommand("Shoot 5s", new ShootCommand(drive, shooter).withTimeout(5));
+    NamedCommands.registerCommand("Shoot 10s", new ShootCommand(drive, shooter).withTimeout(10));
+    NamedCommands.registerCommand("Toggle Intake", new ToggleIntakeCommand(intake));
+    NamedCommands.registerCommand(
+        "Closest Climb",
+        new DeferredCommand(
+            () ->
+                DriveCommands.followPosesWithMaxSpeed(drive, 0.5, OtherUtil.getClimberAlignPos(drive.getPose()))));
   }
 
   private LoggedDashboardChooser<Command> configureAutos() {
@@ -313,7 +322,7 @@ public class RobotContainer {
     // have hopper automatically deciding when to run or not to run
     hoppert.setDefaultCommand(new HoppertCommand(hoppert, shooter));
 
-    // when left bumper is not pressed and in bump zone, auto rotate.
+    // when y (paddle) is not pressed and in bump zone, auto rotate.
     driver.y().negate().and(inBumpZone).whileTrue(driveAtAngleForBump);
 
     // climb raise
@@ -337,10 +346,10 @@ public class RobotContainer {
     // auto-align to climber positions with bumpers (left/right bumper = left/right pos)
     driver
         .leftBumper()
-        .whileTrue(DriveCommands.goToTransform(drive, OtherUtil.getClimberAlignPos(true)));
+        .whileTrue(new DeferredCommand(() -> DriveCommands.followPosesWithMaxSpeed(drive, 0.5, drive.getPose(), OtherUtil.getClimberAlignPos(true))));
     driver
         .rightBumper()
-        .whileTrue(DriveCommands.goToTransform(drive, OtherUtil.getClimberAlignPos(false)));
+        .whileTrue(new DeferredCommand(() -> DriveCommands.followPosesWithMaxSpeed(drive, 0.5, drive.getPose(), OtherUtil.getClimberAlignPos(false))));
 
     // auto-aim hood and turret always
     shooter.setDefaultCommand(new IdleShooterCommand(drive, shooter));

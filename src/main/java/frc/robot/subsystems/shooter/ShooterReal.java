@@ -2,7 +2,6 @@ package frc.robot.subsystems.shooter;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.*;
-import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.StrictFollower;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
@@ -144,7 +143,8 @@ public class ShooterReal implements ShooterIO {
     if (angle < Constants.SHOOTER_HOOD_MAX_PITCH && angle > Constants.SHOOTER_HOOD_MIN_PITCH) {
       angle = angle - Constants.SHOOTER_HOOD_MIN_PITCH; // zero position is not zero degrees
       hoodTargetAngle = angle;
-      hoodMotor.setControl(new MotionMagicVoltage(ShootingUtil.toHoodRevs(angle)).withEnableFOC(true));
+      hoodMotor.setControl(
+          new MotionMagicVoltage(ShootingUtil.toHoodRevs(angle)).withEnableFOC(true));
     }
   }
 
@@ -156,7 +156,8 @@ public class ShooterReal implements ShooterIO {
   public void setTurretTarget(double angle) {
     if (angle < Constants.SHOOTER_TURRET_MAX_YAW && angle > Constants.SHOOTER_TURRET_MIN_YAW) {
       turretTargetAngle = angle;
-      turretMotor.setControl(new MotionMagicVoltage(ShootingUtil.toTurretRevs(angle)).withEnableFOC(true));
+      turretMotor.setControl(
+          new MotionMagicVoltage(ShootingUtil.toTurretRevs(angle)).withEnableFOC(true));
     }
   }
 
