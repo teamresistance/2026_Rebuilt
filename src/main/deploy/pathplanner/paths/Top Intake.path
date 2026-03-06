@@ -47,11 +47,11 @@
   "rotationTargets": [
     {
       "waypointRelativePos": 0.6329787234042553,
-      "rotationDegrees": 0.0
+      "rotationDegrees": -90.0
     },
     {
       "waypointRelativePos": 1.2180851063829787,
-      "rotationDegrees": 90.0
+      "rotationDegrees": 0.0
     }
   ],
   "constraintZones": [
@@ -80,13 +80,13 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0,
-    "rotation": 90.0
+    "velocity": 0.0,
+    "rotation": 0.0
   },
   "reversed": false,
   "folder": "Intake Shoot Climb",
   "idealStartingState": {
-    "velocity": 0,
+    "velocity": 2.0,
     "rotation": -45.0
   },
   "useDefaultConstraints": true
