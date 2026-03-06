@@ -16,12 +16,12 @@
     },
     {
       "anchor": {
-        "x": 1.448888888888889,
-        "y": 2.4076777777777774
+        "x": 1.0761055634807417,
+        "y": 2.462952924393724
       },
       "prevControl": {
-        "x": 3.5372637916701257,
-        "y": 1.9954969160420806
+        "x": 3.164480466261978,
+        "y": 2.050772062658027
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 180.0
   },
   "reversed": false,
   "folder": "Shoot Climb",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 180.0
   },
   "useDefaultConstraints": false
 }
