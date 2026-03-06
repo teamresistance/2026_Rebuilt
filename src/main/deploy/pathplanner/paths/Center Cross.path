@@ -48,11 +48,11 @@
     },
     {
       "anchor": {
-        "x": 5.83618962432916,
+        "x": 6.2774465049928665,
         "y": 2.582826475849731
       },
       "prevControl": {
-        "x": 4.372156237736035,
+        "x": 4.813413118399741,
         "y": 2.545271876465135
       },
       "nextControl": null,
@@ -66,7 +66,21 @@
       "rotationDegrees": 45.0
     }
   ],
-  "constraintZones": [],
+  "constraintZones": [
+    {
+      "name": "Slow Bump",
+      "minWaypointRelativePos": 0.5996978851963743,
+      "maxWaypointRelativePos": 2.5030211480362543,
+      "constraints": {
+        "maxVelocity": 3.0,
+        "maxAcceleration": 5.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 400.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
