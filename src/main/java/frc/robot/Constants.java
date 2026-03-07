@@ -144,13 +144,17 @@ public final class Constants {
 
   public class ShootingConstants {
 
+    private ShootingConstants() {
+      throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
+    }
+
     /*
      * ===============
      * Ballistic Constants
      * ===============
      */
 
-    /// Mass of the projectile fuel (kg) - affects drag and energy loss calculations
+    // Mass of the projectile fuel (kg) - affects drag and energy loss calculations
     public static final double FUEL_MASS = 0.227;
 
     // Hub height (m) specifically to the top of the polycarbonate edges
@@ -173,12 +177,12 @@ public final class Constants {
     // Vertical velocity component (m/s) - gravitational component of projectile
     // motion
 
-    private static double root_mg_over_k = Math.sqrt(FUEL_MASS * G / QUADRATIC_DRAG_COEFFICIENT);
+    private static double ROOT_MG_OVER_K = Math.sqrt(FUEL_MASS * G / QUADRATIC_DRAG_COEFFICIENT);
     public static final double VERTICAL_VELOCITY_COMPONENT =
-        root_mg_over_k
+        ROOT_MG_OVER_K
             * (Math.exp(QUADRATIC_DRAG_COEFFICIENT * (HUB_HEIGHT - TURRET_HEIGHT) / FUEL_MASS)
-                - Math.cos((1 / root_mg_over_k) * G * MINIMUM_TIME_OF_FLIGHT))
-            / (Math.sin((1 / root_mg_over_k) * G * MINIMUM_TIME_OF_FLIGHT));
+                - Math.cos((1 / ROOT_MG_OVER_K) * G * MINIMUM_TIME_OF_FLIGHT))
+            / (Math.sin((1 / ROOT_MG_OVER_K) * G * MINIMUM_TIME_OF_FLIGHT));
 
     // TODO: correct numbers with real hardware
     // Square of vertical velocity component (m^2/s^2) - used in total velocity

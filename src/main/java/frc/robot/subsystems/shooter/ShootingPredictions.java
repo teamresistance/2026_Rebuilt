@@ -59,24 +59,24 @@ public class ShootingPredictions {
    * Time delay (seconds) from when a shot starts until the next ball is ready to be launched
    * (reload time). Used to predict where the robot/target will be at the time of the next shot.
    */
-  private final double reloadTime = ShootingConstants.RELOAD_TIME;
+  private static final double reloadTime = ShootingConstants.RELOAD_TIME;
 
   // 20ms loop
-  private final double LOOP_DT = 0.02;
+  private static final double LOOP_DT = 0.02;
 
   private Transform2d acceleration = new Transform2d();
 
   // Maximum allowed change per second
-  private final double MAX_HOOD_RATE_DEG_PER_SEC = 180.0;
-  private final double MAX_TURRET_RATE_DEG_PER_SEC = 360.0;
-  private final double MAX_LAUNCH_VELOCITY_RATE_MPS = 15.0;
+  private static final double MAX_HOOD_RATE_DEG_PER_SEC = 180.0;
+  private static final double MAX_TURRET_RATE_DEG_PER_SEC = 360.0;
+  private static final double MAX_LAUNCH_VELOCITY_RATE_MPS = 15.0;
 
   // Derived per-cycle limits
-  private final double MAX_HOOD_DELTA = MAX_HOOD_RATE_DEG_PER_SEC * LOOP_DT;
+  private static final double MAX_HOOD_DELTA = MAX_HOOD_RATE_DEG_PER_SEC * LOOP_DT;
 
-  private final double MAX_TURRET_DELTA = MAX_TURRET_RATE_DEG_PER_SEC * LOOP_DT;
+  private static final double MAX_TURRET_DELTA = MAX_TURRET_RATE_DEG_PER_SEC * LOOP_DT;
 
-  private final double MAX_LAUNCH_VELOCITY_DELTA = MAX_LAUNCH_VELOCITY_RATE_MPS * LOOP_DT;
+  private static final double MAX_LAUNCH_VELOCITY_DELTA = MAX_LAUNCH_VELOCITY_RATE_MPS * LOOP_DT;
 
   private static double rateLimit(double current, double target, double maxDelta) {
     double delta = MathUtil.inputModulus(target - current, -180.0, 180.0);
@@ -124,7 +124,6 @@ public class ShootingPredictions {
     Rotation2d robotRotation = robotPose.getRotation();
     double cos = Math.cos(robotRotation.getRadians());
     double sin = Math.sin(robotRotation.getRadians());
-    ShootingUtil.robotPose = robotPose;
 
     // Robot-relative velocities (vx, vy) are rotated into the field frame.
     double vxField = chassisSpeeds.vxMetersPerSecond * cos - chassisSpeeds.vyMetersPerSecond * sin;
@@ -133,21 +132,17 @@ public class ShootingPredictions {
     double axField = acceleration.getX() * cos - acceleration.getY() * sin;
     double ayField = acceleration.getX() * sin + acceleration.getY() * cos;
 
-    // Predict where the robot/target will be after the reload delay so ballistic
-    // calculations account for robot motion during the reload. Use the field
-    // frame velocities for that prediction.
-    predictDistanceAndAngleAfterReload(vxField, vyField, distanceToHub, fieldRelativeAngleToHub);
-
     // Compute ballistic solution for predicted range/angle using current robot
     // velocity in the field frame.
     BallisticSolution calculation =
         ShootingUtil.computeBallistics(
-            predictedDistanceToHubAfterReload,
-            Math.toDegrees(predictedFieldRelativeAngleToHubAfterReload),
+            distanceToHub,
+            Math.toDegrees(fieldRelativeAngleToHub),
             vxField,
             vyField,
             axField,
-            ayField);
+            ayField,
+            robotPose);
 
     // Store outputs from the calculators into this manager's public fields.
     double newVertical = calculation.hoodAngleDeg();
@@ -204,62 +199,6 @@ public class ShootingPredictions {
    */
   public double getDesiredAngularVelocity() {
     return desiredAngularVelocity;
-  }
-
-  /**
-   * Predicts the robot-to-hub distance and field-relative angle at the time when the next shot will
-   * be available (after {@link #reloadTime}). The prediction uses the linear components of the
-   * robot's chassis speed to estimate displacement during the reload.
-   *
-   * <p>Outputs are written to {@code predictedDistanceToHubAfterReload} and {@code
-   * predictedFieldRelativeAngleToHubAfterReload} and also recorded via Logger.
-   *
-   * @param vxField robot linear velocity in the field X direction (m/s)
-   * @param vyField robot linear velocity in the field Y direction (m/s)
-   * @param currentDistanceToHub current straight-line distance to the hub (meters)
-   * @param currentAngleToHub current field-relative angle to the hub (radians)
-   */
-  public void predictDistanceAndAngleAfterReload(
-      double vxField, double vyField, double currentDistanceToHub, double currentAngleToHub) {
-    // Represent the current hub position in the field frame using the
-    // provided distance and field-relative angle. From there, apply the robot's
-    // linear displacement during the reload (provided in field-frame vx/vy)
-    // to predict the hub position when the next shot is ready.
-    double x = currentDistanceToHub * Math.cos(currentAngleToHub);
-    double y = currentDistanceToHub * Math.sin(currentAngleToHub);
-
-    double predictedX = vxField * reloadTime;
-    double predictedY = vyField * reloadTime;
-
-    double newX = x - predictedX;
-    double newY = y - predictedY;
-
-    // Hypotenuse gives the predicted straight-line distance after applying the
-    // translation due to robot motion during reload.
-    predictedDistanceToHubAfterReload = Math.hypot(newX, newY);
-
-    // Angle relative to the robot/field after the predicted displacement.
-    predictedFieldRelativeAngleToHubAfterReload = Math.atan2(newY, newX);
-
-    Logger.recordOutput(
-        "Shooting/PredictedDistanceToHubAfterReload", predictedDistanceToHubAfterReload);
-    Logger.recordOutput(
-        "Shooting/PredictedFieldRelativeAngleToHubAfterReload",
-        Math.toDegrees(predictedFieldRelativeAngleToHubAfterReload));
-  }
-
-  /**
-   * @return the predicted distance to the hub after reload (meters)
-   */
-  public double getPredictedDistanceToHubAfterReload() {
-    return predictedDistanceToHubAfterReload;
-  }
-
-  /**
-   * @return the predicted field-relative angle to the hub after reload (radians)
-   */
-  public double getPredictedFieldRelativeAngleToHubAfterReload() {
-    return predictedFieldRelativeAngleToHubAfterReload;
   }
 
   /**

@@ -124,7 +124,6 @@ public class ShooterSim implements ShooterIO {
         double error = angleDifferenceDeg(turretTargetDegs, turretAngleDegs);
         turretOutput = turretPID.calculate(0, error); // PID expects setpoint=0 for error
         hoodOutput = hoodPID.calculate(hoodAngleDegs, hoodTargetDegs);
-        // acceleration = ;
 
         turretOutput = MathUtil.clamp(turretOutput, -3.0, 3.0);
         hoodOutput = MathUtil.clamp(hoodOutput, -2.0, 2.0);
@@ -147,15 +146,9 @@ public class ShooterSim implements ShooterIO {
           try {
             Pose2d pose = poseSupplier.get();
             ChassisSpeeds speeds = speedsSupplier.get();
-            double fieldRelativeAngleToHub =
-                calculator.getPredictedFieldRelativeAngleToHubAfterReload();
             double totalHorizDeg =
                 MathUtil.inputModulus(calculator.getHorizontalTotalShootingAngle(), 0.0, 360.0);
             totalHorizontal.setAngle(totalHorizDeg);
-
-            double rawAngleDeg = Math.toDegrees(fieldRelativeAngleToHub);
-            double smoothAngleDeg = unwrapAngle(rawAngleDeg);
-            originalHorizontal.setAngle(smoothAngleDeg);
 
             var robotRotation = pose.getRotation();
             double cosR = Math.cos(robotRotation.getRadians());

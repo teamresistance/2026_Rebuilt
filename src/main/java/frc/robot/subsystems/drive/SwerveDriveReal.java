@@ -160,7 +160,6 @@ public class SwerveDriveReal implements SwerveDriveIO {
     previous = current;
   }
 
-  // TODO: Replace this with TalonFX's own methods
   @Override
   public Transform2d getAcceleration() {
     return acceleration;

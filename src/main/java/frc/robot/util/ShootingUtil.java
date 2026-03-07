@@ -196,25 +196,9 @@ public class ShootingUtil {
 
   private static final double HUB_HEIGHT = ShootingConstants.HUB_HEIGHT;
 
-  /*
-   * =======================
-   * Output State Variables
-   * =======================
-   */
-
-  /** Floor azimuth (degrees) - absolute angle of the target in the floor frame */
-  public static double floorAzimuthDeg;
-
-  /** For debug checking */
-  public static double vxFloor;
-
-  public static double vyFloor;
-
-  public static Pose2d robotPose;
-
   private static final int RK_STEPS = 30; // Increased for sub-centimeter precision
   private static final int SOLVE_ITERS = 3;
-  private static final double dt = T / RK_STEPS;
+  private static final double DT = T / RK_STEPS;
   private static final double G = 9.806;
 
   public record BallisticSolution(
@@ -236,7 +220,7 @@ public class ShootingUtil {
    * @param v_y robot floor velocity in the Y direction (m/s)
    */
   public static BallisticSolution computeBallistics(
-      double D, double floorAzimuthDeg, double v_x, double v_y) {
+      double D, double floorAzimuthDeg, double v_x, double v_y, Pose2d robotPose) {
     double azRad = floorAzimuthDeg * ShootingConstants.DEG_TO_RAD;
 
     // 1. Hub position is fixed in the Field Frame
@@ -249,12 +233,13 @@ public class ShootingUtil {
     double vyGuess = vFloorField * Math.sin(azRad);
     double vzGuess = (VY + 0.5 * 9.806 * T); // Initial vertical guess to counter gravity
 
-    // 3. Optimized Iterative Solve
-    final double dt = T / RK_STEPS;
-
     for (int iter = 0; iter < SOLVE_ITERS; iter++) {
-      double x = 0.0, y = 0.0, z = 0.0;
-      double vx = vxGuess, vy = vyGuess, vz = vzGuess;
+      double x = 0.0;
+      double y = 0.0;
+      double z = 0.0;
+      double vx = vxGuess;
+      double vy = vyGuess;
+      double vz = vzGuess;
 
       for (int i = 0; i < RK_STEPS; i++) {
         // Instantaneous 3D speed (The "True" Drag source)
@@ -262,21 +247,21 @@ public class ShootingUtil {
         double dragFactor = -ALPHA * speed;
 
         // RK2 Midpoint
-        double vxMid = vx + 0.5 * dt * (dragFactor * vx);
-        double vyMid = vy + 0.5 * dt * (dragFactor * vy);
-        double vzMid = vz + 0.5 * dt * (dragFactor * vz - G);
+        double vxMid = vx + 0.5 * DT * (dragFactor * vx);
+        double vyMid = vy + 0.5 * DT * (dragFactor * vy);
+        double vzMid = vz + 0.5 * DT * (dragFactor * vz - G);
 
         double speedMid = Math.sqrt(vxMid * vxMid + vyMid * vyMid + vzMid * vzMid);
         double dragFactorMid = -ALPHA * speedMid;
 
         // State Update
-        x += dt * vxMid;
-        y += dt * vyMid;
-        z += dt * vzMid;
+        x += DT * vxMid;
+        y += DT * vyMid;
+        z += DT * vzMid;
 
-        vx += dt * (dragFactorMid * vxMid);
-        vy += dt * (dragFactorMid * vyMid);
-        vz += dt * (dragFactorMid * vzMid - G);
+        vx += DT * (dragFactorMid * vxMid);
+        vy += DT * (dragFactorMid * vyMid);
+        vz += DT * (dragFactorMid * vzMid - G);
       }
 
       // Compute 3D Error
@@ -328,7 +313,13 @@ public class ShootingUtil {
    * @param a_y robot floor acceleration in the Y direction (m/s²)
    */
   public static BallisticSolution computeBallistics(
-      double D, double floorAzimuthDeg, double v_x, double v_y, double a_x, double a_y) {
+      double D,
+      double floorAzimuthDeg,
+      double v_x,
+      double v_y,
+      double a_x,
+      double a_y,
+      Pose2d robotPose) {
     double azRad = floorAzimuthDeg * ShootingConstants.DEG_TO_RAD;
 
     // 1. PROJECT ROBOT AND TARGET RELATIVE TO RELEASE POINT
@@ -358,27 +349,31 @@ public class ShootingUtil {
 
     // 3. SOLVE LOOP
     for (int iter = 0; iter < 4; iter++) { // 4 iterations to settle quadratic error
-      double x = 0.0, y = 0.0, z = 0.0;
-      double vx = vxGuess, vy = vyGuess, vz = vzGuess;
+      double x = 0.0;
+      double y = 0.0;
+      double z = 0.0;
+      double vx = vxGuess;
+      double vy = vyGuess;
+      double vz = vzGuess;
 
       for (int i = 0; i < RK_STEPS; i++) {
         double speed = Math.sqrt(vx * vx + vy * vy + vz * vz);
         double dragFactor = -ALPHA * speed;
 
         // RK2 Midpoint
-        double vxMid = vx + 0.5 * dt * (dragFactor * vx);
-        double vyMid = vy + 0.5 * dt * (dragFactor * vy);
-        double vzMid = vz + 0.5 * dt * (dragFactor * vz - G);
+        double vxMid = vx + 0.5 * DT * (dragFactor * vx);
+        double vyMid = vy + 0.5 * DT * (dragFactor * vy);
+        double vzMid = vz + 0.5 * DT * (dragFactor * vz - G);
 
         double speedMid = Math.sqrt(vxMid * vxMid + vyMid * vyMid + vzMid * vzMid);
         double dragMid = -ALPHA * speedMid;
 
-        x += dt * vxMid;
-        y += dt * vyMid;
-        z += dt * vzMid;
-        vx += dt * (dragMid * vxMid);
-        vy += dt * (dragMid * vyMid);
-        vz += dt * (dragMid * vzMid - G);
+        x += DT * vxMid;
+        y += DT * vyMid;
+        z += DT * vzMid;
+        vx += DT * (dragMid * vxMid);
+        vy += DT * (dragMid * vyMid);
+        vz += DT * (dragMid * vzMid - G);
       }
 
       // Error relative to the hub's position from the release point
@@ -418,7 +413,7 @@ public class ShootingUtil {
   public static double[] predictLandingPose(
       double xStart, double yStart, double vxLaunch, double vyLaunch, double vzLaunch) {
     final int RK_STEPS = 25;
-    final double dt = T / RK_STEPS;
+    final double DT = T / RK_STEPS;
     final double G = 9.806;
 
     double x = xStart; // Start from where the robot will be at release
@@ -438,35 +433,25 @@ public class ShootingUtil {
       double az = -ALPHA * speed * vz - G;
 
       // RK2 Midpoint velocity
-      double vxMid = vx + 0.5 * dt * ax;
-      double vyMid = vy + 0.5 * dt * ay;
-      double vzMid = vz + 0.5 * dt * az;
+      double vxMid = vx + 0.5 * DT * ax;
+      double vyMid = vy + 0.5 * DT * ay;
+      double vzMid = vz + 0.5 * DT * az;
       double speedMid = Math.sqrt(vxMid * vxMid + vyMid * vyMid + vzMid * vzMid);
 
       // Update state
-      x += dt * vxMid;
-      y += dt * vyMid;
-      z += dt * vzMid;
+      x += DT * vxMid;
+      y += DT * vyMid;
+      z += DT * vzMid;
 
-      vx += dt * (-ALPHA * speedMid * vxMid);
-      vy += dt * (-ALPHA * speedMid * vyMid);
-      vz += dt * (-ALPHA * speedMid * vzMid - G);
+      vx += DT * (-ALPHA * speedMid * vxMid);
+      vy += DT * (-ALPHA * speedMid * vyMid);
+      vz += DT * (-ALPHA * speedMid * vzMid - G);
     }
     return new double[] {x, y, z};
   }
 
-  public static double restingAngularVelocity = ShootingConstants.FREE_ANGULAR_VELOCITY;
-  public static double RADIUS = ShootingConstants.SHOOTER_RADIUS;
-  public static double E = ShootingConstants.SHOOTER_EFFICIENCY;
-
-  /* =======================
-   * Output State Variables
-   * ======================= */
-
-  /**
-   * Desired angular velocity of launcher wheel after adjustment (rad/s) - target speed post-launch
-   */
-  public static double desiredAngularVelocity = 0;
+  public static final double RADIUS = ShootingConstants.SHOOTER_RADIUS;
+  public static final double E = ShootingConstants.SHOOTER_EFFICIENCY;
 
   /**
    * Computes the required motor angular acceleration to restore launcher wheel speed.
@@ -481,7 +466,7 @@ public class ShootingUtil {
    * relevant metrics are printed to standard output.
    */
   public static double computeMotorAdjustment(double launchSpeed) {
-    desiredAngularVelocity = launchSpeed / (E * RADIUS) / 2 / Math.PI;
+    double desiredAngularVelocity = launchSpeed / (E * RADIUS) / 2 / Math.PI;
     return desiredAngularVelocity;
   }
 }
