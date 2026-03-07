@@ -234,12 +234,8 @@ public class ShootingUtil {
     double vzGuess = (VY + 0.5 * 9.806 * T); // Initial vertical guess to counter gravity
 
     for (int iter = 0; iter < SOLVE_ITERS; iter++) {
-      double x = 0.0;
-      double y = 0.0;
-      double z = 0.0;
-      double vx = vxGuess;
-      double vy = vyGuess;
-      double vz = vzGuess;
+      double x = 0.0, y = 0.0, z = 0.0;
+      double vx = vxGuess, vy = vyGuess, vz = vzGuess;
 
       for (int i = 0; i < RK_STEPS; i++) {
         // Instantaneous 3D speed (The "True" Drag source)
@@ -349,12 +345,8 @@ public class ShootingUtil {
 
     // 3. SOLVE LOOP
     for (int iter = 0; iter < 4; iter++) { // 4 iterations to settle quadratic error
-      double x = 0.0;
-      double y = 0.0;
-      double z = 0.0;
-      double vx = vxGuess;
-      double vy = vyGuess;
-      double vz = vzGuess;
+      double x = 0.0, y = 0.0, z = 0.0;
+      double vx = vxGuess, vy = vyGuess, vz = vzGuess;
 
       for (int i = 0; i < RK_STEPS; i++) {
         double speed = Math.sqrt(vx * vx + vy * vy + vz * vz);
