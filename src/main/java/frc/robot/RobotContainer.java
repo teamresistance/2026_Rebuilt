@@ -135,7 +135,9 @@ public class RobotContainer {
                 () -> MathUtil.clamp(-driver.getLeftY(), -0.8, 0.8),
                 () -> MathUtil.clamp(-driver.getLeftX(), -0.8, 0.8),
                 () -> MathUtil.clamp(-driver.getRightX(), -0.75, 0.75)),
-            () -> Math.abs(shooter.getDriveAssistanceAngle()) > 2);
+            () ->
+                Math.abs(shooter.getDriveAssistanceAngle()) > 2
+                    && driver.y().negate().getAsBoolean());
     driveShooting.addRequirements(drive);
 
     manualShiftAssigner.addOption("Red", "R");
