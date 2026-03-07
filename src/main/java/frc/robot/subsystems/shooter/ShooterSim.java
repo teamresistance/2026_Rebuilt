@@ -86,7 +86,7 @@ public class ShooterSim implements ShooterIO {
 
     hood = turretBase.append(new MechanismLigament2d("Hood", 0.4, 0, 6, new Color8Bit(Color.kRed)));
     SmartDashboard.putData("Turret Mechanism2d", mech);
-        }
+  }
 
   @Override
   public void periodic() {
@@ -136,7 +136,10 @@ public class ShooterSim implements ShooterIO {
             Pose2d pose = poseSupplier.get();
             ChassisSpeeds speeds = speedsSupplier.get();
             double totalHorizDeg =
-                MathUtil.inputModulus(ShootingPredictions.getCalculator().getHorizontalTotalShootingAngle(), 0.0, 360.0);
+                MathUtil.inputModulus(
+                    ShootingPredictions.getCalculator().getHorizontalTotalShootingAngle(),
+                    0.0,
+                    360.0);
             totalHorizontal.setAngle(totalHorizDeg);
 
             var robotRotation = pose.getRotation();

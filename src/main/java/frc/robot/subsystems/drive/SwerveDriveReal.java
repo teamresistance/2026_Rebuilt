@@ -156,20 +156,18 @@ public class SwerveDriveReal implements SwerveDriveIO {
   @Override
   public Transform2d getAcceleration() {
     for (int i = 0; i < 4; i++) {
-    accelStates[i] = new SwerveModuleState(
-        modules[i].getAcceleration(),
-        modules[i].getState().angle
-    );
-}
+      accelStates[i] =
+          new SwerveModuleState(modules[i].getAcceleration(), modules[i].getState().angle);
+    }
 
-ChassisSpeeds chassisAccel = kinematics.toChassisSpeeds(accelStates);
+    ChassisSpeeds chassisAccel = kinematics.toChassisSpeeds(accelStates);
 
-Transform2d acceleration = new Transform2d(
-    chassisAccel.vxMetersPerSecond,
-    chassisAccel.vyMetersPerSecond,
-    new Rotation2d(chassisAccel.omegaRadiansPerSecond)
-);
-return acceleration;
+    Transform2d acceleration =
+        new Transform2d(
+            chassisAccel.vxMetersPerSecond,
+            chassisAccel.vyMetersPerSecond,
+            new Rotation2d(chassisAccel.omegaRadiansPerSecond));
+    return acceleration;
   }
 
   /**

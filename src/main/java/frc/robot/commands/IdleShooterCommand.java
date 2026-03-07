@@ -58,8 +58,9 @@ public class IdleShooterCommand extends Command {
 
         // 3. Update the global calculator (Stateful calculation)
         // We pass the acceleration stored in the shooter's IO
-        ShootingPredictions.getCalculator().updateShootingParameters(
-            distanceToHub, fieldRelativeAngleToHub, speeds, drive.getAcceleration(), robotPose);
+        ShootingPredictions.getCalculator()
+            .updateShootingParameters(
+                distanceToHub, fieldRelativeAngleToHub, speeds, drive.getAcceleration(), robotPose);
 
         // 4. Extract results and set targets
         // Turret needs to be robot-relative for the hardware/PID

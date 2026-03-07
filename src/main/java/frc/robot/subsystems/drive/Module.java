@@ -10,7 +10,6 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.Timer;
-
 import org.littletonrobotics.junction.Logger;
 
 public class Module {
@@ -27,7 +26,7 @@ public class Module {
   private SwerveModulePosition[] odometryPositions = new SwerveModulePosition[] {};
 
   private double previousVelocity = 0;
-private double previousTimestamp = 0;
+  private double previousTimestamp = 0;
 
   public Module(
       ModuleIO io,
@@ -102,7 +101,7 @@ private double previousTimestamp = 0;
     return inputs.driveVelocityRadPerSec * constants.WheelRadius;
   }
 
-public double getAcceleration() {
+  public double getAcceleration() {
     double velocity = getState().speedMetersPerSecond;
     double timestamp = Timer.getFPGATimestamp();
 
@@ -112,7 +111,7 @@ public double getAcceleration() {
     previousTimestamp = timestamp;
 
     return accel;
-}
+  }
 
   /** Returns the module position (turn angle and drive position). */
   public SwerveModulePosition getPosition() {

@@ -27,9 +27,11 @@ public class ShootCommand extends Command {
     switch (calcMode) {
       case CALC:
         shooter.runFlywheelAtRPS(
-            Units.radiansToRotations(ShootingPredictions.getCalculator().getDesiredAngularVelocity()));
+            Units.radiansToRotations(
+                ShootingPredictions.getCalculator().getDesiredAngularVelocity()));
         Logger.recordOutput(
-            "Shooter/Desired Angular Velocity", ShootingPredictions.getCalculator().getDesiredAngularVelocity());
+            "Shooter/Desired Angular Velocity",
+            ShootingPredictions.getCalculator().getDesiredAngularVelocity());
         break;
       case MAPS:
         double distance =
