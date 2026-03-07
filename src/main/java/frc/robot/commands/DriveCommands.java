@@ -430,32 +430,30 @@ public class DriveCommands {
    * @param maxSpeedMPS max speed in meters per sec
    * @param points {@code Pose2d} points to construct a path out of
    */
-  public static Command followPosesWithMaxSpeed(SwerveDriveIO drive, double maxSpeedMPS, Pose2d... points) {
+  public static Command followPosesWithMaxSpeed(
+      SwerveDriveIO drive, double maxSpeedMPS, Pose2d... points) {
     if (points == null || points.length == 0) {
       return new InstantCommand(() -> {});
     }
 
-    PathConstraints localConstraints = new PathConstraints(
-      maxSpeedMPS,
-      5.0,
-      Units.degreesToRadians(540),
-      Units.degreesToRadians(400));
+    PathConstraints localConstraints =
+        new PathConstraints(
+            maxSpeedMPS, 5.0, Units.degreesToRadians(540), Units.degreesToRadians(400));
 
     List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(points);
     PathPlannerPath path =
-      new PathPlannerPath(
-        waypoints,
-        localConstraints,
-        new IdealStartingState(
-          drive.getPose().getTranslation().getDistance(points[0].getTranslation()),
-          points[0].getRotation()),
-        new GoalEndState(0, points[points.length - 1].getRotation()));
+        new PathPlannerPath(
+            waypoints,
+            localConstraints,
+            new IdealStartingState(
+                drive.getPose().getTranslation().getDistance(points[0].getTranslation()),
+                points[0].getRotation()),
+            new GoalEndState(0, points[points.length - 1].getRotation()));
 
     path.preventFlipping = true;
     return Commands.sequence(
-      AutoBuilder.pathfindToPose(
-        points[0], localConstraints, maxSpeedMPS),
-      AutoBuilder.followPath(path));
+        AutoBuilder.pathfindToPose(points[0], localConstraints, maxSpeedMPS),
+        AutoBuilder.followPath(path));
   }
 
   /**

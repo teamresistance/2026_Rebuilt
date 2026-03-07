@@ -2,12 +2,14 @@ package frc.robot.subsystems.shooter;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.*;
+import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.StrictFollower;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.math.MathUtil;
 import frc.robot.Constants;
 import frc.robot.util.ShootingUtil;
 import org.littletonrobotics.junction.Logger;
@@ -25,6 +27,7 @@ public class ShooterReal implements ShooterIO {
 
   private double hoodTargetAngle = 0;
   private double turretTargetAngle = 0;
+  private double turretDriveAssistTargetAngle = 0;
   private double flywheelTargetRPS = 0;
 
   /** Real implementation of a turret shooter. */
@@ -130,6 +133,10 @@ public class ShooterReal implements ShooterIO {
   @Override
   public void runFlywheelAtRPS(double rps) {
     flywheelTargetRPS = rps;
+    if (rps == 0) {
+      flywheelMotor.setControl(new CoastOut());
+      flywheelMotor2.setControl(new CoastOut());
+    }
     flywheelMotor.setControl(new VelocityDutyCycle(rps));
     flywheelMotor2.setControl(new StrictFollower(Constants.SHOOTER_FLYWHEEL_ID));
   }
@@ -154,11 +161,16 @@ public class ShooterReal implements ShooterIO {
    */
   @Override
   public void setTurretTarget(double angle) {
-    if (angle < Constants.SHOOTER_TURRET_MAX_YAW && angle > Constants.SHOOTER_TURRET_MIN_YAW) {
-      turretTargetAngle = angle;
-      turretMotor.setControl(
-          new MotionMagicVoltage(ShootingUtil.toTurretRevs(angle)).withEnableFOC(true));
+    double turretAngle =
+        MathUtil.clamp(angle, Constants.SHOOTER_TURRET_MIN_YAW, Constants.SHOOTER_TURRET_MAX_YAW);
+    if (Math.abs(angle - turretAngle) > 2.0) {
+      turretDriveAssistTargetAngle = MathUtil.inputModulus(angle - turretAngle, -180, 180);
+    } else {
+      turretDriveAssistTargetAngle = 0;
     }
+    turretTargetAngle = turretAngle;
+    turretMotor.setControl(
+        new MotionMagicVoltage(ShootingUtil.toTurretRevs(turretAngle)).withEnableFOC(true));
   }
 
   /**
@@ -174,8 +186,13 @@ public class ShooterReal implements ShooterIO {
   }
 
   @Override
+  public double getDriveAssistanceAngle() {
+    return turretDriveAssistTargetAngle;
+  }
+
+  @Override
   public boolean isShooting() {
-    return flywheelTargetRPS > 1.0;
+    return flywheelTargetRPS >= 1.0;
   }
 
   @Override
@@ -192,5 +209,6 @@ public class ShooterReal implements ShooterIO {
         "Shooter/Hood Real Angle",
         ShootingUtil.toTurretDegrees(
             ShootingUtil.toHoodDegrees(hoodMotor.getPosition().getValueAsDouble())));
+    Logger.recordOutput("Shooter/Drive Assist Angle", turretDriveAssistTargetAngle);
   }
 }

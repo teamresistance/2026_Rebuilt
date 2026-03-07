@@ -21,6 +21,7 @@ public class HoppertCommand extends Command {
   @Override
   public void initialize() {
     directionSwitchTimer.reset();
+    directionSwitchTimer.start();
   }
 
   @Override

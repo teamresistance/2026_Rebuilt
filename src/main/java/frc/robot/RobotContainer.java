@@ -3,6 +3,7 @@ package frc.robot;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -73,14 +74,13 @@ public class RobotContainer {
   // bump zone and prebuilt commands
   private final Trigger inBumpZone;
   private final Command driveAtAngleForBump;
-  private final Command driveAtLimitedSpeed;
+  private final Command driveShooting;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
 
     drive = configureDrive();
     vision = configureAprilTagVision();
-    configureNamedCommands();
     ShootingConstants.configureShootingConstants();
 
     switch (Constants.CURRENT_MODE) {
@@ -103,6 +103,8 @@ public class RobotContainer {
         climber = new ClimberReal();
     }
 
+    configureNamedCommands();
+
     // bump stuff
     inBumpZone = new Trigger(() -> BumpUtil.inBumpZone(drive::getPose, drive::getChassisSpeeds));
 
@@ -116,15 +118,24 @@ public class RobotContainer {
             .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming);
     driveAtAngleForBump.addRequirements(drive);
 
-    // clamps inputs to the drive command
-    driveAtLimitedSpeed =
-        DriveCommands.joystickDrive(
+    // angle assist vs.
+    driveShooting =
+        new ConditionalCommand(
+            DriveCommands.joystickDriveAtAngle(
                 drive,
                 () -> MathUtil.clamp(-driver.getLeftY(), -0.8, 0.8),
                 () -> MathUtil.clamp(-driver.getLeftX(), -0.8, 0.8),
-                () -> MathUtil.clamp(-driver.getRightX(), -0.75, 0.75))
-            .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming);
-    driveAtLimitedSpeed.addRequirements(drive);
+                () ->
+                    drive
+                        .getRotation()
+                        .plus(Rotation2d.fromDegrees(shooter.getDriveAssistanceAngle()))),
+            DriveCommands.joystickDrive(
+                drive,
+                () -> MathUtil.clamp(-driver.getLeftY(), -0.8, 0.8),
+                () -> MathUtil.clamp(-driver.getLeftX(), -0.8, 0.8),
+                () -> MathUtil.clamp(-driver.getRightX(), -0.75, 0.75)),
+            () -> Math.abs(shooter.getDriveAssistanceAngle()) > 2);
+    driveShooting.addRequirements(drive);
 
     manualShiftAssigner.addOption("Red", "R");
     manualShiftAssigner.addOption("Blue", "B");
@@ -138,10 +149,12 @@ public class RobotContainer {
   }
 
   private void configureNamedCommands() {
-    NamedCommands.registerCommand("Climb Up", Commands.runOnce(climber::unbrake)
-      .andThen(climber::up)
-      .andThen(new WaitUntilCommand(climber::atTarget))
-      .andThen(climber::brake));
+    NamedCommands.registerCommand(
+        "Climb Up",
+        Commands.runOnce(climber::unbrake)
+            .andThen(climber::up)
+            .andThen(new WaitUntilCommand(climber::atTarget))
+            .andThen(climber::brake));
     NamedCommands.registerCommand("Stop", Commands.runOnce(drive::stop, drive));
     NamedCommands.registerCommand("Shoot 5s", new ShootCommand(drive, shooter).withTimeout(5));
     NamedCommands.registerCommand("Shoot 10s", new ShootCommand(drive, shooter).withTimeout(10));
@@ -150,7 +163,8 @@ public class RobotContainer {
         "Closest Climb",
         new DeferredCommand(
             () ->
-                DriveCommands.followPosesWithMaxSpeed(drive, 0.5, OtherUtil.getClimberAlignPos(drive.getPose()))));
+                DriveCommands.followPosesWithMaxSpeed(
+                    drive, 0.5, OtherUtil.getClimberAlignPos(drive.getPose()))));
   }
 
   private LoggedDashboardChooser<Command> configureAutos() {
@@ -346,10 +360,18 @@ public class RobotContainer {
     // auto-align to climber positions with bumpers (left/right bumper = left/right pos)
     driver
         .leftBumper()
-        .whileTrue(new DeferredCommand(() -> DriveCommands.followPosesWithMaxSpeed(drive, 0.5, drive.getPose(), OtherUtil.getClimberAlignPos(true))));
+        .whileTrue(
+            new DeferredCommand(
+                () ->
+                    DriveCommands.followPosesWithMaxSpeed(
+                        drive, 0.5, drive.getPose(), OtherUtil.getClimberAlignPos(true))));
     driver
         .rightBumper()
-        .whileTrue(new DeferredCommand(() -> DriveCommands.followPosesWithMaxSpeed(drive, 0.5, drive.getPose(), OtherUtil.getClimberAlignPos(false))));
+        .whileTrue(
+            new DeferredCommand(
+                () ->
+                    DriveCommands.followPosesWithMaxSpeed(
+                        drive, 0.5, drive.getPose(), OtherUtil.getClimberAlignPos(false))));
 
     // auto-aim hood and turret always
     shooter.setDefaultCommand(new IdleShooterCommand(drive, shooter));
@@ -358,7 +380,7 @@ public class RobotContainer {
     driver.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
     driver.rightTrigger().whileTrue(new ShootCommand(drive, shooter));
-    driver.rightTrigger().whileTrue(driveAtLimitedSpeed);
+    driver.rightTrigger().whileTrue(driveShooting);
 
     // left trigger toggles intake
     driver.leftTrigger().onTrue(new ToggleIntakeCommand(intake));

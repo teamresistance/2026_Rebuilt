@@ -2,7 +2,6 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 
 // Use this file as an example file that allows for referencing positions on a field
 public final class FieldConstants {
@@ -105,5 +104,4 @@ public final class FieldConstants {
   public static final Pose2d RED_RIGHT_CLIMBER_ALIGN = new Pose2d(0.0, 0.0, Rotation2d.kZero);
   public static final Pose2d BLUE_LEFT_CLIMBER_ALIGN = new Pose2d(0.0, 0.0, Rotation2d.kZero);
   public static final Pose2d BLUE_RIGHT_CLIMBER_ALIGN = new Pose2d(0.0, 0.0, Rotation2d.kZero);
-
 }

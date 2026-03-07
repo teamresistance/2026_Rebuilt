@@ -83,6 +83,7 @@ public class HoppertReal implements HoppertIO {
     hopperRollerMotor.setControl(new CoastOut());
     hopperWheelsMotor.setControl(new CoastOut());
     hopperRollersRunning = false;
+    hopperWheelsRunning = false;
   }
 
   @Override
