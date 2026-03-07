@@ -44,7 +44,6 @@ public final class Constants {
   public static final int SHOOTER_TURRET_ID = 13;
   public static final int SHOOTER_FLYWHEEL_ID = 14;
   public static final int SHOOTER_FLYWHEEL_ID_2 = 15;
-  public static final int SHOOTER_TURRET_ENCODER_ID = 16;
 
   public static final int INTAKE_MOTOR_ID = 16;
 

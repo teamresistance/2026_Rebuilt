@@ -6,7 +6,6 @@ import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.StrictFollower;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
-import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.MathUtil;
@@ -22,8 +21,6 @@ public class ShooterReal implements ShooterIO {
       new TalonFX(Constants.SHOOTER_FLYWHEEL_ID, CANBus.roboRIO());
   private final TalonFX flywheelMotor2 =
       new TalonFX(Constants.SHOOTER_FLYWHEEL_ID_2, CANBus.roboRIO());
-  private final CANcoder turretEncoder =
-      new CANcoder(Constants.SHOOTER_TURRET_ENCODER_ID, CANBus.roboRIO());
 
   private double hoodTargetAngle = 0;
   private double turretTargetAngle = 0;
@@ -79,13 +76,7 @@ public class ShooterReal implements ShooterIO {
                     .withStatorCurrentLimit(40)
                     .withStatorCurrentLimitEnable(true)
                     .withSupplyCurrentLimit(40)
-                    .withSupplyCurrentLimitEnable(true))
-            .withFeedback(
-                new FeedbackConfigs()
-                    .withFusedCANcoder(turretEncoder)
-                    .withRotorToSensorRatio(5 * 5) // 5:1 and 5:1 planetary to where the encoder
-                    .withSensorToMechanismRatio(
-                        1 / 3.2)); // turret azimuth is a 25:80, encoder on smaller gear
+                    .withSupplyCurrentLimitEnable(true));
     turretMotor.getConfigurator().apply(turretConfig);
 
     TalonFXConfiguration flywheelConfig =
@@ -203,7 +194,7 @@ public class ShooterReal implements ShooterIO {
     Logger.recordOutput("Shooter/Turret Target Angle", turretTargetAngle);
     Logger.recordOutput(
         "Shooter/Turret Real Angle",
-        ShootingUtil.toTurretDegrees(turretEncoder.getPosition().getValueAsDouble()));
+        ShootingUtil.toTurretDegrees(turretMotor.getPosition().getValueAsDouble()));
     Logger.recordOutput("Shooter/Hood Target Angle", hoodTargetAngle);
     Logger.recordOutput(
         "Shooter/Hood Real Angle",
