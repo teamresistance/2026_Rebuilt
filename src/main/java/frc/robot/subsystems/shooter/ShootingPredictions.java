@@ -5,12 +5,21 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import frc.robot.Constants.ShootingConstants;
 import frc.robot.util.ShootingUtil;
 import frc.robot.util.ShootingUtil.BallisticSolution;
 import org.littletonrobotics.junction.Logger;
 
 public class ShootingPredictions {
+
+  /**
+   * This is the instance of {@code ShootingPredictions} that should be referenced by other shooter
+   * classes.
+   */
+  private static final ShootingPredictions calculator = new ShootingPredictions();
+
+  public static ShootingPredictions getCalculator() {
+    return calculator;
+  }
 
   /**
    * Vertical (elevation) angle to set the shooter to, in degrees. Updated by {@link
@@ -43,28 +52,8 @@ public class ShootingPredictions {
    */
   private double desiredAngularVelocity = 0;
 
-  /**
-   * Predicted straight-line distance (meters) to the hub after the reload delay. Used as an input
-   * to ballistic calculations. Updated by {@link #predictDistanceAndAngleAfterReload}.
-   */
-  private double predictedDistanceToHubAfterReload = 0;
-
-  /**
-   * Predicted field-relative angle (radians) to the hub after the reload delay. This is the angle
-   * in the robot's field coordinate frame and is used by the ballistic solver.
-   */
-  private double predictedFieldRelativeAngleToHubAfterReload = 0;
-
-  /**
-   * Time delay (seconds) from when a shot starts until the next ball is ready to be launched
-   * (reload time). Used to predict where the robot/target will be at the time of the next shot.
-   */
-  private static final double reloadTime = ShootingConstants.RELOAD_TIME;
-
   // 20ms loop
   private static final double LOOP_DT = 0.02;
-
-  private Transform2d acceleration = new Transform2d();
 
   // Maximum allowed change per second
   private static final double MAX_HOOD_RATE_DEG_PER_SEC = 180.0;
@@ -147,7 +136,7 @@ public class ShootingPredictions {
     // Store outputs from the calculators into this manager's public fields.
     double newVertical = calculation.hoodAngleDeg();
     double newOffset = calculation.deltaAzimuthDeg();
-    double newTotal = newOffset + Math.toDegrees(predictedFieldRelativeAngleToHubAfterReload);
+    double newTotal = newOffset + Math.toDegrees(fieldRelativeAngleToHub);
     double newLaunchVelocity = calculation.launchSpeed();
 
     // Apply rate limiting
@@ -160,14 +149,11 @@ public class ShootingPredictions {
 
     // Keep offset consistent with total
     horizontalOffsetShootingAngle =
-        horizontalTotalShootingAngle - Math.toDegrees(predictedFieldRelativeAngleToHubAfterReload);
+        horizontalTotalShootingAngle - Math.toDegrees(fieldRelativeAngleToHub);
     desiredAngularVelocity = ShootingUtil.computeMotorAdjustment(calculation.launchSpeed());
 
     // Record outputs for logging and tuning/debugging purposes.
     Logger.recordOutput("Shooting/VerticalShootingAngle", verticalShootingAngle);
-    Logger.recordOutput(
-        "Shooting/PredictedFieldRelativeAngleToHubAfterReload",
-        Math.toDegrees(predictedFieldRelativeAngleToHubAfterReload));
     Logger.recordOutput("Shooting/HorizontalOffsetShootingAngle", horizontalOffsetShootingAngle);
     Logger.recordOutput("Shooting/HorizontalTotalShootingAngle", horizontalTotalShootingAngle);
     Logger.recordOutput("Shooting/LaunchVelocity", launchVelocity);

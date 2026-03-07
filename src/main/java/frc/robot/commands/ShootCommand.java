@@ -6,6 +6,7 @@ import frc.robot.Constants.ShootingStyle;
 import frc.robot.subsystems.drive.SwerveDriveIO;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShootingMaps;
+import frc.robot.subsystems.shooter.ShootingPredictions;
 import frc.robot.util.ShootingUtil;
 import org.littletonrobotics.junction.Logger;
 
@@ -26,9 +27,9 @@ public class ShootCommand extends Command {
     switch (calcMode) {
       case CALC:
         shooter.runFlywheelAtRPS(
-            Units.radiansToRotations(ShooterIO.calculator.getDesiredAngularVelocity()));
+            Units.radiansToRotations(ShootingPredictions.getCalculator().getDesiredAngularVelocity()));
         Logger.recordOutput(
-            "Shooter/Desired Angular Velocity", ShooterIO.calculator.getDesiredAngularVelocity());
+            "Shooter/Desired Angular Velocity", ShootingPredictions.getCalculator().getDesiredAngularVelocity());
         break;
       case MAPS:
         double distance =

@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -30,9 +31,6 @@ public class SwerveDriveSim implements SwerveDriveIO {
   final DriveTrainSimulationConfig simulationConfig;
   final SelfControlledSwerveDriveSimulation driveSimulation;
   final Field2d field2d;
-
-  static ChassisSpeeds previous = new ChassisSpeeds();
-  static Transform2d acceleration = new Transform2d();
 
   public SwerveDriveSim() {
     simulationConfig =
@@ -73,9 +71,6 @@ public class SwerveDriveSim implements SwerveDriveIO {
 
   @Override
   public void periodic() {
-    ChassisSpeeds current = getChassisSpeeds();
-    acceleration = SwerveDriveIO.setAcceleration(current, previous);
-    previous = current;
 
     driveSimulation.periodic();
     SimulatedArena.getInstance().simulationPeriodic();
@@ -86,7 +81,21 @@ public class SwerveDriveSim implements SwerveDriveIO {
 
   @Override
   public Transform2d getAcceleration() {
-    return acceleration;
+    for (int i = 0; i < 4; i++) {
+    accelStates[i] = new SwerveModuleState(
+        modules[i].getAcceleration(),
+        modules[i].getState().angle
+    );
+}
+
+ChassisSpeeds chassisAccel = kinematics.toChassisSpeeds(accelStates);
+
+Transform2d acceleration = new Transform2d(
+    chassisAccel.vxMetersPerSecond,
+    chassisAccel.vyMetersPerSecond,
+    new Rotation2d(chassisAccel.omegaRadiansPerSecond)
+);
+return acceleration;
   }
 
   @Override

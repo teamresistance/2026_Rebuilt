@@ -36,9 +36,6 @@ public class SwerveDriveReal implements SwerveDriveIO {
   private final SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
   private final Field2d field2d = new Field2d();
-  // For acceleration estimation: store previous chassis speeds and latest accel
-  private ChassisSpeeds previous = new ChassisSpeeds();
-  private Transform2d acceleration = new Transform2d();
 
   public SwerveDriveReal(
       GyroIO gyroIO,
@@ -154,15 +151,25 @@ public class SwerveDriveReal implements SwerveDriveIO {
 
     // Update gyro alert
     gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.CURRENT_MODE != Mode.SIM);
-
-    ChassisSpeeds current = getChassisSpeeds();
-    acceleration = SwerveDriveIO.setAcceleration(current, previous);
-    previous = current;
   }
 
   @Override
   public Transform2d getAcceleration() {
-    return acceleration;
+    for (int i = 0; i < 4; i++) {
+    accelStates[i] = new SwerveModuleState(
+        modules[i].getAcceleration(),
+        modules[i].getState().angle
+    );
+}
+
+ChassisSpeeds chassisAccel = kinematics.toChassisSpeeds(accelStates);
+
+Transform2d acceleration = new Transform2d(
+    chassisAccel.vxMetersPerSecond,
+    chassisAccel.vyMetersPerSecond,
+    new Rotation2d(chassisAccel.omegaRadiansPerSecond)
+);
+return acceleration;
   }
 
   /**

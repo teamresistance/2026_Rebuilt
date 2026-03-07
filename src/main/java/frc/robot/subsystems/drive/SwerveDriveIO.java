@@ -18,6 +18,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -37,8 +38,7 @@ import org.littletonrobotics.junction.Logger;
 
 public interface SwerveDriveIO extends Subsystem {
 
-  // For acceleration estimation: store previous chassis speeds and latest accel
-  static Transform2d acceleration = new Transform2d();
+  SwerveModuleState[] accelStates = new SwerveModuleState[4];
 
   // Drive Constants
 
@@ -133,25 +133,6 @@ public interface SwerveDriveIO extends Subsystem {
   ChassisSpeeds getChassisSpeeds();
 
   Transform2d getVelocity();
-
-  static Transform2d setAcceleration(ChassisSpeeds current, ChassisSpeeds previousChassisSpeeds) {
-    try {
-      double dt = 0.02; // periodic loop at 20ms
-      double ax = (current.vxMetersPerSecond - previousChassisSpeeds.vxMetersPerSecond) / dt;
-      double ay = (current.vyMetersPerSecond - previousChassisSpeeds.vyMetersPerSecond) / dt;
-      double aomega =
-          (current.omegaRadiansPerSecond - previousChassisSpeeds.omegaRadiansPerSecond) / dt;
-      Transform2d accel = new Transform2d(ax, ay, new Rotation2d(aomega));
-      previousChassisSpeeds = current;
-      Logger.recordOutput("Drive/EstimatedAcceleration", acceleration);
-
-      return accel;
-    } catch (Exception ex) {
-      // Defensive: do not let acceleration estimation break periodic
-      Logger.recordOutput("Drive/AccelerationError", ex.toString());
-      return new Transform2d();
-    }
-  }
 
   Transform2d getAcceleration();
 

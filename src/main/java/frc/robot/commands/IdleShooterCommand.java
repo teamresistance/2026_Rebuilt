@@ -8,6 +8,7 @@ import frc.robot.Constants.ShootingStyle;
 import frc.robot.subsystems.drive.SwerveDriveIO;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShootingMaps;
+import frc.robot.subsystems.shooter.ShootingPredictions;
 import frc.robot.util.ShootingUtil;
 import org.littletonrobotics.junction.Logger;
 
@@ -33,10 +34,10 @@ public class IdleShooterCommand extends Command {
       case MAPS:
         double distance =
             ShootingUtil.getVirtualDistanceToTarget(drive.getPose(), drive.getChassisSpeeds());
-        double turretAngle =
+        turretAngleDeg =
             ShootingUtil.getAngleToAim(
                 drive.getPose(), drive.getChassisSpeeds(), ShootingMaps.getTimeOfFlight(distance));
-        double hoodAngle = ShootingMaps.getHoodAngle(distance);
+        hoodAngleDeg = ShootingMaps.getHoodAngle(distance);
 
         Logger.recordOutput("Shooter/Virtual Distance to Hub", distance);
         break;
@@ -57,15 +58,15 @@ public class IdleShooterCommand extends Command {
 
         // 3. Update the global calculator (Stateful calculation)
         // We pass the acceleration stored in the shooter's IO
-        ShooterIO.calculator.updateShootingParameters(
+        ShootingPredictions.getCalculator().updateShootingParameters(
             distanceToHub, fieldRelativeAngleToHub, speeds, drive.getAcceleration(), robotPose);
 
         // 4. Extract results and set targets
         // Turret needs to be robot-relative for the hardware/PID
         turretAngleDeg =
-            ShooterIO.calculator.getHorizontalTotalShootingAngle()
+            ShootingPredictions.getCalculator().getHorizontalTotalShootingAngle()
                 - robotPose.getRotation().getDegrees();
-        hoodAngleDeg = ShooterIO.calculator.getVerticalShootingAngle();
+        hoodAngleDeg = ShootingPredictions.getCalculator().getVerticalShootingAngle();
         break;
     }
 

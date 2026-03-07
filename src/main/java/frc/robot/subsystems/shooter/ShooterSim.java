@@ -86,18 +86,7 @@ public class ShooterSim implements ShooterIO {
 
     hood = turretBase.append(new MechanismLigament2d("Hood", 0.4, 0, 6, new Color8Bit(Color.kRed)));
     SmartDashboard.putData("Turret Mechanism2d", mech);
-  }
-
-  // Keep turret/robot angles continuous across 0/360 boundary
-  private double lastOriginalAngleDeg = 0;
-
-  private double unwrapAngle(double angleDeg) {
-    double delta = angleDeg - lastOriginalAngleDeg;
-    if (delta > 180.0) delta -= 360.0;
-    if (delta < -180.0) delta += 360.0;
-    lastOriginalAngleDeg += delta;
-    return lastOriginalAngleDeg;
-  }
+        }
 
   @Override
   public void periodic() {
@@ -147,7 +136,7 @@ public class ShooterSim implements ShooterIO {
             Pose2d pose = poseSupplier.get();
             ChassisSpeeds speeds = speedsSupplier.get();
             double totalHorizDeg =
-                MathUtil.inputModulus(calculator.getHorizontalTotalShootingAngle(), 0.0, 360.0);
+                MathUtil.inputModulus(ShootingPredictions.getCalculator().getHorizontalTotalShootingAngle(), 0.0, 360.0);
             totalHorizontal.setAngle(totalHorizDeg);
 
             var robotRotation = pose.getRotation();
@@ -161,8 +150,8 @@ public class ShooterSim implements ShooterIO {
             robotVel.setAngle(robotAngleDeg);
             robotVel.setLength(Math.min(1.5, robotSpeed * 0.25));
 
-            double launch = calculator.getLaunchVelocity();
-            shotVel.setAngle(calculator.getHorizontalTotalShootingAngle());
+            double launch = ShootingPredictions.getCalculator().getLaunchVelocity();
+            shotVel.setAngle(ShootingPredictions.getCalculator().getHorizontalTotalShootingAngle());
             shotVel.setLength(Math.min(1.5, Math.abs(launch) * 0.075));
           } catch (Exception ex) {
             Logger.recordOutput("Shooter/Sim Error", ex.toString());
