@@ -52,7 +52,6 @@ public class RobotContainer {
   public final PhotonCamera frontRightCamera = new PhotonCamera("front-right");
   public final PhotonCamera backLeftCamera = new PhotonCamera("back_left");
   public final PhotonCamera backRightCamera = new PhotonCamera("back_right");
-  public final PhotonCamera frontCenterCamera = new PhotonCamera("front-center");
   private final Alert cameraFailureAlert;
 
   // Subsystems
@@ -202,12 +201,7 @@ public class RobotContainer {
   private VisionSubsystem configureAprilTagVision() {
     try {
       vision =
-          new VisionSubsystem(
-              frontLeftCamera,
-              frontRightCamera,
-              backRightCamera,
-              frontCenterCamera,
-              backLeftCamera);
+          new VisionSubsystem(frontLeftCamera, frontRightCamera, backRightCamera, backLeftCamera);
       vision.setDataInterfaces(drive::getPose, drive::addAutoVisionMeasurement);
 
     } catch (IOException e) {
