@@ -128,7 +128,8 @@ public class RobotContainer {
                 () ->
                     drive
                         .getRotation()
-                        .plus(Rotation2d.fromDegrees(shooter.getDriveAssistanceAngle()))),
+                        .plus(Rotation2d.fromDegrees(shooter.getDriveAssistanceAngle()))
+                        .plus(Rotation2d.fromDegrees(-driver.getRightX() * 90))),
             DriveCommands.joystickDrive(
                 drive,
                 () -> MathUtil.clamp(-driver.getLeftY(), -0.8, 0.8),
