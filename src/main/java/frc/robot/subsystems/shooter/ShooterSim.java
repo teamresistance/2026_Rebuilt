@@ -15,7 +15,7 @@ import frc.robot.Constants.ShootingStyle;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
-public class ShooterSimCalc implements ShooterIO {
+public class ShooterSim implements ShooterIO {
 
   private final Mechanism2d mech;
   private final MechanismRoot2d root;
@@ -44,7 +44,7 @@ public class ShooterSimCalc implements ShooterIO {
   private Supplier<Pose2d> poseSupplier = null;
   private Supplier<ChassisSpeeds> speedsSupplier = null;
 
-  public ShooterSimCalc(
+  public ShooterSim(
       Supplier<Pose2d> poseSupplier,
       Supplier<ChassisSpeeds> speedsSupplier,
       ShootingStyle calcMode) {

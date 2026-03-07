@@ -9,16 +9,15 @@ import frc.robot.subsystems.drive.SwerveDriveIO;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShootingMaps;
 import frc.robot.util.ShootingUtil;
-import frc.robot.util.ShootingUtil.SimulationAndState;
 import org.littletonrobotics.junction.Logger;
 
-public class IdleShooterCalcCommand extends Command {
+public class IdleShooterCommand extends Command {
 
   private final SwerveDriveIO drive;
   private final ShooterIO shooter;
   private final ShootingStyle calcMode;
 
-  public IdleShooterCalcCommand(SwerveDriveIO _drive, ShooterIO _shooter, ShootingStyle _calcMode) {
+  public IdleShooterCommand(SwerveDriveIO _drive, ShooterIO _shooter, ShootingStyle _calcMode) {
     drive = _drive;
     shooter = _shooter;
     calcMode = _calcMode;
@@ -47,7 +46,7 @@ public class IdleShooterCalcCommand extends Command {
         ChassisSpeeds speeds = drive.getChassisSpeeds();
 
         // 2. Calculate Target Geometry
-        var targetPose = SimulationAndState.getShootingTarget(robotPose);
+        var targetPose = ShootingUtil.getShootingTarget(robotPose);
         Translation2d hub = targetPose.getTranslation();
         Translation2d robot = robotPose.getTranslation();
 

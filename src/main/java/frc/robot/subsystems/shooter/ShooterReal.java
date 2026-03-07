@@ -10,7 +10,6 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import frc.robot.Constants;
 import frc.robot.util.ShootingUtil;
-import frc.robot.util.ShootingUtil.Conversions;
 import org.littletonrobotics.junction.Logger;
 
 public class ShooterReal implements ShooterIO {
@@ -155,7 +154,7 @@ public class ShooterReal implements ShooterIO {
   public void zeroHood(double newValueDegrees) {
     if (newValueDegrees > Constants.SHOOTER_HOOD_MAX_PITCH
         || newValueDegrees < Constants.SHOOTER_HOOD_MIN_PITCH) {
-      hoodMotor.setPosition(Conversions.toHoodRevs(newValueDegrees));
+      hoodMotor.setPosition(ShootingUtil.toHoodRevs(newValueDegrees));
     }
   }
 
@@ -172,10 +171,10 @@ public class ShooterReal implements ShooterIO {
     Logger.recordOutput("Shooter/Turret Target Angle", turretTargetAngle);
     Logger.recordOutput(
         "Shooter/Turret Real Angle",
-        Conversions.toTurretDegrees(turretEncoder.getPosition().getValueAsDouble()));
+        ShootingUtil.toTurretDegrees(turretEncoder.getPosition().getValueAsDouble()));
     Logger.recordOutput("Shooter/Hood Target Angle", hoodTargetAngle);
     Logger.recordOutput(
         "Shooter/Hood Real Angle",
-        Conversions.toHoodDegrees(hoodMotor.getPosition().getValueAsDouble()));
+        ShootingUtil.toHoodDegrees(hoodMotor.getPosition().getValueAsDouble()));
   }
 }

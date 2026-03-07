@@ -31,7 +31,7 @@ public class SwerveDriveSim implements SwerveDriveIO {
   final SelfControlledSwerveDriveSimulation driveSimulation;
   final Field2d field2d;
 
-  ChassisSpeeds previous = new ChassisSpeeds();
+  static ChassisSpeeds previous = new ChassisSpeeds();
   static Transform2d acceleration = new Transform2d();
 
   public SwerveDriveSim() {
@@ -76,6 +76,7 @@ public class SwerveDriveSim implements SwerveDriveIO {
     ChassisSpeeds current = getChassisSpeeds();
     acceleration = SwerveDriveIO.setAcceleration(current, previous);
     previous = current;
+
     driveSimulation.periodic();
     SimulatedArena.getInstance().simulationPeriodic();
     field2d.setRobotPose(getPose());
@@ -83,7 +84,6 @@ public class SwerveDriveSim implements SwerveDriveIO {
     Logger.recordOutput("Drive/Robot Pose", getPose());
   }
 
-  // TODO: Replace this with TalonFX's own methods
   @Override
   public Transform2d getAcceleration() {
     return acceleration;

@@ -6,8 +6,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.Constants.ShootingConstants;
-import frc.robot.util.FastBallisticCalculator;
-import frc.robot.util.FastBallisticCalculator.BallisticSolution;
+import frc.robot.util.ShootingUtil;
+import frc.robot.util.ShootingUtil.BallisticSolution;
 import org.littletonrobotics.junction.Logger;
 
 public class ShootingPredictions {
@@ -124,7 +124,7 @@ public class ShootingPredictions {
     Rotation2d robotRotation = robotPose.getRotation();
     double cos = Math.cos(robotRotation.getRadians());
     double sin = Math.sin(robotRotation.getRadians());
-    FastBallisticCalculator.robotPose = robotPose;
+    ShootingUtil.robotPose = robotPose;
 
     // Robot-relative velocities (vx, vy) are rotated into the field frame.
     double vxField = chassisSpeeds.vxMetersPerSecond * cos - chassisSpeeds.vyMetersPerSecond * sin;
@@ -141,7 +141,7 @@ public class ShootingPredictions {
     // Compute ballistic solution for predicted range/angle using current robot
     // velocity in the field frame.
     BallisticSolution calculation =
-        FastBallisticCalculator.computeBallistics(
+        ShootingUtil.computeBallistics(
             predictedDistanceToHubAfterReload,
             Math.toDegrees(predictedFieldRelativeAngleToHubAfterReload),
             vxField,
@@ -166,8 +166,7 @@ public class ShootingPredictions {
     // Keep offset consistent with total
     horizontalOffsetShootingAngle =
         horizontalTotalShootingAngle - Math.toDegrees(predictedFieldRelativeAngleToHubAfterReload);
-    desiredAngularVelocity =
-        FastBallisticCalculator.computeMotorAdjustment(calculation.launchSpeed());
+    desiredAngularVelocity = ShootingUtil.computeMotorAdjustment(calculation.launchSpeed());
 
     // Record outputs for logging and tuning/debugging purposes.
     Logger.recordOutput("Shooting/VerticalShootingAngle", verticalShootingAngle);

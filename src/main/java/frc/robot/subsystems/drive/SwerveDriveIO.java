@@ -38,7 +38,6 @@ import org.littletonrobotics.junction.Logger;
 public interface SwerveDriveIO extends Subsystem {
 
   // For acceleration estimation: store previous chassis speeds and latest accel
-  static ChassisSpeeds previousChassisSpeeds = new ChassisSpeeds();
   static Transform2d acceleration = new Transform2d();
 
   // Drive Constants
@@ -136,11 +135,6 @@ public interface SwerveDriveIO extends Subsystem {
   Transform2d getVelocity();
 
   static Transform2d setAcceleration(ChassisSpeeds current, ChassisSpeeds previousChassisSpeeds) {
-    // TODO: Replace this with TalonFX's own methods
-    // --- Acceleration estimation ---
-    // Compute current chassis speeds from module states and estimate linear/angular
-    // acceleration by differencing with the previous stored speeds and dividing
-    // by the period (20ms). Store the result for callers of getAcceleration().
     try {
       double dt = 0.02; // periodic loop at 20ms
       double ax = (current.vxMetersPerSecond - previousChassisSpeeds.vxMetersPerSecond) / dt;

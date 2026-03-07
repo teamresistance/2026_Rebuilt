@@ -96,6 +96,7 @@ public class SwerveDriveReal implements SwerveDriveIO {
   @Override
   public void periodic() {
     ODOMETRY_LOCK.lock(); // Prevents odometry updates while reading data
+
     gyroIO.updateInputs(gyroInputs);
     Logger.processInputs("Drive/Gyro", gyroInputs);
     for (var module : modules) {

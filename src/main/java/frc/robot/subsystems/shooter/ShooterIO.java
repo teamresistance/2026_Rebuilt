@@ -10,20 +10,24 @@ public interface ShooterIO extends Subsystem {
    */
   static ShootingPredictions calculator = new ShootingPredictions();
 
+  static ShootingPredictions getCalculator() {
+    return calculator;
+  }
+
   @Override
-  public void periodic();
+  void periodic();
 
-  public boolean atShootingSetpoints();
+  boolean atShootingSetpoints();
 
-  public void runFlywheelAtRPS(double rps);
+  void runFlywheelAtRPS(double rps);
 
-  public void setHoodTarget(double hoodTargetAngle);
+  void setHoodTarget(double hoodTargetAngle);
 
-  public void setTurretTarget(double turretTargetAngle);
+  void setTurretTarget(double turretTargetAngle);
 
-  public boolean atTargetRPS();
+  boolean atTargetRPS();
 
-  public boolean isShooting();
+  boolean isShooting();
 
   void zeroHood(double newValue);
 }

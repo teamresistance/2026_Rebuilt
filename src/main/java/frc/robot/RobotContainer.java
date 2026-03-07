@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.HoppertCommand;
-import frc.robot.commands.IdleShooterCalcCommand;
+import frc.robot.commands.IdleShooterCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.commands.ToggleIntakeCommand;
 import frc.robot.generated.TunerConstants;
@@ -30,7 +30,7 @@ import frc.robot.subsystems.leds.LEDStream;
 import frc.robot.subsystems.leds.LEDSubsystem;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterReal;
-import frc.robot.subsystems.shooter.ShooterSimCalc;
+import frc.robot.subsystems.shooter.ShooterSim;
 import frc.robot.subsystems.shooter.ShootingMaps;
 import frc.robot.subsystems.vision.*;
 import frc.robot.util.BumpUtil;
@@ -94,8 +94,7 @@ public class RobotContainer {
         break;
       case SIM:
         shooter =
-            new ShooterSimCalc(
-                drive::getPose, drive::getChassisSpeeds, Constants.CURRENT_SHOT_STYLE);
+            new ShooterSim(drive::getPose, drive::getChassisSpeeds, Constants.CURRENT_SHOT_STYLE);
         hoppert = new HoppertSim();
         climber = new ClimberSim();
         intake = new IntakeSim();
@@ -229,8 +228,7 @@ public class RobotContainer {
                 "shooting/passing",
                 4,
                 () -> {
-                  boolean isShooting =
-                      ShootingUtil.SimulationAndState.getShootingType(drive::getPose) == 0;
+                  boolean isShooting = ShootingUtil.getShootingType(drive::getPose) == 0;
                   boolean isConfident =
                       TurretConfidenceUtil.calculateConfidence(drive)
                           > 75.0; // confidence threshold is greater than 75%
@@ -340,8 +338,7 @@ public class RobotContainer {
         .whileTrue(DriveCommands.goToTransform(drive, OtherUtil.getClimberAlignPos(false)));
 
     // auto-aim hood and turret always
-    shooter.setDefaultCommand(
-        new IdleShooterCalcCommand(drive, shooter, Constants.CURRENT_SHOT_STYLE));
+    shooter.setDefaultCommand(new IdleShooterCommand(drive, shooter, Constants.CURRENT_SHOT_STYLE));
 
     // Switch to X pattern when X button is pressed
     driver.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
