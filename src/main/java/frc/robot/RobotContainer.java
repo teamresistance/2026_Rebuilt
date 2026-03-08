@@ -377,7 +377,7 @@ public class RobotContainer {
     driver.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
     driver.rightTrigger().whileTrue(new ShootCommand(drive, shooter));
-    driver.rightTrigger().whileTrue(driveShooting);
+    driver.rightTrigger().and(driver.y().negate()).whileTrue(driveShooting);
 
     // left trigger toggles intake
     driver.leftTrigger().onTrue(new ToggleIntakeCommand(intake));
