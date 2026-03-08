@@ -8,7 +8,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -31,6 +30,11 @@ public class SwerveDriveSim implements SwerveDriveIO {
   final DriveTrainSimulationConfig simulationConfig;
   final SelfControlledSwerveDriveSimulation driveSimulation;
   final Field2d field2d;
+
+  // For acceleration estimation: store previous chassis speeds and latest accel
+  ChassisSpeeds previousChassisSpeeds = new ChassisSpeeds();
+  Transform2d acceleration = new Transform2d();
+  ChassisSpeeds current = new ChassisSpeeds();
 
   public SwerveDriveSim() {
     simulationConfig =
@@ -77,23 +81,29 @@ public class SwerveDriveSim implements SwerveDriveIO {
     field2d.setRobotPose(getPose());
     field2d.getObject("odometry").setPose(getPose());
     Logger.recordOutput("Drive/Robot Pose", getPose());
+
+    ChassisSpeeds current = getChassisSpeeds();
+    acceleration = getAcceleration();
+    previousChassisSpeeds = current;
   }
 
   @Override
   public Transform2d getAcceleration() {
-    for (int i = 0; i < 4; i++) {
-      accelStates[i] =
-          new SwerveModuleState(modules[i].getAcceleration(), modules[i].getState().angle);
+    try {
+      double dt = 0.02; // periodic loop at 20ms
+      double ax = (current.vxMetersPerSecond - previousChassisSpeeds.vxMetersPerSecond) / dt;
+      double ay = (current.vyMetersPerSecond - previousChassisSpeeds.vyMetersPerSecond) / dt;
+      double aomega =
+          (current.omegaRadiansPerSecond - previousChassisSpeeds.omegaRadiansPerSecond) / dt;
+      Transform2d accel = new Transform2d(ax, ay, new Rotation2d(aomega));
+      previousChassisSpeeds = current;
+      Logger.recordOutput("Drive/EstimatedAcceleration", acceleration);
+      return accel;
+    } catch (Exception ex) {
+      // Defensive: do not let acceleration estimation break periodic
+      Logger.recordOutput("Drive/AccelerationError", ex.toString());
+      return new Transform2d();
     }
-
-    ChassisSpeeds chassisAccel = kinematics.toChassisSpeeds(accelStates);
-
-    Transform2d acceleration =
-        new Transform2d(
-            chassisAccel.vxMetersPerSecond,
-            chassisAccel.vyMetersPerSecond,
-            new Rotation2d(chassisAccel.omegaRadiansPerSecond));
-    return acceleration;
   }
 
   @Override
