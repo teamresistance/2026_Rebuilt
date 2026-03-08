@@ -148,12 +148,6 @@ public final class Constants {
       throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
     }
 
-    /*
-     * ===============
-     * Ballistic Constants
-     * ===============
-     */
-
     // Mass of the projectile fuel (kg) - affects drag and energy loss calculations
     public static final double FUEL_MASS = 0.227;
 
@@ -166,28 +160,22 @@ public final class Constants {
     // Acceleration due to gravity (m/s^2)
     public static final double G = 9.80665;
 
-    // Fixed flight time (seconds) - predetermined projectile flight duration used
-    // in calculations
+    // Fixed flight time (seconds) - predetermined projectile flight duration used in calculations
     public static final double MINIMUM_TIME_OF_FLIGHT = 1.2;
 
     // Drag coefficient - exponential factor in air resistance equation
     public static final double QUADRATIC_DRAG_COEFFICIENT = 0.004997;
 
-    // TODO: correct numbers with real hardware
-    // Vertical velocity component (m/s) - gravitational component of projectile
-    // motion
-
     private static final double ROOT_MG_OVER_K =
         Math.sqrt(FUEL_MASS * G / QUADRATIC_DRAG_COEFFICIENT);
+        
     public static final double VERTICAL_VELOCITY_COMPONENT =
         ROOT_MG_OVER_K
             * (Math.exp(QUADRATIC_DRAG_COEFFICIENT * (HUB_HEIGHT - TURRET_HEIGHT) / FUEL_MASS)
                 - Math.cos((1 / ROOT_MG_OVER_K) * G * MINIMUM_TIME_OF_FLIGHT))
             / (Math.sin((1 / ROOT_MG_OVER_K) * G * MINIMUM_TIME_OF_FLIGHT));
 
-    // TODO: correct numbers with real hardware
-    // Square of vertical velocity component (m^2/s^2) - used in total velocity
-    // calculations
+    // Square of vertical velocity component (m^2/s^2) - used in total velocity calculations
     public static final double VERTICAL_VELOCITY_COMPONENT_SQUARED = 48.0052946927;
 
     /*
@@ -202,27 +190,10 @@ public final class Constants {
     // shot
     public static final double RELOAD_TIME = 0.07675438596;
 
-    // TODO: correct numbers with real hardware
-    // Upswing velocity of projectile before launch (m/s) - pre-launch speed
-    // requirement for
-    // consistent shooting performance
-    public static final double UPSWING_VELOCITY = 5.7912;
-
-    // TODO: correct numbers with real hardware
-    // Moment of inertia of the shooter mechanism (kg·m^2) - affects how much torque
-    // is needed to
-    // adjust wheel speed after a shot
-    public static final double SHOOTER_MOMENT_OF_INERTIA = 0.00126;
 
     public static final double SHOOTER_RADIUS = 0.0381; // (meters)
     public static final double SHOOTER_EFFICIENCY =
         0.60; // worst-case placeholder. TODO: empirically calculate
-
-    // TODO: correct numbers with real hardware
-    // Resting angular velocity of the shooter wheel (rad/s) - target steady-state
-    // speed for
-    // consistent shooting performance
-    public static final double FREE_ANGULAR_VELOCITY = 0;
 
     /** Conversion factor from radians to degrees */
     public static final double RAD_TO_DEG = 180.0 / Math.PI;

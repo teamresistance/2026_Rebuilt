@@ -156,9 +156,6 @@ public class ShootingUtil {
       return 0;
     }
 
-    // TODO: Uncomment if the variable is needed, otherwise delete
-    // boolean isTop = pose.getY() >= FieldConstants.TOP_BOTTOM_SPLIT_Y;
-
     if (allianceOpt.get() == DriverStation.Alliance.Blue
         && pose.getX() <= FieldConstants.BLUE_SHOOTING_ZONE_END) {
       return 0;
