@@ -21,12 +21,12 @@ public class HoppertCommand extends Command {
   @Override
   public void initialize() {
     directionSwitchTimer.reset();
+    directionSwitchTimer.start();
   }
 
   @Override
   public void execute() {
 
-    // TODO: only run the hopper when at target speed too? test if motors stall constantly or
     // something
 
     if (shooter.isShooting()) {

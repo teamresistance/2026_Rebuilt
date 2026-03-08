@@ -2,12 +2,13 @@ package frc.robot.subsystems.shooter;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.*;
+import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.StrictFollower;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
-import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.math.MathUtil;
 import frc.robot.Constants;
 import frc.robot.util.ShootingUtil;
 import org.littletonrobotics.junction.Logger;
@@ -20,17 +21,19 @@ public class ShooterReal implements ShooterIO {
       new TalonFX(Constants.SHOOTER_FLYWHEEL_ID, CANBus.roboRIO());
   private final TalonFX flywheelMotor2 =
       new TalonFX(Constants.SHOOTER_FLYWHEEL_ID_2, CANBus.roboRIO());
-  private final CANcoder turretEncoder =
-      new CANcoder(Constants.SHOOTER_TURRET_ENCODER_ID, CANBus.roboRIO());
 
   private double hoodTargetAngle = 0;
-  private double turretTargetAngle = 180;
+  private double turretTargetAngle = 0;
+  private double turretDriveAssistTargetAngle = 0;
   private double flywheelTargetRPS = 0;
+
+  private boolean emergencyStopSwivel = false;
 
   /** Real implementation of a turret shooter. */
   public ShooterReal() {
     register();
     configure();
+    zeroHood(Constants.SHOOTER_HOOD_MIN_PITCH);
   }
 
   /** Configures motors (control mode, pid, current limits) */
@@ -47,10 +50,18 @@ public class ShooterReal implements ShooterIO {
             .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
-                    .withStatorCurrentLimit(0)
+                    .withStatorCurrentLimit(10)
                     .withStatorCurrentLimitEnable(true)
-                    .withSupplyCurrentLimit(0)
-                    .withSupplyCurrentLimitEnable(true));
+                    .withSupplyCurrentLimit(10)
+                    .withSupplyCurrentLimitEnable(true))
+            .withSoftwareLimitSwitch(
+                new SoftwareLimitSwitchConfigs()
+                    .withForwardSoftLimitEnable(true)
+                    .withForwardSoftLimitThreshold(
+                        ShootingUtil.toHoodRevs(Constants.SHOOTER_HOOD_MAX_PITCH))
+                    .withReverseSoftLimitEnable(true)
+                    .withReverseSoftLimitThreshold(
+                        ShootingUtil.toHoodRevs(Constants.SHOOTER_HOOD_MIN_PITCH)));
     hoodMotor.getConfigurator().apply(hoodConfig);
 
     // TODO: tune me and get rid of the ultra slow starting values
@@ -59,17 +70,15 @@ public class ShooterReal implements ShooterIO {
             .withSlot0(new Slot0Configs().withKP(1).withKI(0).withKD(0).withKS(0))
             .withMotionMagic(
                 new MotionMagicConfigs()
-                    .withMotionMagicAcceleration(50)
-                    .withMotionMagicCruiseVelocity(10))
+                    .withMotionMagicAcceleration(150)
+                    .withMotionMagicCruiseVelocity(140))
             .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
-                    .withStatorCurrentLimit(0)
+                    .withStatorCurrentLimit(40)
                     .withStatorCurrentLimitEnable(true)
-                    .withSupplyCurrentLimit(0)
-                    .withSupplyCurrentLimitEnable(true))
-            .withFeedback(
-                new FeedbackConfigs().withRemoteCANcoder(turretEncoder).withRotorToSensorRatio(20));
+                    .withSupplyCurrentLimit(40)
+                    .withSupplyCurrentLimitEnable(true));
     turretMotor.getConfigurator().apply(turretConfig);
 
     TalonFXConfiguration flywheelConfig =
@@ -117,6 +126,10 @@ public class ShooterReal implements ShooterIO {
   @Override
   public void runFlywheelAtRPS(double rps) {
     flywheelTargetRPS = rps;
+    if (rps == 0) {
+      flywheelMotor.setControl(new CoastOut());
+      flywheelMotor2.setControl(new CoastOut());
+    }
     flywheelMotor.setControl(new VelocityDutyCycle(rps));
     flywheelMotor2.setControl(new StrictFollower(Constants.SHOOTER_FLYWHEEL_ID));
   }
@@ -130,7 +143,8 @@ public class ShooterReal implements ShooterIO {
     if (angle < Constants.SHOOTER_HOOD_MAX_PITCH && angle > Constants.SHOOTER_HOOD_MIN_PITCH) {
       angle = angle - Constants.SHOOTER_HOOD_MIN_PITCH; // zero position is not zero degrees
       hoodTargetAngle = angle;
-      hoodMotor.setControl(new MotionMagicVoltage(ShootingUtil.toHoodRevs(angle)));
+      hoodMotor.setControl(
+          new MotionMagicVoltage(ShootingUtil.toHoodRevs(angle)).withEnableFOC(true));
     }
   }
 
@@ -140,9 +154,21 @@ public class ShooterReal implements ShooterIO {
    */
   @Override
   public void setTurretTarget(double angle) {
-    if (angle < Constants.SHOOTER_TURRET_MAX_YAW && angle > Constants.SHOOTER_TURRET_MIN_YAW) {
-      turretTargetAngle = angle;
-      turretMotor.setControl(new MotionMagicVoltage(ShootingUtil.toTurretRevs(angle)));
+    if (emergencyStopSwivel) {
+      // stop swivel, aim with drive, offset from stopped position
+      turretDriveAssistTargetAngle =
+          angle + (ShootingUtil.toTurretDegrees(turretMotor.getPosition().getValueAsDouble()));
+    } else {
+      double turretAngle =
+          MathUtil.clamp(angle, Constants.SHOOTER_TURRET_MIN_YAW, Constants.SHOOTER_TURRET_MAX_YAW);
+      if (Math.abs(angle - turretAngle) > 2.0) {
+        turretDriveAssistTargetAngle = MathUtil.inputModulus(angle - turretAngle, -180, 180);
+      } else {
+        turretDriveAssistTargetAngle = 0;
+      }
+      turretTargetAngle = turretAngle;
+      turretMotor.setControl(
+          new MotionMagicVoltage(ShootingUtil.toTurretRevs(turretAngle)).withEnableFOC(true));
     }
   }
 
@@ -159,8 +185,18 @@ public class ShooterReal implements ShooterIO {
   }
 
   @Override
+  public double getDriveAssistanceAngle() {
+    return turretDriveAssistTargetAngle;
+  }
+
+  @Override
+  public void setSwivelStop(boolean stopped) {
+    emergencyStopSwivel = stopped;
+  }
+
+  @Override
   public boolean isShooting() {
-    return flywheelTargetRPS > 1.0;
+    return flywheelTargetRPS >= 1.0;
   }
 
   @Override
@@ -171,11 +207,12 @@ public class ShooterReal implements ShooterIO {
     Logger.recordOutput("Shooter/Turret Target Angle", turretTargetAngle);
     Logger.recordOutput(
         "Shooter/Turret Real Angle",
-        ShootingUtil.toTurretDegrees(turretEncoder.getPosition().getValueAsDouble()));
+        ShootingUtil.toTurretDegrees(turretMotor.getPosition().getValueAsDouble()));
     Logger.recordOutput("Shooter/Hood Target Angle", hoodTargetAngle);
     Logger.recordOutput(
         "Shooter/Hood Real Angle",
         ShootingUtil.toTurretDegrees(
             ShootingUtil.toHoodDegrees(hoodMotor.getPosition().getValueAsDouble())));
+    Logger.recordOutput("Shooter/Drive Assist Angle", turretDriveAssistTargetAngle);
   }
 }

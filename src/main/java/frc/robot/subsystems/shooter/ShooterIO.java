@@ -20,4 +20,8 @@ public interface ShooterIO extends Subsystem {
   boolean isShooting();
 
   void zeroHood(double newValue);
+
+  double getDriveAssistanceAngle();
+
+  void setSwivelStop(boolean stopped);
 }
