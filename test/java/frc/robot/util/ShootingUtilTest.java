@@ -3,8 +3,6 @@ package frc.robot.util;
 import static org.junit.jupiter.api.Assertions.*;
 
 import edu.wpi.first.hal.HAL;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.util.ShootingUtil.BallisticSolution;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,9 +20,6 @@ public class ShootingUtilTest {
   // Tolerance in degrees for angle assertions.
   private static final double ANGLE_TOLERANCE_DEG = 1.5;
 
-  // A neutral robot pose (origin, facing field +X) used when pose does not affect the test.
-  private static final Pose2d ORIGIN_POSE = new Pose2d(0, 0, Rotation2d.kZero);
-
   @BeforeEach
   public void setup() {
     assertTrue(HAL.initialize(500, 0));
@@ -41,7 +36,7 @@ public class ShootingUtilTest {
     double D = 4.0;
     double azimuthDeg = 0.0;
 
-    BallisticSolution sol = ShootingUtil.computeBallistics(D, azimuthDeg, 0.0, 0.0, ORIGIN_POSE);
+    BallisticSolution sol = ShootingUtil.computeBallistics(D, azimuthDeg, 0.0, 0.0);
 
     // Back-simulate to verify landing position
     double[] landing =
@@ -72,7 +67,7 @@ public class ShootingUtilTest {
   @DisplayName(
       "[Calculated Approach] Stationary robot: solution is physically plausible (positive speed, angle)")
   public void testStationaryShot_plausibility() {
-    BallisticSolution sol = ShootingUtil.computeBallistics(4.0, 0.0, 0.0, 0.0, ORIGIN_POSE);
+    BallisticSolution sol = ShootingUtil.computeBallistics(4.0, 0.0, 0.0, 0.0);
 
     assertTrue(sol.launchSpeed() > 0, "[Calculated Approach] Launch speed must be positive");
     assertTrue(
@@ -85,7 +80,7 @@ public class ShootingUtilTest {
       "[Calculated Approach] Stationary robot: azimuth correction is zero when aiming directly at target")
   public void testStationaryShot_noAzimuthCorrection() {
     // No robot velocity means Galilean correction is zero — azimuth delta should be near zero
-    BallisticSolution sol = ShootingUtil.computeBallistics(4.0, 0.0, 0.0, 0.0, ORIGIN_POSE);
+    BallisticSolution sol = ShootingUtil.computeBallistics(4.0, 0.0, 0.0, 0.0);
 
     assertEquals(
         0.0,
@@ -97,9 +92,9 @@ public class ShootingUtilTest {
   @Test
   @DisplayName("[Calculated Approach] Moving robot: launch speed differs from stationary shot")
   public void testMovingRobot_speedDiffersFromStationary() {
-    BallisticSolution stationary = ShootingUtil.computeBallistics(4.0, 0.0, 0.0, 0.0, ORIGIN_POSE);
+    BallisticSolution stationary = ShootingUtil.computeBallistics(4.0, 0.0, 0.0, 0.0);
     // Robot moving toward the target at 3 m/s
-    BallisticSolution moving = ShootingUtil.computeBallistics(4.0, 0.0, 3.0, 0.0, ORIGIN_POSE);
+    BallisticSolution moving = ShootingUtil.computeBallistics(4.0, 0.0, 3.0, 0.0);
 
     // Shooter output speed must be lower when moving toward target (Galilean subtraction)
     assertTrue(
@@ -112,7 +107,7 @@ public class ShootingUtilTest {
       "[Calculated Approach] Moving robot: azimuth correction applied for lateral velocity")
   public void testMovingRobot_lateralAzimuthCorrection() {
     // Robot moving laterally (perpendicular to target direction)
-    BallisticSolution sol = ShootingUtil.computeBallistics(4.0, 0.0, 0.0, 3.0, ORIGIN_POSE);
+    BallisticSolution sol = ShootingUtil.computeBallistics(4.0, 0.0, 0.0, 3.0);
 
     // Shooter must aim off-axis to compensate
     assertNotEquals(
@@ -125,8 +120,8 @@ public class ShootingUtilTest {
   @Test
   @DisplayName("[Calculated Approach] Longer range produces higher required launch speed")
   public void testLaunchSpeedScalesWithDistance() {
-    BallisticSolution near = ShootingUtil.computeBallistics(2.0, 0.0, 0.0, 0.0, ORIGIN_POSE);
-    BallisticSolution far = ShootingUtil.computeBallistics(6.0, 0.0, 0.0, 0.0, ORIGIN_POSE);
+    BallisticSolution near = ShootingUtil.computeBallistics(2.0, 0.0, 0.0, 0.0);
+    BallisticSolution far = ShootingUtil.computeBallistics(6.0, 0.0, 0.0, 0.0);
 
     assertTrue(
         far.launchSpeed() > near.launchSpeed(), "Farther targets require higher launch speed");
@@ -137,7 +132,7 @@ public class ShootingUtilTest {
       "[Calculated Approach] Non-zero azimuth target: solution points shooter toward target")
   public void testNonZeroAzimuth_solutionDirectionCorrect() {
     double azimuthDeg = 45.0;
-    BallisticSolution sol = ShootingUtil.computeBallistics(4.0, azimuthDeg, 0.0, 0.0, ORIGIN_POSE);
+    BallisticSolution sol = ShootingUtil.computeBallistics(4.0, azimuthDeg, 0.0, 0.0);
 
     // deltaAzimuthDeg is the correction relative to azimuth; for stationary robot it should be ~0
     assertEquals(
@@ -159,9 +154,8 @@ public class ShootingUtilTest {
       "[Calculated Approach] Acceleration overload: zero acceleration matches no-acceleration overload")
   public void testAccelOverload_zeroAccelMatchesBaseOverload() {
     double D = 4.0;
-    BallisticSolution base = ShootingUtil.computeBallistics(D, 0.0, 2.0, 0.0, ORIGIN_POSE);
-    BallisticSolution accel =
-        ShootingUtil.computeBallistics(D, 0.0, 2.0, 0.0, 0.0, 0.0, ORIGIN_POSE);
+    BallisticSolution base = ShootingUtil.computeBallistics(D, 0.0, 2.0, 0.0);
+    BallisticSolution accel = ShootingUtil.computeBallistics(D, 0.0, 2.0, 0.0, 0.0, 0.0);
 
     assertEquals(
         base.launchSpeed(),
@@ -185,10 +179,8 @@ public class ShootingUtilTest {
       "[Calculated Approach] Acceleration overload: nonzero X acceleration changes the solution")
   public void testAccelOverload_nonzeroXaccelChangesSolution() {
     double D = 4.0;
-    BallisticSolution noAccel =
-        ShootingUtil.computeBallistics(D, 0.0, 0.0, 0.0, 0.0, 0.0, ORIGIN_POSE);
-    BallisticSolution withAccel =
-        ShootingUtil.computeBallistics(D, 0.0, 0.0, 0.0, 4.0, 0.0, ORIGIN_POSE);
+    BallisticSolution noAccel = ShootingUtil.computeBallistics(D, 0.0, 0.0, 0.0, 0.0, 0.0);
+    BallisticSolution withAccel = ShootingUtil.computeBallistics(D, 0.0, 0.0, 0.0, 4.0, 0.0);
 
     // At max robot acceleration the solution must shift meaningfully
     assertNotEquals(
@@ -203,10 +195,8 @@ public class ShootingUtilTest {
       "[Calculated Approach] Acceleration overload: nonzero Y acceleration changes the solution")
   public void testAccelOverload_nonzeroYaccelChangesSolution() {
     double D = 4.0;
-    BallisticSolution noAccel =
-        ShootingUtil.computeBallistics(D, 0.0, 0.0, 0.0, 0.0, 0.0, ORIGIN_POSE);
-    BallisticSolution withAccel =
-        ShootingUtil.computeBallistics(D, 0.0, 0.0, 0.0, 0.0, 4.0, ORIGIN_POSE);
+    BallisticSolution noAccel = ShootingUtil.computeBallistics(D, 0.0, 0.0, 0.0, 0.0, 0.0);
+    BallisticSolution withAccel = ShootingUtil.computeBallistics(D, 0.0, 0.0, 0.0, 0.0, 4.0);
 
     // At max robot acceleration the solution must shift meaningfully
     assertNotEquals(
@@ -219,8 +209,7 @@ public class ShootingUtilTest {
   @Test
   @DisplayName("[Calculated Approach] Acceleration overload: solution is physically plausible")
   public void testAccelOverload_plausibility() {
-    BallisticSolution sol =
-        ShootingUtil.computeBallistics(4.0, 0.0, 2.0, 1.0, 3.0, 1.5, ORIGIN_POSE);
+    BallisticSolution sol = ShootingUtil.computeBallistics(4.0, 0.0, 2.0, 1.0, 3.0, 1.5);
 
     assertTrue(
         sol.launchSpeed() > 0,

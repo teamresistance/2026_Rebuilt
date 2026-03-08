@@ -177,7 +177,8 @@ public final class Constants {
     // Vertical velocity component (m/s) - gravitational component of projectile
     // motion
 
-    private static double ROOT_MG_OVER_K = Math.sqrt(FUEL_MASS * G / QUADRATIC_DRAG_COEFFICIENT);
+    private static final double ROOT_MG_OVER_K =
+        Math.sqrt(FUEL_MASS * G / QUADRATIC_DRAG_COEFFICIENT);
     public static final double VERTICAL_VELOCITY_COMPONENT =
         ROOT_MG_OVER_K
             * (Math.exp(QUADRATIC_DRAG_COEFFICIENT * (HUB_HEIGHT - TURRET_HEIGHT) / FUEL_MASS)

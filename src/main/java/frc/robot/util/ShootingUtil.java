@@ -189,7 +189,7 @@ public class ShootingUtil {
   private static final double R = ShootingConstants.RELOAD_TIME;
 
   /** Inverse of flight time (1/T) - precomputed for efficiency in calculations */
-  private static final double invT = 1.0 / T;
+  private static final double INV_T = 1.0 / T;
 
   /** Alpha constant for RK2 correction - derived from drag coefficient and mass */
   private static final double ALPHA = K / M;
@@ -216,11 +216,11 @@ public class ShootingUtil {
    *
    * @param D distance to the target along the floor (meters)
    * @param floorAzimuthDeg absolute azimuth angle of the target in the floor frame (degrees)
-   * @param v_x robot floor velocity in the X direction (m/s)
-   * @param v_y robot floor velocity in the Y direction (m/s)
+   * @param vX robot floor velocity in the X direction (m/s)
+   * @param vY robot floor velocity in the Y direction (m/s)
    */
   public static BallisticSolution computeBallistics(
-      double D, double floorAzimuthDeg, double v_x, double v_y, Pose2d robotPose) {
+      double D, double floorAzimuthDeg, double vX, double vY) {
     double azRad = floorAzimuthDeg * ShootingConstants.DEG_TO_RAD;
 
     // 1. Hub position is fixed in the Field Frame
@@ -265,18 +265,18 @@ public class ShootingUtil {
       double errY = y - yHub;
       double errZ = z - HUB_HEIGHT;
 
-      // Newton correction (using invT for horizontal,
+      // Newton correction (using INV_T for horizontal,
       // vertical requires less gain due to gravity's dominance)
-      vxGuess -= errX * invT;
-      vyGuess -= errY * invT;
-      vzGuess -= errZ * invT;
+      vxGuess -= errX * INV_T;
+      vyGuess -= errY * INV_T;
+      vzGuess -= errZ * INV_T;
     }
 
     // 4. GALILEAN TRANSFORMATION (The "Magic" Step)
     // vxGuess is what the ball needs to be doing relative to the ground.
     // The shooter only provides the difference between that and the robot's velocity.
-    double vxShooter = vxGuess - v_x;
-    double vyShooter = vyGuess - v_y;
+    double vxShooter = vxGuess - vX;
+    double vyShooter = vyGuess - vY;
 
     double vFloorCorrected = Math.sqrt(vxShooter * vxShooter + vyShooter * vyShooter);
 
@@ -303,29 +303,23 @@ public class ShootingUtil {
    *
    * @param D distance to the target along the floor (meters)
    * @param floorAzimuthDeg absolute azimuth angle of the target in the floor frame (degrees)
-   * @param v_x robot floor velocity in the X direction (m/s)
-   * @param v_y robot floor velocity in the Y direction (m/s)
-   * @param a_x robot floor acceleration in the X direction (m/s²)
-   * @param a_y robot floor acceleration in the Y direction (m/s²)
+   * @param vX robot floor velocity in the X direction (m/s)
+   * @param vY robot floor velocity in the Y direction (m/s)
+   * @param aX robot floor acceleration in the X direction (m/s²)
+   * @param aY robot floor acceleration in the Y direction (m/s²)
    */
   public static BallisticSolution computeBallistics(
-      double D,
-      double floorAzimuthDeg,
-      double v_x,
-      double v_y,
-      double a_x,
-      double a_y,
-      Pose2d robotPose) {
+      double D, double floorAzimuthDeg, double vX, double vY, double aX, double aY) {
     double azRad = floorAzimuthDeg * ShootingConstants.DEG_TO_RAD;
 
     // 1. PROJECT ROBOT AND TARGET RELATIVE TO RELEASE POINT
     // Robot displacement from now until release (t=R)
-    double xRel = v_x * R + 0.5 * a_x * R * R;
-    double yRel = v_y * R + 0.5 * a_y * R * R;
+    double xRel = vX * R + 0.5 * aX * R * R;
+    double yRel = vY * R + 0.5 * aY * R * R;
 
     // Robot velocity at release
-    double vxRobotRelease = v_x + a_x * R;
-    double vyRobotRelease = v_y + a_y * R;
+    double vxRobotRelease = vX + aX * R;
+    double vyRobotRelease = vY + aY * R;
 
     // Hub position relative to the START position (field frame)
     double xHubField = D * Math.cos(azRad);
@@ -374,9 +368,9 @@ public class ShootingUtil {
       double errZ = z - HUB_HEIGHT;
 
       // Apply corrections
-      vxGuess -= errX * invT;
-      vyGuess -= errY * invT;
-      vzGuess -= errZ * invT;
+      vxGuess -= errX * INV_T;
+      vyGuess -= errY * INV_T;
+      vzGuess -= errZ * INV_T;
     }
 
     // 4. TRANSFORM TO ROBOT FRAME
@@ -445,20 +439,8 @@ public class ShootingUtil {
   public static final double RADIUS = ShootingConstants.SHOOTER_RADIUS;
   public static final double E = ShootingConstants.SHOOTER_EFFICIENCY;
 
-  /**
-   * Computes the required motor angular acceleration to restore launcher wheel speed.
-   *
-   * <p>This method calculates the angular acceleration needed to compensate for energy lost when
-   * the projectile is launched. It retrieves the actual launch velocity from the ballistic
-   * calculator, then uses rotational dynamics to determine the motor adjustment required to return
-   * the wheel from its post-launch state back to resting angular velocity within the specified time
-   * interval.
-   *
-   * <p>The computed angular acceleration is stored in {@link #desiredAngularAcceleration} and
-   * relevant metrics are printed to standard output.
-   */
+  /** Computes the required angular velocity to launch the fuel at the desired launch speed. */
   public static double computeMotorAdjustment(double launchSpeed) {
-    double desiredAngularVelocity = launchSpeed / (E * RADIUS) / 2 / Math.PI;
-    return desiredAngularVelocity;
+    return launchSpeed / (E * RADIUS) / 2 / Math.PI;
   }
 }

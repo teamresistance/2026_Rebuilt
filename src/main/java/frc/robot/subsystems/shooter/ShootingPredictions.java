@@ -130,8 +130,7 @@ public class ShootingPredictions {
             vxField,
             vyField,
             axField,
-            ayField,
-            robotPose);
+            ayField);
 
     // Store outputs from the calculators into this manager's public fields.
     double newVertical = calculation.hoodAngleDeg();

@@ -36,6 +36,7 @@ public class SwerveDriveReal implements SwerveDriveIO {
   private final SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
   private final Field2d field2d = new Field2d();
+  SwerveModuleState[] accelStates = new SwerveModuleState[4];
 
   public SwerveDriveReal(
       GyroIO gyroIO,
@@ -162,12 +163,10 @@ public class SwerveDriveReal implements SwerveDriveIO {
 
     ChassisSpeeds chassisAccel = kinematics.toChassisSpeeds(accelStates);
 
-    Transform2d acceleration =
-        new Transform2d(
-            chassisAccel.vxMetersPerSecond,
-            chassisAccel.vyMetersPerSecond,
-            new Rotation2d(chassisAccel.omegaRadiansPerSecond));
-    return acceleration;
+    return new Transform2d(
+        chassisAccel.vxMetersPerSecond,
+        chassisAccel.vyMetersPerSecond,
+        new Rotation2d(chassisAccel.omegaRadiansPerSecond));
   }
 
   /**

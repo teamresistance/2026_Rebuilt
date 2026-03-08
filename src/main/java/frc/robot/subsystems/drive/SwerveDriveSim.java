@@ -82,7 +82,7 @@ public class SwerveDriveSim implements SwerveDriveIO {
     field2d.getObject("odometry").setPose(getPose());
     Logger.recordOutput("Drive/Robot Pose", getPose());
 
-    ChassisSpeeds current = getChassisSpeeds();
+    current = getChassisSpeeds();
     acceleration = getAcceleration();
     previousChassisSpeeds = current;
   }

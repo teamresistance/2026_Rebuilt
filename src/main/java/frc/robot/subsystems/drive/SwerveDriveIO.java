@@ -18,7 +18,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -37,8 +36,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.littletonrobotics.junction.Logger;
 
 public interface SwerveDriveIO extends Subsystem {
-
-  SwerveModuleState[] accelStates = new SwerveModuleState[4];
 
   // Drive Constants
 
