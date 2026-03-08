@@ -117,6 +117,29 @@ public class ShiftUtil {
     return Constants.ShiftOwner.BOTH; // endgame
   }
 
+  /** Returns the number of seconds left in the current shift. Returns 0 after endgame. */
+  public static double getTimeLeftInCurrentShift() {
+    double elapsed = shiftTimer.get();
+    double remaining;
+
+    if (elapsed < 10.0) {
+      remaining = 10.0 - elapsed; // transition -> next boundary at 10
+    } else if (elapsed < 35.0) {
+      remaining = 35.0 - elapsed; // shift 1 -> next at 35
+    } else if (elapsed < 60.0) {
+      remaining = 60.0 - elapsed; // shift 2 -> next at 60
+    } else if (elapsed < 85.0) {
+      remaining = 85.0 - elapsed; // shift 3 -> next at 85
+    } else if (elapsed < 110.0) {
+      remaining = 110.0 - elapsed; // shift 4 -> next at 110
+    } else {
+      remaining = 0.0; // endgame or beyond
+    }
+
+    // Clamp to zero to avoid tiny negatives from timing imprecision
+    return Math.max(0.0, remaining);
+  }
+
   /** Returns if the provided {@code shiftOwner} matches our alliance color. */
   public static boolean isOurs(Constants.ShiftOwner shiftOwner) {
     if (DriverStation.getAlliance().isPresent()) {
