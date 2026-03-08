@@ -7,6 +7,7 @@ import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
@@ -29,8 +30,23 @@ public class HoppertReal implements HoppertIO {
   public HoppertReal() {
     TalonFXConfiguration config =
         new TalonFXConfiguration()
-            .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake));
+            .withMotorOutput(
+                new MotorOutputConfigs()
+                    .withNeutralMode(NeutralModeValue.Brake)
+                    .withInverted(InvertedValue.Clockwise_Positive));
     towerMotor.getConfigurator().apply(config);
+
+    // TODO: me
+    TalonFXConfiguration config2 =
+        new TalonFXConfiguration()
+            .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake));
+    hopperRollerMotor.getConfigurator().apply(config2);
+
+    // TODO: me
+    TalonFXConfiguration config3 =
+        new TalonFXConfiguration()
+            .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake));
+    hopperWheelsMotor.getConfigurator().apply(config3);
 
     register();
   }
