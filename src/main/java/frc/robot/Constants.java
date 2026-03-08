@@ -168,7 +168,7 @@ public final class Constants {
 
     private static final double ROOT_MG_OVER_K =
         Math.sqrt(FUEL_MASS * G / QUADRATIC_DRAG_COEFFICIENT);
-        
+
     public static final double VERTICAL_VELOCITY_COMPONENT =
         ROOT_MG_OVER_K
             * (Math.exp(QUADRATIC_DRAG_COEFFICIENT * (HUB_HEIGHT - TURRET_HEIGHT) / FUEL_MASS)
@@ -189,7 +189,6 @@ public final class Constants {
     // and prepare for next
     // shot
     public static final double RELOAD_TIME = 0.07675438596;
-
 
     public static final double SHOOTER_RADIUS = 0.0381; // (meters)
     public static final double SHOOTER_EFFICIENCY =
