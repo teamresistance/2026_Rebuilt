@@ -76,14 +76,14 @@ public class HoppertReal implements HoppertIO {
 
   @Override
   public void runTowerBackwards() {
-    towerMotor.setControl(new DutyCycleOut(-1.0));
+    towerMotor.setControl(new DutyCycleOut(-1.0).withEnableFOC(true));
     towerMotorRunning = true;
     towerMotorReversed = true;
   }
 
   @Override
   public void runTowerForwards() {
-    towerMotor.setControl(new DutyCycleOut(1.0));
+    towerMotor.setControl(new DutyCycleOut(1.0).withEnableFOC(true));
     towerMotorRunning = true;
     towerMotorReversed = false;
   }
