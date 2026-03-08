@@ -35,7 +35,6 @@ public final class Constants {
   public static final int HOPPER_WHEELS_ID = 18;
   public static final int TOWER_MOTOR_ID = 19;
 
-  public static final int CLIMBER_BRAKE_ID = 0; // TODO: correct RELAY port
   public static final int CLIMBER_MOTOR_ID = 11;
   public static final int CLIMBER_ZERO = 0;
   public static final int CLIMBER_FULL = 10; // TODO: actual high/low pos

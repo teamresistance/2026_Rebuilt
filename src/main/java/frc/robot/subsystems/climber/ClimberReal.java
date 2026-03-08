@@ -10,7 +10,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import edu.wpi.first.wpilibj.Relay;
+import edu.wpi.first.wpilibj.PowerDistribution;
 import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
 
@@ -20,7 +20,7 @@ public class ClimberReal implements ClimberIO {
   private final RelativeEncoder climberInternalEncoder = climber.getEncoder();
   private final SparkClosedLoopController climberControl = climber.getClosedLoopController();
 
-  private final Relay brakeSolenoid = new Relay(Constants.CLIMBER_BRAKE_ID);
+  private final PowerDistribution pdh = new PowerDistribution(1, PowerDistribution.ModuleType.kRev);
 
   public ClimberReal() {
     register();
@@ -34,12 +34,12 @@ public class ClimberReal implements ClimberIO {
 
   @Override
   public void brake() {
-    brakeSolenoid.set(Relay.Value.kOff);
+    pdh.setSwitchableChannel(false);
   }
 
   @Override
   public void unbrake() {
-    brakeSolenoid.set(Relay.Value.kOn);
+    pdh.setSwitchableChannel(true);
   }
 
   @Override
@@ -61,6 +61,6 @@ public class ClimberReal implements ClimberIO {
   public void periodic() {
     Logger.recordOutput("Climber/Setpoint", climberControl.getSetpoint());
     Logger.recordOutput("Climber/Position", climberInternalEncoder.getPosition());
-    Logger.recordOutput("Climber/Braking", brakeSolenoid.get().equals(Relay.Value.kOff));
+    Logger.recordOutput("Climber/Braking", !pdh.getSwitchableChannel());
   }
 }
