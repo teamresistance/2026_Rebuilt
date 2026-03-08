@@ -156,18 +156,19 @@ public class ShooterReal implements ShooterIO {
   public void setTurretTarget(double angle) {
     if (emergencyStopSwivel) {
       // stop swivel, aim with drive, offset from stopped position
-      turretDriveAssistTargetAngle = angle + (ShootingUtil.toTurretDegrees(turretMotor.getPosition().getValueAsDouble()));
+      turretDriveAssistTargetAngle =
+          angle + (ShootingUtil.toTurretDegrees(turretMotor.getPosition().getValueAsDouble()));
     } else {
-    double turretAngle =
-        MathUtil.clamp(angle, Constants.SHOOTER_TURRET_MIN_YAW, Constants.SHOOTER_TURRET_MAX_YAW);
-    if (Math.abs(angle - turretAngle) > 2.0) {
-      turretDriveAssistTargetAngle = MathUtil.inputModulus(angle - turretAngle, -180, 180);
-    } else {
-      turretDriveAssistTargetAngle = 0;
-    }
-    turretTargetAngle = turretAngle;
-    turretMotor.setControl(
-        new MotionMagicVoltage(ShootingUtil.toTurretRevs(turretAngle)).withEnableFOC(true));
+      double turretAngle =
+          MathUtil.clamp(angle, Constants.SHOOTER_TURRET_MIN_YAW, Constants.SHOOTER_TURRET_MAX_YAW);
+      if (Math.abs(angle - turretAngle) > 2.0) {
+        turretDriveAssistTargetAngle = MathUtil.inputModulus(angle - turretAngle, -180, 180);
+      } else {
+        turretDriveAssistTargetAngle = 0;
+      }
+      turretTargetAngle = turretAngle;
+      turretMotor.setControl(
+          new MotionMagicVoltage(ShootingUtil.toTurretRevs(turretAngle)).withEnableFOC(true));
     }
   }
 
