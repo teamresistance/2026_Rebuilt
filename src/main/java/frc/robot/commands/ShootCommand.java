@@ -24,16 +24,14 @@ public class ShootCommand extends Command {
 
   @Override
   public void execute() {
-    switch (calcMode) {
-      case CALC:
+    if (calcMode == ShootingStyle.CALC) {
         shooter.runFlywheelAtRPS(
             Units.radiansToRotations(
                 ShootingPredictions.getCalculator().getDesiredAngularVelocity()));
         Logger.recordOutput(
             "Shooter/Desired Angular Velocity",
             ShootingPredictions.getCalculator().getDesiredAngularVelocity());
-        break;
-      case MAPS:
+        } else if (calcMode == ShootingStyle.MAPS) {
         double distance =
             ShootingUtil.getVirtualDistanceToTarget(drive.getPose(), drive.getChassisSpeeds());
         shooter.runFlywheelAtRPS(ShootingMaps.getRPS(distance));

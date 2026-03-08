@@ -30,8 +30,7 @@ public class IdleShooterCommand extends Command {
     double turretAngleDeg = 0;
     double hoodAngleDeg = 0;
 
-    switch (calcMode) {
-      case MAPS:
+    if (calcMode == ShootingStyle.MAPS) {
         double distance =
             ShootingUtil.getVirtualDistanceToTarget(drive.getPose(), drive.getChassisSpeeds());
         turretAngleDeg =
@@ -40,8 +39,7 @@ public class IdleShooterCommand extends Command {
         hoodAngleDeg = ShootingMaps.getHoodAngle(distance);
 
         Logger.recordOutput("Shooter/Virtual Distance to Hub", distance);
-        break;
-      case CALC:
+            }else if (calcMode == ShootingStyle.CALC) {
         // 1. Get current robot state from Drive
         Pose2d robotPose = drive.getPose();
         ChassisSpeeds speeds = drive.getChassisSpeeds();
@@ -68,7 +66,7 @@ public class IdleShooterCommand extends Command {
             ShootingPredictions.getCalculator().getHorizontalTotalShootingAngle()
                 - robotPose.getRotation().getDegrees();
         hoodAngleDeg = ShootingPredictions.getCalculator().getVerticalShootingAngle();
-        break;
+
     }
 
     shooter.setTurretTarget(turretAngleDeg);

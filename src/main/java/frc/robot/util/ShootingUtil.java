@@ -214,21 +214,21 @@ public class ShootingUtil {
    *
    * <p>The computed values are stored in static state variables and printed to standard output.
    *
-   * @param D distance to the target along the floor (meters)
+   * @param d distance to the target along the floor (meters)
    * @param floorAzimuthDeg absolute azimuth angle of the target in the floor frame (degrees)
    * @param vX robot floor velocity in the X direction (m/s)
    * @param vY robot floor velocity in the Y direction (m/s)
    */
   public static BallisticSolution computeBallistics(
-      double D, double floorAzimuthDeg, double vX, double vY) {
+      double d, double floorAzimuthDeg, double vX, double vY) {
     double azRad = floorAzimuthDeg * ShootingConstants.DEG_TO_RAD;
 
     // 1. Hub position is fixed in the Field Frame
-    double xHub = D * Math.cos(azRad);
-    double yHub = D * Math.sin(azRad);
+    double xHub = d * Math.cos(azRad);
+    double yHub = d * Math.sin(azRad);
 
-    // 2. ANALYTIC BASE (Initial guess to hit a stationary target distance D)
-    double vFloorField = (M / (K * T)) * (Math.exp((K * D) / M) - 1.0);
+    // 2. ANALYTIC BASE (Initial guess to hit a stationary target distance d)
+    double vFloorField = (M / (K * T)) * (Math.exp((K * d) / M) - 1.0);
     double vxGuess = vFloorField * Math.cos(azRad);
     double vyGuess = vFloorField * Math.sin(azRad);
     double vzGuess = (VY + 0.5 * 9.806 * T); // Initial vertical guess to counter gravity
@@ -301,7 +301,7 @@ public class ShootingUtil {
    *
    * <p>The computed values are stored in static state variables and printed to standard output.
    *
-   * @param D distance to the target along the floor (meters)
+   * @param d distance to the target along the floor (meters)
    * @param floorAzimuthDeg absolute azimuth angle of the target in the floor frame (degrees)
    * @param vX robot floor velocity in the X direction (m/s)
    * @param vY robot floor velocity in the Y direction (m/s)
@@ -309,7 +309,7 @@ public class ShootingUtil {
    * @param aY robot floor acceleration in the Y direction (m/s²)
    */
   public static BallisticSolution computeBallistics(
-      double D, double floorAzimuthDeg, double vX, double vY, double aX, double aY) {
+      double d, double floorAzimuthDeg, double vX, double vY, double aX, double aY) {
     double azRad = floorAzimuthDeg * ShootingConstants.DEG_TO_RAD;
 
     // 1. PROJECT ROBOT AND TARGET RELATIVE TO RELEASE POINT
@@ -322,8 +322,8 @@ public class ShootingUtil {
     double vyRobotRelease = vY + aY * R;
 
     // Hub position relative to the START position (field frame)
-    double xHubField = D * Math.cos(azRad);
-    double yHubField = D * Math.sin(azRad);
+    double xHubField = d * Math.cos(azRad);
+    double yHubField = d * Math.sin(azRad);
 
     // Target displacement relative to the release point
     double dxTarget = xHubField - xRel;

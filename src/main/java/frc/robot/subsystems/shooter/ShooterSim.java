@@ -94,8 +94,7 @@ public class ShooterSim implements ShooterIO {
     double turretOutput;
     double hoodOutput;
 
-    switch (calcMode) {
-      case MAPS:
+    if (calcMode == ShootingStyle.MAPS) {
         turretOutput = turretPID.calculate(turretAngleDegs, turretTargetDegs);
         hoodOutput = hoodPID.calculate(hoodAngleDegs, hoodTargetDegs);
 
@@ -107,8 +106,7 @@ public class ShooterSim implements ShooterIO {
 
         turretBase.setAngle(turretAngleDegs);
         hood.setAngle(hoodAngleDegs);
-        break;
-      case CALC:
+    } else if (calcMode == ShootingStyle.CALC) {
         // Compute shortest-path turret rotation
         double error = angleDifferenceDeg(turretTargetDegs, turretAngleDegs);
         turretOutput = turretPID.calculate(0, error); // PID expects setpoint=0 for error
@@ -159,7 +157,6 @@ public class ShooterSim implements ShooterIO {
           } catch (Exception ex) {
             Logger.recordOutput("Shooter/Sim Error", ex.toString());
           }
-          break;
         }
     }
 
