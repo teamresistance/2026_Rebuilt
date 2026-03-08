@@ -69,7 +69,7 @@ public class ShooterReal implements ShooterIO {
             .withMotionMagic(
                 new MotionMagicConfigs()
                     .withMotionMagicAcceleration(150)
-                    .withMotionMagicCruiseVelocity(1000))
+                    .withMotionMagicCruiseVelocity(140))
             .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
