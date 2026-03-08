@@ -27,6 +27,8 @@ public class ShooterReal implements ShooterIO {
   private double turretDriveAssistTargetAngle = 0;
   private double flywheelTargetRPS = 0;
 
+  private boolean emergencyStopSwivel = false;
+
   /** Real implementation of a turret shooter. */
   public ShooterReal() {
     register();
@@ -152,6 +154,10 @@ public class ShooterReal implements ShooterIO {
    */
   @Override
   public void setTurretTarget(double angle) {
+    if (emergencyStopSwivel) {
+      // stop swivel, aim with drive, offset from stopped position
+      turretDriveAssistTargetAngle = angle + (ShootingUtil.toTurretDegrees(turretMotor.getPosition().getValueAsDouble()));
+    } else {
     double turretAngle =
         MathUtil.clamp(angle, Constants.SHOOTER_TURRET_MIN_YAW, Constants.SHOOTER_TURRET_MAX_YAW);
     if (Math.abs(angle - turretAngle) > 2.0) {
@@ -162,6 +168,7 @@ public class ShooterReal implements ShooterIO {
     turretTargetAngle = turretAngle;
     turretMotor.setControl(
         new MotionMagicVoltage(ShootingUtil.toTurretRevs(turretAngle)).withEnableFOC(true));
+    }
   }
 
   /**
@@ -179,6 +186,11 @@ public class ShooterReal implements ShooterIO {
   @Override
   public double getDriveAssistanceAngle() {
     return turretDriveAssistTargetAngle;
+  }
+
+  @Override
+  public void setSwivelStop(boolean stopped) {
+    emergencyStopSwivel = stopped;
   }
 
   @Override

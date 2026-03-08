@@ -24,6 +24,8 @@ public class ShooterSim implements ShooterIO {
   private double turretDriveAssistTargetAngle = 0;
   private double hoodTargetDegs = 13.0;
 
+  private boolean emergencyStopSwivel = false;
+
   private boolean shooting = false;
 
   private final PIDController turretPID = new PIDController(1.5, 0.0, 0);
@@ -107,5 +109,10 @@ public class ShooterSim implements ShooterIO {
   @Override
   public double getDriveAssistanceAngle() {
     return turretDriveAssistTargetAngle;
+  }
+
+  @Override
+  public void setSwivelStop(boolean stopped) {
+    emergencyStopSwivel = stopped;
   }
 }
