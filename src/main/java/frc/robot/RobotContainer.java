@@ -165,8 +165,11 @@ public class RobotContainer {
             .andThen(new WaitUntilCommand(climber::atTarget))
             .andThen(climber::brake));
     NamedCommands.registerCommand("Stop", Commands.runOnce(drive::stop, drive));
-    NamedCommands.registerCommand("Shoot 5s", new ShootCommand(drive, shooter, Constants.CURRENT_SHOT_STYLE).withTimeout(5));
-    NamedCommands.registerCommand("Shoot 10s", new ShootCommand(drive, shooter, Constants.CURRENT_SHOT_STYLE).withTimeout(10));
+    NamedCommands.registerCommand(
+        "Shoot 5s", new ShootCommand(drive, shooter, Constants.CURRENT_SHOT_STYLE).withTimeout(5));
+    NamedCommands.registerCommand(
+        "Shoot 10s",
+        new ShootCommand(drive, shooter, Constants.CURRENT_SHOT_STYLE).withTimeout(10));
     NamedCommands.registerCommand("Toggle Intake", new ToggleIntakeCommand(intake));
     NamedCommands.registerCommand(
         "Closest Climb",

@@ -16,7 +16,7 @@ public class ShootCommand extends Command {
   private final SwerveDriveIO drive;
   private final ShootingStyle calcMode;
 
-  public ShootCommand(ShooterIO _shooter, SwerveDriveIO _drive, ShootingStyle _calcMode) {
+  public ShootCommand(SwerveDriveIO _drive, ShooterIO _shooter, ShootingStyle _calcMode) {
     shooter = _shooter;
     drive = _drive;
     calcMode = _calcMode;
