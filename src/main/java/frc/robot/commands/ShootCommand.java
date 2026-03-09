@@ -39,4 +39,9 @@ public class ShootCommand extends Command {
       Logger.recordOutput("Shooter/Virtual Distance to Hub", distance);
     }
   }
+
+  @Override
+  public void end(boolean interrupted) {
+    shooter.runFlywheelAtRPS(0);
+  }
 }

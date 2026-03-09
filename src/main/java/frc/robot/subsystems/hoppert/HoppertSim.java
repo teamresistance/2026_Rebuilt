@@ -56,10 +56,11 @@ public class HoppertSim implements HoppertIO {
   @Override
   public void stopHopper() {
     hopperRollersRunning = false;
+    hopperWheelsRunning = false;
   }
 
   @Override
   public void stopTower() {
-    hopperRollersRunning = false;
+    towerMotorRunning = false;
   }
 }

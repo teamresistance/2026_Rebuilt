@@ -3,6 +3,7 @@ package frc.robot;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -10,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.commands.DeferredCommand;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.HoppertCommand;
 import frc.robot.commands.IdleShooterCommand;
@@ -33,11 +35,7 @@ import frc.robot.subsystems.shooter.ShooterReal;
 import frc.robot.subsystems.shooter.ShooterSim;
 import frc.robot.subsystems.shooter.ShootingMaps;
 import frc.robot.subsystems.vision.*;
-import frc.robot.util.BumpUtil;
-import frc.robot.util.OtherUtil;
-import frc.robot.util.ShiftUtil;
-import frc.robot.util.ShootingUtil;
-import frc.robot.util.TurretConfidenceUtil;
+import frc.robot.util.*;
 import java.io.IOException;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -70,12 +68,13 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
+  private final SendableChooser<Boolean> swivelStop = new SendableChooser<>();
   private final SendableChooser<String> manualShiftAssigner = new SendableChooser<>();
 
   // bump zone and prebuilt commands
   private final Trigger inBumpZone;
   private final Command driveAtAngleForBump;
-  private final Command driveAtLimitedSpeed;
+  private final Command driveShooting;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -106,6 +105,8 @@ public class RobotContainer {
         climber = new ClimberReal();
     }
 
+    configureNamedCommands();
+
     // bump stuff
     inBumpZone = new Trigger(() -> BumpUtil.inBumpZone(drive::getPose, drive::getChassisSpeeds));
 
@@ -119,20 +120,36 @@ public class RobotContainer {
             .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming);
     driveAtAngleForBump.addRequirements(drive);
 
-    // clamps inputs to the drive command
-    driveAtLimitedSpeed =
-        DriveCommands.joystickDrive(
+    // angle assist vs.
+    driveShooting =
+        new ConditionalCommand(
+            DriveCommands.joystickDriveAtAngle(
                 drive,
                 () -> MathUtil.clamp(-driver.getLeftY(), -0.8, 0.8),
                 () -> MathUtil.clamp(-driver.getLeftX(), -0.8, 0.8),
-                () -> MathUtil.clamp(-driver.getRightX(), -0.75, 0.75))
-            .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming);
-    driveAtLimitedSpeed.addRequirements(drive);
+                () ->
+                    drive
+                        .getRotation()
+                        .plus(Rotation2d.fromDegrees(shooter.getDriveAssistanceAngle()))
+                        .plus(Rotation2d.fromDegrees(-driver.getRightX() * 90))),
+            DriveCommands.joystickDrive(
+                drive,
+                () -> MathUtil.clamp(-driver.getLeftY(), -0.8, 0.8),
+                () -> MathUtil.clamp(-driver.getLeftX(), -0.8, 0.8),
+                () -> MathUtil.clamp(-driver.getRightX(), -0.75, 0.75)),
+            () ->
+                Math.abs(shooter.getDriveAssistanceAngle()) > 2
+                    && driver.y().negate().getAsBoolean());
+    driveShooting.addRequirements(drive);
 
     manualShiftAssigner.addOption("Red", "R");
     manualShiftAssigner.addOption("Blue", "B");
     manualShiftAssigner.setDefaultOption("None", "");
     SmartDashboard.putData("Manual Shift Setup", manualShiftAssigner);
+
+    swivelStop.addOption("STOP", true);
+    swivelStop.addOption("GOOD", false);
+    SmartDashboard.putData("Turret Swivel Stop", swivelStop);
 
     configureDriverFeedback();
     autoChooser = configureAutos();
@@ -141,7 +158,22 @@ public class RobotContainer {
   }
 
   private void configureNamedCommands() {
+    NamedCommands.registerCommand(
+        "Climb Up",
+        Commands.runOnce(climber::unbrake)
+            .andThen(climber::up)
+            .andThen(new WaitUntilCommand(climber::atTarget))
+            .andThen(climber::brake));
     NamedCommands.registerCommand("Stop", Commands.runOnce(drive::stop, drive));
+    NamedCommands.registerCommand("Shoot 5s", new ShootCommand(drive, shooter, Constants.CURRENT_SHOT_STYLE).withTimeout(5));
+    NamedCommands.registerCommand("Shoot 10s", new ShootCommand(drive, shooter, Constants.CURRENT_SHOT_STYLE).withTimeout(10));
+    NamedCommands.registerCommand("Toggle Intake", new ToggleIntakeCommand(intake));
+    NamedCommands.registerCommand(
+        "Closest Climb",
+        new DeferredCommand(
+            () ->
+                DriveCommands.followPosesWithMaxSpeed(
+                    drive, 0.5, OtherUtil.getClimberAlignPos(drive.getPose()))));
   }
 
   private LoggedDashboardChooser<Command> configureAutos() {
@@ -308,7 +340,7 @@ public class RobotContainer {
     // have hopper automatically deciding when to run or not to run
     hoppert.setDefaultCommand(new HoppertCommand(hoppert, shooter));
 
-    // when left bumper is not pressed and in bump zone, auto rotate.
+    // when y (paddle) is not pressed and in bump zone, auto rotate.
     driver.y().negate().and(inBumpZone).whileTrue(driveAtAngleForBump);
 
     // climb raise
@@ -332,10 +364,18 @@ public class RobotContainer {
     // auto-align to climber positions with bumpers (left/right bumper = left/right pos)
     driver
         .leftBumper()
-        .whileTrue(DriveCommands.goToTransform(drive, OtherUtil.getClimberAlignPos(true)));
+        .whileTrue(
+            new DeferredCommand(
+                () ->
+                    DriveCommands.followPosesWithMaxSpeed(
+                        drive, 0.5, drive.getPose(), OtherUtil.getClimberAlignPos(true))));
     driver
         .rightBumper()
-        .whileTrue(DriveCommands.goToTransform(drive, OtherUtil.getClimberAlignPos(false)));
+        .whileTrue(
+            new DeferredCommand(
+                () ->
+                    DriveCommands.followPosesWithMaxSpeed(
+                        drive, 0.5, drive.getPose(), OtherUtil.getClimberAlignPos(false))));
 
     // auto-aim hood and turret always
     shooter.setDefaultCommand(new IdleShooterCommand(drive, shooter, Constants.CURRENT_SHOT_STYLE));
@@ -343,8 +383,8 @@ public class RobotContainer {
     // Switch to X pattern when X button is pressed
     driver.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
-    driver.rightTrigger().whileTrue(new ShootCommand(shooter, drive, Constants.CURRENT_SHOT_STYLE));
-    driver.rightTrigger().whileTrue(driveAtLimitedSpeed);
+    driver.rightTrigger().whileTrue(new ShootCommand(drive, shooter, Constants.CURRENT_SHOT_STYLE));
+    driver.rightTrigger().and(driver.y().negate()).whileTrue(driveShooting);
 
     // left trigger toggles intake
     driver.leftTrigger().onTrue(new ToggleIntakeCommand(intake));
@@ -373,6 +413,10 @@ public class RobotContainer {
 
   public String getShiftChosen() {
     return manualShiftAssigner.getSelected();
+  }
+
+  public void checkTurretStop() {
+    shooter.setSwivelStop(swivelStop.getSelected());
   }
 
   /** Returns the autonomous command to schedule for the auto period. */

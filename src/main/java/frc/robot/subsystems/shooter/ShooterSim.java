@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
+import frc.robot.Constants;
 import frc.robot.Constants.ShootingStyle;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -27,13 +28,18 @@ public class ShooterSim implements ShooterIO {
   private final MechanismLigament2d shotVel;
   private final MechanismLigament2d hood;
 
-  private double turretAngleDegs = 180;
+  private double turretAngleDegs = 0;
   private double hoodAngleDegs = 13;
   private double turretTargetDegs = 180.0;
+  private double turretDriveAssistTargetAngle = 0;
   private double hoodTargetDegs = 13.0;
   Transform2d acceleration = new Transform2d();
 
-  private final PIDController turretPID = new PIDController(0.5, 0.0, 0);
+  private boolean emergencyStopSwivel = false;
+
+  private boolean shooting = false;
+
+  private final PIDController turretPID = new PIDController(1.5, 0.0, 0);
   private final PIDController hoodPID = new PIDController(0.8, 0.0, 0);
 
   private final ShootingStyle calcMode;
@@ -164,6 +170,7 @@ public class ShooterSim implements ShooterIO {
     Logger.recordOutput("Shooter/Sim Hood Angle", hoodAngleDegs);
     Logger.recordOutput("Shooter/Sim Turret Target", turretTargetDegs);
     Logger.recordOutput("Shooter/Sim Hood Target", hoodTargetDegs);
+    Logger.recordOutput("Shooter/Drive Assist Angle", turretDriveAssistTargetAngle);
   }
 
   /** Computes the shortest angular difference from current to target in degrees [-180,180] */
@@ -183,16 +190,23 @@ public class ShooterSim implements ShooterIO {
 
   @Override
   public void runFlywheelAtRPS(double rps) {
-    // not relevant in sim
+    shooting = rps >= 1;
   }
 
   public boolean isShooting() {
-    return true;
+    return shooting;
   }
 
   @Override
-  public void setTurretTarget(double turretTargetAngle) {
-    turretTargetDegs = turretTargetAngle;
+  public void setTurretTarget(double angle) {
+    double turretAngle =
+        MathUtil.clamp(angle, Constants.SHOOTER_TURRET_MIN_YAW, Constants.SHOOTER_TURRET_MAX_YAW);
+    if (Math.abs(angle - turretAngle) > 2.0) {
+      turretDriveAssistTargetAngle = MathUtil.inputModulus(angle - turretAngle, -180, 180);
+    } else {
+      turretDriveAssistTargetAngle = 0;
+    }
+    turretTargetDegs = turretAngle;
   }
 
   @Override
@@ -203,5 +217,15 @@ public class ShooterSim implements ShooterIO {
   @Override
   public void zeroHood(double newValue) {
     // not relevant in sim
+  }
+
+  @Override
+  public double getDriveAssistanceAngle() {
+    return turretDriveAssistTargetAngle;
+  }
+
+  @Override
+  public void setSwivelStop(boolean stopped) {
+    emergencyStopSwivel = stopped;
   }
 }
