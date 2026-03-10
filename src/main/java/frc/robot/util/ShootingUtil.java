@@ -133,7 +133,8 @@ public class ShootingUtil {
         "Shooter/Calculated Virtual Pose",
         new Pose2d(futureTurretPos.getX(), futureTurretPos.getY(), Rotation2d.kZero));
 
-    return Math.toDegrees(turretAngleRobotRelative);
+    // flip angle because code-front of the robot has turret "backwards"
+    return Math.toDegrees(MathUtil.angleModulus(turretAngleRobotRelative + Math.PI));
   }
 
   /**
