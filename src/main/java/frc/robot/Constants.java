@@ -161,7 +161,7 @@ public final class Constants {
     public static final double MINIMUM_TIME_OF_FLIGHT = 1.2;
 
     // Drag coefficient - exponential factor in air resistance equation
-    public static final double QUADRATIC_DRAG_COEFFICIENT = 0.004997;
+    public static final double QUADRATIC_DRAG_COEFFICIENT = 0.0429140552109; // theoretical value is 0.004997, empirically tested value is 0.0429140552109
 
     private static final double ROOT_MG_OVER_K =
         Math.sqrt(FUEL_MASS * G / QUADRATIC_DRAG_COEFFICIENT);
