@@ -97,7 +97,7 @@ public class TurretConfidenceUtilTest {
 
   @ParameterizedTest
   @DisplayName("Standard deviation sweep")
-  @ValueSource(doubles = {0}) // typical sweep: 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5
+  @ValueSource(doubles = {1}) // typical sweep: 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5
   void stdDevSweep(double stdDev) {
 
     double confidence = calculateConfidence(distance, vx, vy, rotationspeed, stdDev);
