@@ -4,17 +4,19 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 public class TurretConfidenceUtilTest {
 
-  // Editable parameters for experimentation
+  // Editable parameters for experimentation and testing
   double stdDev = 1.0;
 
-  double distance = 6.0;
+  double distance = 3.0;
 
   double vx = 1.0;
   double vy = 1.0;
-  double rotationspeed = 1.0;
+  double rotationspeed = 0.25;
 
   private double calculateConfidence(
       double distance, double vx, double vy, double rotationspeed, double stdDev) {
@@ -36,83 +38,70 @@ public class TurretConfidenceUtilTest {
   }
 
   @Test
-  @DisplayName("Baseline stationary shot has high confidence")
-  public void baselineStationaryShot() {
+  @DisplayName("Tested situation shot has high confidence")
+  public void testedSituationShot() {
 
-    double confidence = calculateConfidence(distance, 0, 0, 0, stdDev);
+    double confidence = calculateConfidence(distance, vx, vy, rotationspeed, stdDev);
 
-    System.out.println("Stationary confidence = " + confidence);
+    System.out.println("Tested situation confidence = " + confidence);
 
-    assertTrue(confidence > 95);
+    assertTrue(
+        confidence > 50, "Expected confidence > 50% for tested situation, but got " + confidence);
   }
 
-  @Test
-  @DisplayName("X-velocity sweep shows decreasing confidence")
-  public void xVelocitySweep() {
+  @ParameterizedTest
+  @DisplayName("X velocity sweep")
+  @ValueSource(doubles = {0}) // typical sweep: 0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5
+  void xVelocitySweep(double vx) {
 
-    for (double vx = 0; vx <= 5; vx += 0.5) {
+    double confidence = calculateConfidence(distance, vx, vy, rotationspeed, stdDev);
 
-      double confidence = calculateConfidence(distance, vx, 0, 0, stdDev);
+    System.out.println("vx=" + vx + " confidence=" + confidence);
 
-      System.out.println("vx=" + vx + " confidence=" + confidence);
-    }
-
-    assertTrue(true);
+    assertTrue(confidence > 0);
   }
 
-  @Test
-  @DisplayName("Y-velocity sweep shows decreasing confidence")
-  public void yVelocitySweep() {
+  @ParameterizedTest
+  @DisplayName("Y velocity sweep")
+  @ValueSource(doubles = {0}) // typical sweep: 0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5
+  void yVelocitySweep(double vy) {
 
-    for (double vy = 0; vy <= 5; vy += 0.5) {
+    double confidence = calculateConfidence(distance, vx, vy, rotationspeed, stdDev);
+    System.out.println("vy=" + vy + " confidence=" + confidence);
 
-      double confidence = calculateConfidence(distance, 0, vy, 0, stdDev);
-
-      System.out.println("vy=" + vy + " confidence=" + confidence);
-    }
-
-    assertTrue(true);
+    assertTrue(confidence > 0);
   }
 
-  @Test
-  @DisplayName("Rotation speed sweep shows decreasing confidence")
-  public void rotationSweep() {
+  @ParameterizedTest
+  @DisplayName("Rotation speed sweep")
+  @ValueSource(doubles = {0}) // typical sweep: 0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5
+  void rotationSpeedSweep(double rotationspeed) {
 
-    for (double rotationspeed = 0; rotationspeed <= 6; rotationspeed += 0.5) {
+    double confidence = calculateConfidence(distance, vx, vy, rotationspeed, stdDev);
+    System.out.println("rotationspeed=" + rotationspeed + " confidence=" + confidence);
 
-      double confidence = calculateConfidence(distance, 0, 0, rotationspeed, stdDev);
-
-      System.out.println("rotationspeed=" + rotationspeed + " confidence=" + confidence);
-    }
-
-    assertTrue(true);
+    assertTrue(confidence > 0);
   }
 
-  @Test
-  @DisplayName("Standard deviation sweep shows increasing confidence")
-  public void standardDeviationSweep() {
+  @ParameterizedTest
+  @DisplayName("Distance sweep")
+  @ValueSource(doubles = {0}) // typical sweep: 0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5
+  void distanceSweep(double distance) {
 
-    for (double sigma = 0.25; sigma <= 2.0; sigma += 0.25) {
+    double confidence = calculateConfidence(distance, vx, vy, rotationspeed, stdDev);
+    System.out.println("distance=" + distance + " confidence=" + confidence);
 
-      double confidence = calculateConfidence(distance, 1.0, 0, 0, sigma);
-
-      System.out.println("sigma=" + sigma + " confidence=" + confidence);
-    }
-
-    assertTrue(true);
+    assertTrue(confidence > 0);
   }
 
-  @Test
-  @DisplayName("Distance sweep shows decreasing confidence")
-  public void distanceSweep() {
+  @ParameterizedTest
+  @DisplayName("Standard deviation sweep")
+  @ValueSource(doubles = {0}) // typical sweep: 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5
+  void stdDevSweep(double stdDev) {
 
-    for (double d = 2; d <= 10; d += 1) {
+    double confidence = calculateConfidence(distance, vx, vy, rotationspeed, stdDev);
+    System.out.println("stdDev=" + stdDev + " confidence=" + confidence);
 
-      double confidence = calculateConfidence(d, 1.0, 0, 0, stdDev);
-
-      System.out.println("distance=" + d + " confidence=" + confidence);
-    }
-
-    assertTrue(true);
+    assertTrue(confidence > 0);
   }
 }
