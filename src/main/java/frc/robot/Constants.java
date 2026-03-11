@@ -31,8 +31,8 @@ public final class Constants {
           Units.degreesToRadians(540),
           Units.degreesToRadians(400));
 
-  public static final int HOPPER_ROLLERS_ID = 17;
-  public static final int HOPPER_WHEELS_ID = 18;
+  public static final int HOPPER_ROLLERS_ID = 18;
+  public static final int HOPPER_WHEELS_ID = 17;
   public static final int TOWER_MOTOR_ID = 19;
 
   public static final int CLIMBER_MOTOR_ID = 11;
@@ -61,7 +61,7 @@ public final class Constants {
       new Transform2d(Units.inchesToMeters(1.38), Units.inchesToMeters(3.8), Rotation2d.kZero);
   public static final double SHOOTING_APPROXIMATE_TOF = 1;
 
-  public static final int CANDLE_ID = 32;
+  public static final int CANDLE_ID = 40;
 
   public enum LEDMode {
     RAINBOW,
