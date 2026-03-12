@@ -9,7 +9,7 @@ import frc.robot.subsystems.shooter.ShootingConstants;
 public class TurretConfidenceUtil {
 
   // TODO: Tune the standard deviation to the robot's accuracy
-  private static final double ERROR_STD_DEV = 1.0;
+  private static final double ERROR_STD_DEV = 2.0;
 
   // Portion of rotation error that remains after turret compensation
   // 0 = perfect turret
