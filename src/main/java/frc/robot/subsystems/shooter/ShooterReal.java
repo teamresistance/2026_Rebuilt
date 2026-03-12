@@ -67,11 +67,11 @@ public class ShooterReal implements ShooterIO {
     // TODO: tune me and get rid of the ultra slow starting values
     TalonFXConfiguration turretConfig =
         new TalonFXConfiguration()
-            .withSlot0(new Slot0Configs().withKP(1).withKI(0).withKD(0).withKS(0))
+            .withSlot0(new Slot0Configs().withKP(3).withKI(0).withKD(0).withKS(0))
             .withMotionMagic(
                 new MotionMagicConfigs()
-                    .withMotionMagicAcceleration(150)
-                    .withMotionMagicCruiseVelocity(140))
+                    .withMotionMagicAcceleration(500)
+                    .withMotionMagicCruiseVelocity(120))
             .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
