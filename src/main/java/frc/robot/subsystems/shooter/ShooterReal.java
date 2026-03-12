@@ -53,15 +53,7 @@ public class ShooterReal implements ShooterIO {
                     .withStatorCurrentLimit(10)
                     .withStatorCurrentLimitEnable(true)
                     .withSupplyCurrentLimit(10)
-                    .withSupplyCurrentLimitEnable(true))
-            .withSoftwareLimitSwitch(
-                new SoftwareLimitSwitchConfigs()
-                    .withForwardSoftLimitEnable(true)
-                    .withForwardSoftLimitThreshold(
-                        ShootingUtil.toHoodRevs(Constants.SHOOTER_HOOD_MAX_PITCH))
-                    .withReverseSoftLimitEnable(true)
-                    .withReverseSoftLimitThreshold(
-                        ShootingUtil.toHoodRevs(Constants.SHOOTER_HOOD_MIN_PITCH)));
+                    .withSupplyCurrentLimitEnable(true));
     hoodMotor.getConfigurator().apply(hoodConfig);
 
     // TODO: tune me and get rid of the ultra slow starting values
