@@ -17,10 +17,11 @@ public class TurretConfidenceUtilTest {
   void testConfidenceCalculation() {
 
     // Test parameters, change as needed to test different scenarios
-    double vx = 1.0; // m/s
-    double vy = 1.0; // m/s
-    double rotationSpeed = 0.25; // rad/s
-    double distance = 3.0; // meters
+    double vx = 2.0; // x-translation speed (m/s)
+    double vy = 0.0; // y-translation speed (m/s)
+    double rotationSpeed = 0.0; // angular rotationspeed (rad/s)
+    double distance = 5.0; // distance from hub meters
+    double timeOfFlight = 0.8; // seconds, based on distance
 
     // Mock drive subsystem
     SwerveDriveIO drive = mock(SwerveDriveIO.class);
@@ -51,7 +52,9 @@ public class TurretConfidenceUtilTest {
           .thenReturn(distance);
 
       // Mock the shooting constants to return a time of flight (0.6s) based on the distance
-      shootingConstantsMock.when(() -> ShootingConstants.getTimeOfFlight(distance)).thenReturn(0.6);
+      shootingConstantsMock
+          .when(() -> ShootingConstants.getTimeOfFlight(distance))
+          .thenReturn(timeOfFlight);
 
       // Call the method under test
       double confidence = TurretConfidenceUtil.calculateConfidence(drive);
