@@ -36,8 +36,8 @@ public final class Constants {
   public static final int TOWER_MOTOR_ID = 19;
 
   public static final int CLIMBER_MOTOR_ID = 11;
-  public static final int CLIMBER_ZERO = 0;
-  public static final int CLIMBER_FULL = 10; // TODO: actual high/low pos
+  public static final int CLIMBER_FULL_OUT = 0; // FULL UP
+  public static final int CLIMBER_FULL_IN = 1; // FULLY DOWN
 
   public static final int SHOOTER_HOOD_ID = 12;
   public static final int SHOOTER_TURRET_ID = 13;
@@ -54,12 +54,11 @@ public final class Constants {
 
   public static final double SHOOTER_HOOD_MAX_PITCH = 43;
   public static final double SHOOTER_HOOD_MIN_PITCH = 17.5;
-  public static final double SHOOTER_TURRET_MAX_YAW = 90; // TODO: max min yaw
-  public static final double SHOOTER_TURRET_MIN_YAW = -90;
+  public static final double SHOOTER_TURRET_MAX_YAW = 135; // TODO: max min yaw
+  public static final double SHOOTER_TURRET_MIN_YAW = -135;
 
   public static final Transform2d ROBOT_TO_TURRET =
       new Transform2d(Units.inchesToMeters(1.38), Units.inchesToMeters(3.8), Rotation2d.kZero);
-  public static final double SHOOTING_APPROXIMATE_TOF = 1;
 
   public static final int CANDLE_ID = 40;
 
@@ -110,7 +109,7 @@ public final class Constants {
           .withColor(new RGBWColor(255, 150, 0))
           .withSize(10);
 
-  // at what confidence is it considered "confident" instead of "doubtful"
+  // at what confidence is it considered "confident" instead of "doubtful" TODO: me
   public static final double CONFIDENCE_THRESHOLD = 0.5;
 
   public enum ShiftOwner {

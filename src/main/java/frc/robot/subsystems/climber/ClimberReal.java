@@ -43,13 +43,13 @@ public class ClimberReal implements ClimberIO {
   }
 
   @Override
-  public void up() {
-    climberControl.setSetpoint(Constants.CLIMBER_FULL, SparkBase.ControlType.kPosition);
+  public void down() {
+    climberControl.setSetpoint(Constants.CLIMBER_FULL_IN, SparkBase.ControlType.kPosition);
   }
 
   @Override
-  public void down() {
-    climberControl.setSetpoint(Constants.CLIMBER_ZERO, SparkBase.ControlType.kPosition);
+  public void up() {
+    climberControl.setSetpoint(Constants.CLIMBER_FULL_OUT, SparkBase.ControlType.kPosition);
   }
 
   @Override

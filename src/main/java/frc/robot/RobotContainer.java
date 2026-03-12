@@ -156,10 +156,11 @@ public class RobotContainer {
   }
 
   private void configureNamedCommands() {
+    // TODO: Hi use me in path planner
     NamedCommands.registerCommand(
         "Climb Up",
         Commands.runOnce(climber::unbrake)
-            .andThen(climber::up)
+            .andThen(climber::down)
             .andThen(new WaitUntilCommand(climber::atTarget))
             .andThen(climber::brake));
     NamedCommands.registerCommand("Stop", Commands.runOnce(drive::stop, drive));
@@ -168,7 +169,7 @@ public class RobotContainer {
     // TODO: outpost shoot for longer?
     NamedCommands.registerCommand("Toggle Intake", new ToggleIntakeCommand(intake));
     NamedCommands.registerCommand(
-        "Closest Climb",
+        "Closest Climb Align",
         new DeferredCommand(
             () ->
                 DriveCommands.followPosesWithMaxSpeed(
@@ -262,7 +263,7 @@ public class RobotContainer {
                   boolean isShooting = ShootingUtil.getShootingType(drive::getPose) == 0;
                   boolean isConfident =
                       TurretConfidenceUtil.calculateConfidence(drive)
-                          > 75.0; // confidence threshold is greater than 75%
+                          > Constants.CONFIDENCE_THRESHOLD;
 
                   if (isShooting) {
                     return isConfident

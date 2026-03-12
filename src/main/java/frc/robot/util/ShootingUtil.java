@@ -134,7 +134,7 @@ public class ShootingUtil {
         new Pose2d(futureTurretPos.getX(), futureTurretPos.getY(), Rotation2d.kZero));
 
     // code-front of the robot has turret 90deg right
-    return Math.toDegrees(MathUtil.angleModulus(turretAngleRobotRelative + (Math.PI/2)));
+    return Math.toDegrees(MathUtil.angleModulus(turretAngleRobotRelative + (Math.PI / 2)));
   }
 
   /**
