@@ -11,6 +11,12 @@ public class TurretConfidenceUtil {
   // TODO: Tune the standard deviation to the robot's accuracy
   private static final double ERROR_STD_DEV = 1.0;
 
+  // Portion of rotation error that remains after turret compensation
+  // 0 = perfect turret
+  // 1 = no compensation
+  private static final double ROTATION_COMPENSATION_FACTOR =
+      0.25; // TODO: Tune this based on turret performance
+
   public static double calculateConfidence(SwerveDriveIO drive) {
     // Get current robot pose and velocity
     Pose2d pose = drive.getPose();
@@ -33,7 +39,10 @@ public class TurretConfidenceUtil {
     double translationError = lateralVelocity * timeOfFlight;
 
     // Rotational drift arc displacement at target distance
-    double rotationError = speeds.omegaRadiansPerSecond * timeOfFlight * distance;
+    double rawRotationError = speeds.omegaRadiansPerSecond * timeOfFlight * distance;
+
+    // Apply turret compensation
+    double rotationError = rawRotationError * ROTATION_COMPENSATION_FACTOR;
 
     // Combine errors
     double totalError =

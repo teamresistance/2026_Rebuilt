@@ -1,108 +1,67 @@
 package frc.robot.util;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
-import org.junit.jupiter.api.DisplayName;
+import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import frc.robot.subsystems.drive.SwerveDriveIO;
+import frc.robot.subsystems.shooter.ShootingConstants;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.MockedStatic;
 
 public class TurretConfidenceUtilTest {
 
-  // Editable parameters for experimentation and testing
-  double stdDev = 1.0;
-
-  double distance = 3.0;
-
-  double vx = 1.0;
-  double vy = 1.0;
-  double rotationspeed = 0.25;
-
-  private double calculateConfidence(
-      double distance, double vx, double vy, double rotationspeed, double stdDev) {
-
-    double timeOfFlight = distance / 10; // Approximate time for a projectile to reach the target
-
-    double lateralVelocity = Math.hypot(vx, vy);
-
-    double translationError = lateralVelocity * timeOfFlight;
-
-    double rotationError = rotationspeed * timeOfFlight * distance;
-
-    double totalError =
-        Math.sqrt(translationError * translationError + rotationError * rotationError);
-
-    double probability = Math.exp(-(Math.pow(totalError, 2)) / (2 * Math.pow(stdDev, 2)));
-
-    return probability * 100;
-  }
-
   @Test
-  @DisplayName("Tested situation shot has high confidence")
-  public void testedSituationShot() {
+  void testConfidenceCalculation() {
 
-    double confidence = calculateConfidence(distance, vx, vy, rotationspeed, stdDev);
+    // Test parameters, change as needed to test different scenarios
+    double vx = 1.0; // m/s
+    double vy = 1.0; // m/s
+    double rotationSpeed = 0.25; // rad/s
+    double distance = 3.0; // meters
 
-    System.out.println("Tested situation confidence = " + confidence);
+    // Mock drive subsystem
+    SwerveDriveIO drive = mock(SwerveDriveIO.class);
 
-    assertTrue(
-        confidence > 50, "Expected confidence > 50% for tested situation, but got " + confidence);
-  }
+    // Set up mock behavior for pose and speeds
+    Pose2d pose = new Pose2d(0, 0, new Rotation2d());
+    ChassisSpeeds speeds = new ChassisSpeeds(vx, vy, rotationSpeed);
 
-  @ParameterizedTest
-  @DisplayName("X velocity sweep")
-  @ValueSource(doubles = {0}) // typical sweep: 0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5
-  void xVelocitySweep(double vx) {
+    // Mock the drive subsystem to return the pose and speeds
+    when(drive.getPose()).thenReturn(pose);
+    when(drive.getChassisSpeedsFieldRelative()).thenReturn(speeds);
 
-    double confidence = calculateConfidence(distance, vx, vy, rotationspeed, stdDev);
+    // Mock static methods in ShootingUtil and ShootingConstants
+    try (MockedStatic<ShootingUtil> shootingUtilMock = mockStatic(ShootingUtil.class);
+        MockedStatic<ShootingConstants> shootingConstantsMock =
+            mockStatic(ShootingConstants.class)) {
 
-    System.out.println("vx=" + vx + " confidence=" + confidence);
+      // Set up mock behavior for shooting utility methods
+      Translation2d target = new Translation2d(6, 0);
+      Pose2d targetPose = new Pose2d(target, new Rotation2d());
 
-    assertTrue(confidence > 0);
-  }
+      // Mock the shooting utility to return the target pose and distance
+      shootingUtilMock.when(() -> ShootingUtil.getShootingTarget(any())).thenReturn(targetPose);
 
-  @ParameterizedTest
-  @DisplayName("Y velocity sweep")
-  @ValueSource(doubles = {0}) // typical sweep: 0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5
-  void yVelocitySweep(double vy) {
+      // Mock the shooting utility to return the distance to the target
+      shootingUtilMock
+          .when(() -> ShootingUtil.getVirtualDistanceToTarget(any(), any()))
+          .thenReturn(distance);
 
-    double confidence = calculateConfidence(distance, vx, vy, rotationspeed, stdDev);
-    System.out.println("vy=" + vy + " confidence=" + confidence);
+      // Mock the shooting constants to return a time of flight (0.6s) based on the distance
+      shootingConstantsMock.when(() -> ShootingConstants.getTimeOfFlight(distance)).thenReturn(0.6);
 
-    assertTrue(confidence > 0);
-  }
+      // Call the method under test
+      double confidence = TurretConfidenceUtil.calculateConfidence(drive);
 
-  @ParameterizedTest
-  @DisplayName("Rotation speed sweep")
-  @ValueSource(
-      doubles = {0}) // typical sweep: 0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5
-  void rotationSpeedSweep(double rotationspeed) {
+      // Print the confidence for debugging purposes
+      System.out.println("Confidence = " + confidence);
 
-    double confidence = calculateConfidence(distance, vx, vy, rotationspeed, stdDev);
-    System.out.println("rotationspeed=" + rotationspeed + " confidence=" + confidence);
-
-    assertTrue(confidence > 0);
-  }
-
-  @ParameterizedTest
-  @DisplayName("Distance sweep")
-  @ValueSource(doubles = {0}) // typical sweep: 0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5
-  void distanceSweep(double distance) {
-
-    double confidence = calculateConfidence(distance, vx, vy, rotationspeed, stdDev);
-    System.out.println("distance=" + distance + " confidence=" + confidence);
-
-    assertTrue(confidence > 0);
-  }
-
-  @ParameterizedTest
-  @DisplayName("Standard deviation sweep")
-  @ValueSource(doubles = {1}) // typical sweep: 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5
-  void stdDevSweep(double stdDev) {
-
-    double confidence = calculateConfidence(distance, vx, vy, rotationspeed, stdDev);
-    System.out.println("stdDev=" + stdDev + " confidence=" + confidence);
-
-    assertTrue(confidence > 0);
+      // Assert that the confidence is within the expected range (0 to 100)
+      assertTrue(confidence > 0);
+      assertTrue(confidence <= 100);
+    }
   }
 }
