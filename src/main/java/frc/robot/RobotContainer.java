@@ -17,6 +17,7 @@ import frc.robot.commands.HoppertCommand;
 import frc.robot.commands.IdleShooterCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.commands.ToggleIntakeCommand;
+import frc.robot.commands.TrimCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.climber.ClimberReal;
@@ -386,6 +387,12 @@ public class RobotContainer {
 
     // left trigger toggles intake
     driver.leftTrigger().onTrue(new ToggleIntakeCommand(intake));
+
+    // POV for adjusting shooter trim, with up/down adjusting vertical and left/right adjusting horizontal.
+    driver.povUp().onTrue(TrimCommands.AdjustVerticalTrim(shooter, 1.0));
+    driver.povDown().onTrue(TrimCommands.AdjustVerticalTrim(shooter, -1.0));
+    driver.povRight().onTrue(TrimCommands.AdjustHorizontalTrim(shooter, 1.0));
+    driver.povLeft().onTrue(TrimCommands.AdjustHorizontalTrim(shooter, -1.0));
   }
 
   /**
