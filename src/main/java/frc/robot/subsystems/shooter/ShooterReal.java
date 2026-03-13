@@ -26,6 +26,8 @@ public class ShooterReal implements ShooterIO {
   private double turretTargetAngle = 0;
   private double turretDriveAssistTargetAngle = 0;
   private double flywheelTargetRPS = 0;
+  private double verticalTrim = 0.0;
+  private double horizontalTrim = 0.0;
 
   private boolean emergencyStopSwivel = false;
 
@@ -140,9 +142,9 @@ public class ShooterReal implements ShooterIO {
    */
   @Override
   public void setHoodTarget(double angle) {
+    angle += verticalTrim; // add vertical trim to hood target angle
     if (angle < Constants.SHOOTER_HOOD_MAX_PITCH && angle > Constants.SHOOTER_HOOD_MIN_PITCH) {
       angle = angle - Constants.SHOOTER_HOOD_MIN_PITCH; // zero position is not zero degrees
-      hoodTargetAngle = angle;
       hoodMotor.setControl(
           new MotionMagicVoltage(ShootingUtil.toHoodRevs(angle)).withEnableFOC(true));
     }
@@ -166,7 +168,8 @@ public class ShooterReal implements ShooterIO {
       } else {
         turretDriveAssistTargetAngle = 0;
       }
-      turretTargetAngle = turretAngle;
+      turretTargetAngle =
+          turretAngle + horizontalTrim; // add horizontal trim to turret target angle
       turretMotor.setControl(
           new MotionMagicVoltage(ShootingUtil.toTurretRevs(turretAngle)).withEnableFOC(true));
     }
@@ -200,6 +203,24 @@ public class ShooterReal implements ShooterIO {
   }
 
   @Override
+  public void adjustVerticalTrim(boolean up) {
+    if (up) {
+      verticalTrim += Constants.SHOOTER_TRIM_ADJUSTMENT_INCREMENT;
+    } else {
+      verticalTrim -= Constants.SHOOTER_TRIM_ADJUSTMENT_INCREMENT;
+    }
+  }
+
+  @Override
+  public void adjustHorizontalTrim(boolean right) {
+    if (right) {
+      horizontalTrim += Constants.SHOOTER_TRIM_ADJUSTMENT_INCREMENT;
+    } else {
+      horizontalTrim -= Constants.SHOOTER_TRIM_ADJUSTMENT_INCREMENT;
+    }
+  }
+
+  @Override
   public void periodic() {
     Logger.recordOutput("Shooter/Flywheel Target RPS", flywheelTargetRPS);
     Logger.recordOutput(
@@ -214,5 +235,7 @@ public class ShooterReal implements ShooterIO {
         ShootingUtil.toTurretDegrees(
             ShootingUtil.toHoodDegrees(hoodMotor.getPosition().getValueAsDouble())));
     Logger.recordOutput("Shooter/Drive Assist Angle", turretDriveAssistTargetAngle);
+    Logger.recordOutput("Shooter/Vertical Trim", verticalTrim);
+    Logger.recordOutput("Shooter/Horizontal Trim", horizontalTrim);
   }
 }
