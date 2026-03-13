@@ -142,9 +142,9 @@ public class ShooterReal implements ShooterIO {
    */
   @Override
   public void setHoodTarget(double angle) {
+    angle += verticalTrim; // add vertical trim to hood target angle
     if (angle < Constants.SHOOTER_HOOD_MAX_PITCH && angle > Constants.SHOOTER_HOOD_MIN_PITCH) {
       angle = angle - Constants.SHOOTER_HOOD_MIN_PITCH; // zero position is not zero degrees
-      hoodTargetAngle = angle + verticalTrim; // add vertical trim to hood target angle
       hoodMotor.setControl(
           new MotionMagicVoltage(ShootingUtil.toHoodRevs(angle)).withEnableFOC(true));
     }
