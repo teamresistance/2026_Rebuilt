@@ -50,8 +50,8 @@ import org.photonvision.PhotonCamera;
 public class RobotContainer {
   public final PhotonCamera frontLeftCamera = new PhotonCamera("front-left");
   public final PhotonCamera frontRightCamera = new PhotonCamera("front-right");
-  public final PhotonCamera backLeftCamera = new PhotonCamera("back_left");
-  public final PhotonCamera backRightCamera = new PhotonCamera("back_right");
+  public final PhotonCamera backLeftCamera = new PhotonCamera("back-left");
+  public final PhotonCamera backRightCamera = new PhotonCamera("back-right");
   private final Alert cameraFailureAlert;
 
   // Subsystems
