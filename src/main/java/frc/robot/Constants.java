@@ -78,7 +78,7 @@ public final class Constants {
   }
 
   public static final int LED_START_INDEX = 0;
-  public static final int LED_END_INDEX = 100; // todo: this
+  public static final int LED_END_INDEX = 161;
 
   public static final RainbowAnimation LED_ANIMATION_RAINBOW =
       new RainbowAnimation(LED_START_INDEX, LED_END_INDEX).withFrameRate(60);
