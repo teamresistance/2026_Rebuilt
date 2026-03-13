@@ -252,7 +252,6 @@ public class RobotContainer {
   /** Sets up LEDs and controller rumbles */
   private void configureDriverFeedback() {
 
-    // TODO: integrate confidence system
     // SHOOTING/PASSING (priority 4, determines confidence and passing/shooting, framerate based on
     // confidence)
     LEDStream shootingStream =
@@ -279,13 +278,11 @@ public class RobotContainer {
             .withFramerateSupplier(
                 () -> {
                   double confidence = TurretConfidenceUtil.calculateConfidence(drive);
-                  int framerate =
-                      (confidence > 90.0)
-                          ? 10 // very high framerate for very high confidence
-                          : (confidence > 80.0)
-                              ? 9
-                              : (confidence > 70.0) ? 8 : (confidence > 60.0) ? 7 : 6;
-                  return framerate;
+                  return (confidence > 90.0)
+                      ? 10 // very high framerate for very high confidence
+                      : (confidence > 80.0)
+                          ? 9
+                          : (confidence > 70.0) ? 8 : (confidence > 60.0) ? 7 : 6;
                 });
 
     leds.addStream(shootingStream);
@@ -313,7 +310,7 @@ public class RobotContainer {
 
     // BUMP (priority 5, timed 1s, cancels if leaving zone)
     LEDStream bumpStream =
-        new LEDStream("bump", 5, () -> Constants.LEDMode.BUMP, () -> inBumpZone.getAsBoolean());
+        new LEDStream("bump", 5, () -> Constants.LEDMode.BUMP, inBumpZone::getAsBoolean);
     leds.addStream(bumpStream);
 
     // BUMP trigger (timed 1s when entering bump zone)

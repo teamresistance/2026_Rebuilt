@@ -37,7 +37,8 @@ public final class Constants {
 
   public static final int CLIMBER_MOTOR_ID = 11;
   public static final int CLIMBER_FULL_OUT = 0; // FULL UP
-  public static final int CLIMBER_FULL_IN = 1; // FULLY DOWN
+  public static final int CLIMBER_FULL_IN = -140; // FULLY DOWN
+  public static final int CLIMBER_BRAKE_RELAY_ID = 0; // TODO: me please!
 
   public static final int SHOOTER_HOOD_ID = 12;
   public static final int SHOOTER_TURRET_ID = 13;
