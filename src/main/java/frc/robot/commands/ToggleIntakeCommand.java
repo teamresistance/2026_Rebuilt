@@ -19,4 +19,9 @@ public class ToggleIntakeCommand extends Command {
       intake.activateIntake();
     }
   }
+
+  @Override
+  public boolean isFinished() {
+    return true;
+  }
 }
