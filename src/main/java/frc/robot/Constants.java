@@ -74,7 +74,8 @@ public final class Constants {
     ACTIVE,
     INACTIVE,
     BUMP,
-    AUTO
+    AUTO,
+    DISABLED
   }
 
   public static final int LED_START_INDEX = 0;
@@ -107,9 +108,13 @@ public final class Constants {
           .withColor(new RGBWColor(0, 255, 255));
   public static final LarsonAnimation LED_ANIMATION_AUTO =
       new LarsonAnimation(LED_START_INDEX, LED_END_INDEX)
-          .withFrameRate(10)
+          .withFrameRate(20)
           .withColor(new RGBWColor(255, 150, 0))
-          .withSize(10);
+          .withSize(20);
+  public static final StrobeAnimation LED_ANIMATION_DISABLED =
+      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
+          .withColor(new RGBWColor(20, 3, 0))
+          .withFrameRate(1);
 
   // at what confidence is it considered "confident" instead of "doubtful" TODO: me
   public static final double CONFIDENCE_THRESHOLD = 0.5;

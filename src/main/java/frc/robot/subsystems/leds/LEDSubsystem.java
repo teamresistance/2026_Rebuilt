@@ -43,22 +43,26 @@ public class LEDSubsystem extends SubsystemBase {
     Logger.recordOutput("LEDS/Active Mode", ledMode);
 
     switch (ledMode) {
+      case DISABLED:
+        candle.setControl(Constants.LED_ANIMATION_DISABLED);
+        break;
       case RAINBOW:
-        if (mode.useFramerateSupplier && mode.useBrightnessSupplier) {
-          candle.setControl(
-              Constants.LED_ANIMATION_RAINBOW
-                  .withBrightness(mode.brightnessSupplier.getAsDouble())
-                  .withFrameRate(mode.framerateSupplier.getAsDouble()));
-        } else if (mode.useBrightnessSupplier) {
-          candle.setControl(
-              Constants.LED_ANIMATION_RAINBOW.withBrightness(
-                  mode.brightnessSupplier.getAsDouble()));
-        } else if (mode.useFramerateSupplier) {
-          candle.setControl(
-              Constants.LED_ANIMATION_RAINBOW.withFrameRate(mode.framerateSupplier.getAsDouble()));
-        } else {
-          candle.setControl(Constants.LED_ANIMATION_RAINBOW);
-        }
+        //        if (mode.useFramerateSupplier && mode.useBrightnessSupplier) {
+        //          candle.setControl(
+        //              Constants.LED_ANIMATION_RAINBOW
+        //                  .withBrightness(mode.brightnessSupplier.getAsDouble())
+        //                  .withFrameRate(mode.framerateSupplier.getAsDouble()));
+        //        } else if (mode.useBrightnessSupplier) {
+        //          candle.setControl(
+        //              Constants.LED_ANIMATION_RAINBOW.withBrightness(
+        //                  mode.brightnessSupplier.getAsDouble()));
+        //        } else if (mode.useFramerateSupplier) {
+        //          candle.setControl(
+        //
+        // Constants.LED_ANIMATION_RAINBOW.withFrameRate(mode.framerateSupplier.getAsDouble()));
+        //        } else {
+        candle.setControl(Constants.LED_ANIMATION_RAINBOW);
+        //        }
         break;
       case SHOOTING_CONFIDENT:
         candle.setControl(

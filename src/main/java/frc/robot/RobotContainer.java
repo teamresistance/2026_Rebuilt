@@ -147,6 +147,7 @@ public class RobotContainer {
 
     swivelStop.addOption("STOP", true);
     swivelStop.addOption("GOOD", false);
+    swivelStop.setDefaultOption("GOOD", false);
     SmartDashboard.putData("Turret Swivel Stop", swivelStop);
 
     configureDriverFeedback();
@@ -294,6 +295,11 @@ public class RobotContainer {
             () -> Constants.LEDMode.INTAKING,
             () -> driver.rightTrigger().getAsBoolean());
     leds.addStream(intakeStream);
+
+    // DISABLED
+    LEDStream disabledStream =
+        new LEDStream("disabled", 999, () -> Constants.LEDMode.DISABLED, DriverStation::isDisabled);
+    leds.addStream(disabledStream);
 
     // ACTIVE/INACTIVE
     LEDStream activeInactiveStream =
