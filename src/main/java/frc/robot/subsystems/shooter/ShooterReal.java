@@ -41,20 +41,19 @@ public class ShooterReal implements ShooterIO {
   /** Configures motors (control mode, pid, current limits) */
   public void configure() {
 
-    // TODO: tune me and get rid of the ultra slow starting values
     TalonFXConfiguration hoodConfig =
         new TalonFXConfiguration()
-            .withSlot0(new Slot0Configs().withKP(1).withKI(0).withKD(0).withKS(0))
+            .withSlot0(new Slot0Configs().withKP(6).withKI(0).withKD(0).withKS(0))
             .withMotionMagic(
                 new MotionMagicConfigs()
-                    .withMotionMagicAcceleration(250)
-                    .withMotionMagicCruiseVelocity(10))
+                    .withMotionMagicAcceleration(300)
+                    .withMotionMagicCruiseVelocity(70))
             .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
-                    .withStatorCurrentLimit(10)
+                    .withStatorCurrentLimit(20)
                     .withStatorCurrentLimitEnable(true)
-                    .withSupplyCurrentLimit(10)
+                    .withSupplyCurrentLimit(20)
                     .withSupplyCurrentLimitEnable(true));
     hoodMotor.getConfigurator().apply(hoodConfig);
 
@@ -82,7 +81,7 @@ public class ShooterReal implements ShooterIO {
                 new CurrentLimitsConfigs()
                     .withStatorCurrentLimit(0)
                     .withStatorCurrentLimitEnable(true)
-                    .withSupplyCurrentLimit(0)
+                    .withSupplyCurrentLimit(40)
                     .withSupplyCurrentLimitEnable(true));
     flywheelMotor.getConfigurator().apply(flywheelConfig);
 
