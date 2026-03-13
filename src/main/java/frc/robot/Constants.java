@@ -57,6 +57,7 @@ public final class Constants {
   public static final double SHOOTER_HOOD_MIN_PITCH = 17.5;
   public static final double SHOOTER_TURRET_MAX_YAW = 135; // TODO: max min yaw
   public static final double SHOOTER_TURRET_MIN_YAW = -135;
+  public static final double SHOOTER_TRIM_ADJUSTMENT_INCREMENT = 1; // TODO: number w/ driver
 
   public static final Transform2d ROBOT_TO_TURRET =
       new Transform2d(Units.inchesToMeters(1.38), Units.inchesToMeters(3.8), Rotation2d.kZero);

@@ -384,6 +384,13 @@ public class RobotContainer {
 
     // left trigger toggles intake
     driver.leftTrigger().onTrue(new ToggleIntakeCommand(intake));
+
+    // POV for adjusting shooter trim, with up/down adjusting vertical and left/right adjusting
+    // horizontal.
+    driver.povUp().onTrue(Commands.runOnce(() -> shooter.adjustVerticalTrim(true)));
+    driver.povDown().onTrue(Commands.runOnce(() -> shooter.adjustVerticalTrim(false)));
+    driver.povRight().onTrue(Commands.runOnce(() -> shooter.adjustHorizontalTrim(true)));
+    driver.povLeft().onTrue(Commands.runOnce(() -> shooter.adjustHorizontalTrim(false)));
   }
 
   /**
