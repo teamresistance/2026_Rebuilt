@@ -11,7 +11,6 @@ public class HoppertCommand extends Command {
   private final ShooterIO shooter;
   private final Timer directionSwitchTimer = new Timer();
 
-  // TODO: add intake to this
   public HoppertCommand(HoppertIO hoppert, ShooterIO shooter) {
     this.hoppert = hoppert;
     this.shooter = shooter;
@@ -26,8 +25,6 @@ public class HoppertCommand extends Command {
 
   @Override
   public void execute() {
-
-    // something
 
     if (shooter.isShooting()) {
 

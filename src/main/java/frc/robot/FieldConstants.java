@@ -76,16 +76,16 @@ public final class FieldConstants {
 
   // Y+ blue alliance passing target
   public static final Pose2d BLUE_TOP_FERRY_TARGET =
-      new Pose2d(APRILTAG_32.getX(), 6.02, Rotation2d.kZero);
+      new Pose2d(APRILTAG_32.getX() + 3, 6.02, Rotation2d.kZero);
   // Y- blue alliance passing target
   public static final Pose2d BLUE_BOTTOM_FERRY_TARGET =
-      new Pose2d(APRILTAG_32.getX(), 2.02, Rotation2d.kZero);
+      new Pose2d(APRILTAG_32.getX() + 3, 2.02, Rotation2d.kZero);
   // Y+ red alliance passing target
   public static final Pose2d RED_TOP_FERRY_TARGET =
-      new Pose2d(APRILTAG_16.getX(), 6.02, Rotation2d.kZero);
+      new Pose2d(APRILTAG_16.getX() - 3, 6.02, Rotation2d.kZero);
   // Y- red alliance passing target
   public static final Pose2d RED_BOTTOM_FERRY_TARGET =
-      new Pose2d(APRILTAG_16.getX(), 2.02, Rotation2d.kZero);
+      new Pose2d(APRILTAG_16.getX() - 3, 2.02, Rotation2d.kZero);
 
   public static final double BLUE_SHOOTING_ZONE_END = APRILTAG_20.getX() + 0.5;
   public static final double NEUTRAL_ZONE_BLUESIDE = APRILTAG_20.getX() + 0.5;
@@ -93,7 +93,6 @@ public final class FieldConstants {
   public static final double RED_SHOOTING_ZONE_START = APRILTAG_4.getX() - 0.5;
   public static final double TOP_BOTTOM_SPLIT_Y = APRILTAG_20.getY();
 
-  // TODO: change during testing to driver needs
   public static final double BUMPZONE_START_BLUE = APRILTAG_26.getX();
   public static final double BUMPZONE_END_BLUE = APRILTAG_20.getX();
   public static final double BUMPZONE_START_RED = APRILTAG_4.getX();
