@@ -165,6 +165,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("Stop", Commands.runOnce(drive::stop, drive));
     NamedCommands.registerCommand("Shoot 5s", new ShootCommand(drive, shooter).withTimeout(5));
     NamedCommands.registerCommand("Shoot 10s", new ShootCommand(drive, shooter).withTimeout(10));
+    // TODO: outpost shoot for longer?
     NamedCommands.registerCommand("Toggle Intake", new ToggleIntakeCommand(intake));
     NamedCommands.registerCommand(
         "Closest Climb",
