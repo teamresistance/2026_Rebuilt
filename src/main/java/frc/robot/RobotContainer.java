@@ -17,7 +17,6 @@ import frc.robot.commands.HoppertCommand;
 import frc.robot.commands.IdleShooterCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.commands.ToggleIntakeCommand;
-import frc.robot.commands.TrimCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.climber.ClimberReal;
