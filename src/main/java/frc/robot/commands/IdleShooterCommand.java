@@ -1,9 +1,12 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants;
 import frc.robot.Constants.ShootingStyle;
 import frc.robot.subsystems.drive.SwerveDriveIO;
 import frc.robot.subsystems.shooter.ShooterIO;
@@ -45,12 +48,18 @@ public class IdleShooterCommand extends Command {
       ChassisSpeeds speeds = drive.getChassisSpeeds();
 
       // 2. Calculate Target Geometry
+      // Offset robot center to turret center in field frame
+      Translation2d turretOffset =
+          Constants.ROBOT_TO_TURRET
+              .plus(new Transform2d(0, 0, robotPose.getRotation()))
+              .getTranslation();
+      Translation2d turretPos = robotPose.getTranslation().plus(turretOffset);
+
       var targetPose = ShootingUtil.getShootingTarget(robotPose);
       Translation2d hub = targetPose.getTranslation();
-      Translation2d robot = robotPose.getTranslation();
 
-      double dx = hub.getX() - robot.getX();
-      double dy = hub.getY() - robot.getY();
+      double dx = hub.getX() - turretPos.getX();
+      double dy = hub.getY() - turretPos.getY();
       double distanceToHub = Math.hypot(dx, dy);
       double fieldRelativeAngleToHub = Math.atan2(dy, dx);
 
@@ -66,6 +75,41 @@ public class IdleShooterCommand extends Command {
           ShootingPredictions.getCalculator().getHorizontalTotalShootingAngle()
               - robotPose.getRotation().getDegrees();
       hoodAngleDeg = ShootingPredictions.getCalculator().getVerticalShootingAngle();
+      // 5. Visualization — turret pose and predicted ball trajectory
+      Translation2d turretVizOffset =
+          (Constants.ROBOT_TO_TURRET.plus(new Transform2d(0, 0, robotPose.getRotation())))
+              .getTranslation();
+      Translation2d turretVizPos = robotPose.getTranslation().plus(turretVizOffset);
+      Pose2d turretPose = new Pose2d(turretVizPos, robotPose.getRotation());
+
+      // Decompose launch velocity into field-frame components for trajectory prediction
+      double launchSpeed = ShootingPredictions.getCalculator().getLaunchVelocity();
+      double hoodRad =
+          Math.toRadians(ShootingPredictions.getCalculator().getVerticalShootingAngle());
+      double turretFieldRad =
+          Math.toRadians(ShootingPredictions.getCalculator().getHorizontalTotalShootingAngle());
+
+      double vxLaunch = launchSpeed * Math.cos(hoodRad) * Math.cos(turretFieldRad);
+      double vyLaunch = launchSpeed * Math.cos(hoodRad) * Math.sin(turretFieldRad);
+      double vzLaunch = launchSpeed * Math.sin(hoodRad);
+
+      double[] landing =
+          ShootingUtil.predictLandingPose(
+              turretVizPos.getX(), turretVizPos.getY(), vxLaunch, vyLaunch, vzLaunch);
+
+      // Log turret pose and predicted landing point
+      Logger.recordOutput("Shooter/TurretPose", turretPose);
+      Logger.recordOutput(
+          "Shooter/PredictedLandingPose", new Pose2d(landing[0], landing[1], Rotation2d.kZero));
+
+      // Log trajectory line as a Pose2d array (start = turret, end = landing)
+      // AdvantageScope renders this as a line when logged as a pose array
+      Logger.recordOutput(
+          "Shooter/TrajectoryLine",
+          new Pose2d[] {turretPose, new Pose2d(landing[0], landing[1], Rotation2d.kZero)});
+
+      Logger.recordOutput("Shooter/DistanceToHub", distanceToHub);
+      Logger.recordOutput("Shooter/TurretPos", turretVizPos.toString());
     }
 
     shooter.setTurretTarget(turretAngleDeg);
