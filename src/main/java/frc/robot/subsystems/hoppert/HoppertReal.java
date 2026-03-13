@@ -39,13 +39,13 @@ public class HoppertReal implements HoppertIO {
     // TODO: me
     TalonFXConfiguration config2 =
         new TalonFXConfiguration()
-            .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake));
+            .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Coast));
     hopperRollerMotor.getConfigurator().apply(config2);
 
     // TODO: me
     TalonFXConfiguration config3 =
         new TalonFXConfiguration()
-            .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake));
+            .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Coast));
     hopperWheelsMotor.getConfigurator().apply(config3);
 
     register();

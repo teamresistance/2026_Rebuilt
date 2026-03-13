@@ -156,7 +156,6 @@ public class RobotContainer {
   }
 
   private void configureNamedCommands() {
-    // TODO: Hi use me in path planner
     NamedCommands.registerCommand(
         "Climb Up",
         Commands.runOnce(climber::unbrake)
