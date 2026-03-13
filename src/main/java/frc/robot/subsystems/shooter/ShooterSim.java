@@ -119,24 +119,20 @@ public class ShooterSim implements ShooterIO {
   }
 
   @Override
-  public void adjustVerticalTrim(double trim) {
-    if (trim == 1) {
+  public void adjustVerticalTrim(boolean up) {
+    if (up) {
       verticalTrim += Constants.SHOOTER_TRIM_ADJUSTMENT_INCREMENT;
-    } else if (trim == -1) {
-      verticalTrim -= Constants.SHOOTER_TRIM_ADJUSTMENT_INCREMENT;
     } else {
-      verticalTrim = 0;
+      verticalTrim -= Constants.SHOOTER_TRIM_ADJUSTMENT_INCREMENT;
     }
   }
 
   @Override
-  public void adjustHorizontalTrim(double trim) {
-    if (trim == 1) {
+  public void adjustHorizontalTrim(boolean right) {
+    if (right) {
       horizontalTrim += Constants.SHOOTER_TRIM_ADJUSTMENT_INCREMENT;
-    } else if (trim == -1) {
-      horizontalTrim -= Constants.SHOOTER_TRIM_ADJUSTMENT_INCREMENT;
     } else {
-      horizontalTrim = 0;
+      horizontalTrim -= Constants.SHOOTER_TRIM_ADJUSTMENT_INCREMENT;
     }
   }
 }

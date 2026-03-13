@@ -390,10 +390,10 @@ public class RobotContainer {
 
     // POV for adjusting shooter trim, with up/down adjusting vertical and left/right adjusting
     // horizontal.
-    driver.povUp().onTrue(Commands.runOnce(() -> shooter.adjustVerticalTrim(1)));
-    driver.povDown().onTrue(Commands.runOnce(() -> shooter.adjustVerticalTrim(-1)));
-    driver.povRight().onTrue(Commands.runOnce(() -> shooter.adjustHorizontalTrim(1)));
-    driver.povLeft().onTrue(Commands.runOnce(() -> shooter.adjustHorizontalTrim(-1)));
+    driver.povUp().onTrue(Commands.runOnce(() -> shooter.adjustVerticalTrim(true)));
+    driver.povDown().onTrue(Commands.runOnce(() -> shooter.adjustVerticalTrim(false)));
+    driver.povRight().onTrue(Commands.runOnce(() -> shooter.adjustHorizontalTrim(true)));
+    driver.povLeft().onTrue(Commands.runOnce(() -> shooter.adjustHorizontalTrim(false)));
   }
 
   /**

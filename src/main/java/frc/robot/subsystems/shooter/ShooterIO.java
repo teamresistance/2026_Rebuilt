@@ -25,7 +25,7 @@ public interface ShooterIO extends Subsystem {
 
   void setSwivelStop(boolean stopped);
 
-  void adjustVerticalTrim(double trim);
+  void adjustVerticalTrim(boolean up);
 
-  void adjustHorizontalTrim(double trim);
+  void adjustHorizontalTrim(boolean right);
 }
