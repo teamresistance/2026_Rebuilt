@@ -163,8 +163,8 @@ public final class Constants {
 
     // Drag coefficient - exponential factor in air resistance equation
     public static final double QUADRATIC_DRAG_COEFFICIENT =
-        0.0429140552109; // theoretical value is 0.004997, empirically tested value is
-    // 0.0429140552109
+        0.0245252378984; // theoretical value is 0.004997, empirically tested value is
+    // 0.0245252378984
 
     private static final double ROOT_MG_OVER_K =
         Math.sqrt(FUEL_MASS * G / QUADRATIC_DRAG_COEFFICIENT);
