@@ -350,6 +350,7 @@ public class RobotContainer {
         .start()
         .onTrue(
             Commands.runOnce(climber::unbrake)
+                .andThen(Commands.waitSeconds(0.1))
                 .andThen(climber::up)
                 .andThen(new WaitUntilCommand(climber::atTarget))
                 .andThen(climber::brake));
@@ -359,6 +360,7 @@ public class RobotContainer {
         .back()
         .onTrue(
             Commands.runOnce(climber::unbrake)
+                .andThen(Commands.waitSeconds(0.1))
                 .andThen(climber::down)
                 .andThen(new WaitUntilCommand(climber::atTarget))
                 .andThen(climber::brake));
