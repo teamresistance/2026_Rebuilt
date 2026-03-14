@@ -2,6 +2,8 @@ package frc.robot.subsystems.leds;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.hardware.CANdle;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import java.util.*;
@@ -44,7 +46,14 @@ public class LEDSubsystem extends SubsystemBase {
 
     switch (ledMode) {
       case DISABLED:
-        candle.setControl(Constants.LED_ANIMATION_DISABLED);
+        double voltage = RobotController.getBatteryVoltage();
+        if (voltage > 12.6) {
+          candle.setControl(Constants.LED_ANIMATION_DISABLED_GOOD);
+        } else if (voltage > 12.2) {
+          candle.setControl(Constants.LED_ANIMATION_DISABLED_FINE);
+        } else {
+          candle.setControl(Constants.LED_ANIMATION_DISABLED_BAD);
+        }
         break;
       case RAINBOW:
         //        if (mode.useFramerateSupplier && mode.useBrightnessSupplier) {

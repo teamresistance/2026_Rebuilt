@@ -111,10 +111,18 @@ public final class Constants {
           .withFrameRate(20)
           .withColor(new RGBWColor(255, 150, 0))
           .withSize(20);
-  public static final StrobeAnimation LED_ANIMATION_DISABLED =
+  public static final StrobeAnimation LED_ANIMATION_DISABLED_GOOD =
       new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
-          .withColor(new RGBWColor(20, 3, 0))
+          .withColor(new RGBWColor(0, 15, 0))
           .withFrameRate(1);
+  public static final StrobeAnimation LED_ANIMATION_DISABLED_FINE =
+    new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
+      .withColor(new RGBWColor(15, 3, 0))
+      .withFrameRate(1);
+  public static final StrobeAnimation LED_ANIMATION_DISABLED_BAD =
+    new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
+      .withColor(new RGBWColor(15, 0, 0))
+      .withFrameRate(1);
 
   // at what confidence is it considered "confident" instead of "doubtful" TODO: me
   public static final double CONFIDENCE_THRESHOLD = 0.5;
