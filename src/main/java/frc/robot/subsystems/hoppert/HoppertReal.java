@@ -39,13 +39,13 @@ public class HoppertReal implements HoppertIO {
     // TODO: me
     TalonFXConfiguration config2 =
         new TalonFXConfiguration()
-            .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake));
+            .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Coast));
     hopperRollerMotor.getConfigurator().apply(config2);
 
     // TODO: me
     TalonFXConfiguration config3 =
         new TalonFXConfiguration()
-            .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake));
+            .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Coast));
     hopperWheelsMotor.getConfigurator().apply(config3);
 
     register();
@@ -62,35 +62,35 @@ public class HoppertReal implements HoppertIO {
 
   @Override
   public void runHopperBackwards() {
-    hopperRollerMotor.setControl(new DutyCycleOut(-1.0));
+    hopperRollerMotor.setControl(new DutyCycleOut(-0.5));
     hopperRollersRunning = true;
     hopperRollersReversed = true;
   }
 
   @Override
   public void runHopperForwards() {
-    hopperRollerMotor.setControl(new DutyCycleOut(1.0));
+    hopperRollerMotor.setControl(new DutyCycleOut(0.5));
     hopperRollersRunning = true;
     hopperRollersReversed = false;
   }
 
   @Override
   public void runTowerBackwards() {
-    towerMotor.setControl(new DutyCycleOut(-1.0).withEnableFOC(true));
+    towerMotor.setControl(new DutyCycleOut(-0.75).withEnableFOC(true));
     towerMotorRunning = true;
     towerMotorReversed = true;
   }
 
   @Override
   public void runTowerForwards() {
-    towerMotor.setControl(new DutyCycleOut(1.0).withEnableFOC(true));
+    towerMotor.setControl(new DutyCycleOut(-0.75).withEnableFOC(true));
     towerMotorRunning = true;
     towerMotorReversed = false;
   }
 
   @Override
   public void runHopperWheels() {
-    hopperWheelsMotor.setControl(new DutyCycleOut(1.0));
+    hopperWheelsMotor.setControl(new DutyCycleOut(0.5));
     hopperWheelsRunning = true;
   }
 

@@ -34,6 +34,8 @@ public class ShooterSim implements ShooterIO {
   private double turretDriveAssistTargetAngle = 0;
   private double hoodTargetDegs = 13.0;
   Transform2d acceleration = new Transform2d();
+  private double verticalTrim = 0.0;
+  private double horizontalTrim = 0.0;
 
   private boolean emergencyStopSwivel = false;
 
@@ -206,12 +208,12 @@ public class ShooterSim implements ShooterIO {
     } else {
       turretDriveAssistTargetAngle = 0;
     }
-    turretTargetDegs = turretAngle;
+    turretTargetDegs = turretAngle + horizontalTrim;
   }
 
   @Override
   public void setHoodTarget(double hoodTargetAngle) {
-    hoodTargetDegs = hoodTargetAngle;
+    hoodTargetDegs = hoodTargetAngle + verticalTrim;
   }
 
   @Override
@@ -227,5 +229,23 @@ public class ShooterSim implements ShooterIO {
   @Override
   public void setSwivelStop(boolean stopped) {
     emergencyStopSwivel = stopped;
+  }
+
+  @Override
+  public void adjustVerticalTrim(boolean up) {
+    if (up) {
+      verticalTrim += Constants.SHOOTER_TRIM_ADJUSTMENT_INCREMENT;
+    } else {
+      verticalTrim -= Constants.SHOOTER_TRIM_ADJUSTMENT_INCREMENT;
+    }
+  }
+
+  @Override
+  public void adjustHorizontalTrim(boolean right) {
+    if (right) {
+      horizontalTrim += Constants.SHOOTER_TRIM_ADJUSTMENT_INCREMENT;
+    } else {
+      horizontalTrim -= Constants.SHOOTER_TRIM_ADJUSTMENT_INCREMENT;
+    }
   }
 }

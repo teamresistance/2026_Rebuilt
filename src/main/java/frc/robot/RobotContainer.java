@@ -160,7 +160,7 @@ public class RobotContainer {
     NamedCommands.registerCommand(
         "Climb Up",
         Commands.runOnce(climber::unbrake)
-            .andThen(Commands.runOnce(climber::up))
+            .andThen(climber::down)
             .andThen(new WaitUntilCommand(climber::atTarget))
             .andThen(Commands.runOnce(climber::up)));
     NamedCommands.registerCommand("Stop", Commands.runOnce(drive::stop, drive));
@@ -171,7 +171,7 @@ public class RobotContainer {
         new ShootCommand(drive, shooter, Constants.CURRENT_SHOT_STYLE).withTimeout(10));
     NamedCommands.registerCommand("Toggle Intake", new ToggleIntakeCommand(intake));
     NamedCommands.registerCommand(
-        "Closest Climb",
+        "Closest Climb Align",
         new DeferredCommand(
             () ->
                 DriveCommands.followPosesWithMaxSpeed(
@@ -254,7 +254,6 @@ public class RobotContainer {
   /** Sets up LEDs and controller rumbles */
   private void configureDriverFeedback() {
 
-    // TODO: integrate confidence system
     // SHOOTING/PASSING (priority 4, determines confidence and passing/shooting, framerate based on
     // confidence)
     LEDStream shootingStream =
@@ -265,7 +264,7 @@ public class RobotContainer {
                   boolean isShooting = ShootingUtil.getShootingType(drive::getPose) == 0;
                   boolean isConfident =
                       TurretConfidenceUtil.calculateConfidence(drive)
-                          > 75.0; // confidence threshold is greater than 75%
+                          > Constants.CONFIDENCE_THRESHOLD;
 
                   if (isShooting) {
                     return isConfident
@@ -281,13 +280,11 @@ public class RobotContainer {
             .withFramerateSupplier(
                 () -> {
                   double confidence = TurretConfidenceUtil.calculateConfidence(drive);
-                  int framerate =
-                      (confidence > 90.0)
-                          ? 10 // very high framerate for very high confidence
-                          : (confidence > 80.0)
-                              ? 9
-                              : (confidence > 70.0) ? 8 : (confidence > 60.0) ? 7 : 6;
-                  return framerate;
+                  return (confidence > 90.0)
+                      ? 10 // very high framerate for very high confidence
+                      : (confidence > 80.0)
+                          ? 9
+                          : (confidence > 70.0) ? 8 : (confidence > 60.0) ? 7 : 6;
                 });
 
     leds.addStream(shootingStream);
@@ -315,7 +312,7 @@ public class RobotContainer {
 
     // BUMP (priority 5, timed 1s, cancels if leaving zone)
     LEDStream bumpStream =
-        new LEDStream("bump", 5, () -> Constants.LEDMode.BUMP, () -> inBumpZone.getAsBoolean());
+        new LEDStream("bump", 5, () -> Constants.LEDMode.BUMP, inBumpZone::getAsBoolean);
     leds.addStream(bumpStream);
 
     // BUMP trigger (timed 1s when entering bump zone)
@@ -390,6 +387,13 @@ public class RobotContainer {
 
     // left trigger toggles intake
     driver.leftTrigger().onTrue(new ToggleIntakeCommand(intake));
+
+    // POV for adjusting shooter trim, with up/down adjusting vertical and left/right adjusting
+    // horizontal.
+    driver.povUp().onTrue(Commands.runOnce(() -> shooter.adjustVerticalTrim(true)));
+    driver.povDown().onTrue(Commands.runOnce(() -> shooter.adjustVerticalTrim(false)));
+    driver.povRight().onTrue(Commands.runOnce(() -> shooter.adjustHorizontalTrim(true)));
+    driver.povLeft().onTrue(Commands.runOnce(() -> shooter.adjustHorizontalTrim(false)));
   }
 
   /**

@@ -5,8 +5,6 @@ import org.littletonrobotics.junction.Logger;
 
 public class ClimberSim implements ClimberIO {
 
-  // TODO: actual sim logic once more details known
-
   private boolean braking = false;
   private boolean isUp = true;
   private DCMotor climber = DCMotor.getNeo550(1).withReduction(64);

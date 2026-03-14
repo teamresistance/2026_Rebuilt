@@ -10,7 +10,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import edu.wpi.first.wpilibj.PowerDistribution;
+import edu.wpi.first.wpilibj.Relay;
 import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
 
@@ -20,36 +20,36 @@ public class ClimberReal implements ClimberIO {
   private final RelativeEncoder climberInternalEncoder = climber.getEncoder();
   private final SparkClosedLoopController climberControl = climber.getClosedLoopController();
 
-  private final PowerDistribution pdh = new PowerDistribution(1, PowerDistribution.ModuleType.kRev);
+  private final Relay brakeSolenoid = new Relay(Constants.CLIMBER_BRAKE_RELAY_ID);
 
   public ClimberReal() {
     register();
 
     SparkMaxConfig config = new SparkMaxConfig();
-    config.closedLoop.p(0).i(0).d(0); // TODO: tune me! tune me!
-    config.closedLoop.allowedClosedLoopError(4, ClosedLoopSlot.kSlot0);
+    config.closedLoop.p(1).i(0).d(0);
+    config.closedLoop.allowedClosedLoopError(1, ClosedLoopSlot.kSlot0);
     config.idleMode(SparkBaseConfig.IdleMode.kBrake);
     climber.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
   @Override
   public void brake() {
-    pdh.setSwitchableChannel(false);
+    brakeSolenoid.set(Relay.Value.kOff);
   }
 
   @Override
   public void unbrake() {
-    pdh.setSwitchableChannel(true);
+    brakeSolenoid.set(Relay.Value.kOn);
   }
 
   @Override
   public void up() {
-    climberControl.setSetpoint(Constants.CLIMBER_FULL, SparkBase.ControlType.kPosition);
+    climberControl.setSetpoint(Constants.CLIMBER_FULL_OUT, SparkBase.ControlType.kPosition);
   }
 
   @Override
   public void down() {
-    climberControl.setSetpoint(Constants.CLIMBER_ZERO, SparkBase.ControlType.kPosition);
+    climberControl.setSetpoint(Constants.CLIMBER_FULL_IN, SparkBase.ControlType.kPosition);
   }
 
   @Override
@@ -61,6 +61,6 @@ public class ClimberReal implements ClimberIO {
   public void periodic() {
     Logger.recordOutput("Climber/Setpoint", climberControl.getSetpoint());
     Logger.recordOutput("Climber/Position", climberInternalEncoder.getPosition());
-    Logger.recordOutput("Climber/Braking", !pdh.getSwitchableChannel());
+    Logger.recordOutput("Climber/Braking", brakeSolenoid.get() == Relay.Value.kOff);
   }
 }

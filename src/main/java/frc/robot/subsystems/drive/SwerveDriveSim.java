@@ -54,7 +54,7 @@ public class SwerveDriveSim implements SwerveDriveIO {
     SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation.getDriveTrainSimulation());
     SimulatedArena.getInstance().resetFieldForAuto();
     field2d = new Field2d();
-    SmartDashboard.putData("Simulation Field", field2d);
+    SmartDashboard.putData("Field2d", field2d);
 
     configure(); // Configure AutoBuilder and PathPlanner
   }
