@@ -203,6 +203,46 @@ public class ShootingUtil {
       double launchSpeed, double hoodAngleDeg, double deltaAzimuthDeg) {}
 
   /**
+   * Integrates the 3D drag trajectory for exactly T seconds from the given initial velocity,
+   * returning final {x, y, z, vx, vy, vz}.
+   */
+  private static double[] integrateTrajectory(
+      double xStart, double yStart, double vx0, double vy0, double vz0) {
+
+    double x = xStart, y = yStart, z = 0.0;
+    double vx = vx0, vy = vy0, vz = vz0;
+
+    for (int i = 0; i < RK_STEPS; i++) {
+      double s1 = Math.sqrt(vx * vx + vy * vy + vz * vz);
+      double d1 = -ALPHA * s1;
+      double k1vx = d1 * vx, k1vy = d1 * vy, k1vz = d1 * vz - G;
+
+      double vx2 = vx + 0.5 * DT * k1vx, vy2 = vy + 0.5 * DT * k1vy, vz2 = vz + 0.5 * DT * k1vz;
+      double s2 = Math.sqrt(vx2 * vx2 + vy2 * vy2 + vz2 * vz2);
+      double d2 = -ALPHA * s2;
+      double k2vx = d2 * vx2, k2vy = d2 * vy2, k2vz = d2 * vz2 - G;
+
+      double vx3 = vx + 0.5 * DT * k2vx, vy3 = vy + 0.5 * DT * k2vy, vz3 = vz + 0.5 * DT * k2vz;
+      double s3 = Math.sqrt(vx3 * vx3 + vy3 * vy3 + vz3 * vz3);
+      double d3 = -ALPHA * s3;
+      double k3vx = d3 * vx3, k3vy = d3 * vy3, k3vz = d3 * vz3 - G;
+
+      double vx4 = vx + DT * k3vx, vy4 = vy + DT * k3vy, vz4 = vz + DT * k3vz;
+      double s4 = Math.sqrt(vx4 * vx4 + vy4 * vy4 + vz4 * vz4);
+      double d4 = -ALPHA * s4;
+      double k4vx = d4 * vx4, k4vy = d4 * vy4, k4vz = d4 * vz4 - G;
+
+      x += (DT / 6.0) * (vx + 2 * vx2 + 2 * vx3 + vx4);
+      y += (DT / 6.0) * (vy + 2 * vy2 + 2 * vy3 + vy4);
+      z += (DT / 6.0) * (vz + 2 * vz2 + 2 * vz3 + vz4);
+      vx += (DT / 6.0) * (k1vx + 2 * k2vx + 2 * k3vx + k4vx);
+      vy += (DT / 6.0) * (k1vy + 2 * k2vy + 2 * k3vy + k4vy);
+      vz += (DT / 6.0) * (k1vz + 2 * k2vz + 2 * k3vz + k4vz);
+    }
+    return new double[] {x, y, z, vx, vy, vz};
+  }
+
+  /**
    * Runs the RK4 Newton solve loop, iterating launch velocity components toward the given
    * horizontal and vertical targets. Corrects vertical first each iteration to minimize
    * horizontal-vertical drag coupling error.
@@ -218,42 +258,12 @@ public class ShootingUtil {
       double vxGuess, double vyGuess, double vzGuess, double xTarget, double yTarget) {
 
     for (int iter = 0; iter < SOLVE_ITERS; iter++) {
-      double x = 0.0, y = 0.0, z = 0.0;
-      double vx = vxGuess, vy = vyGuess, vz = vzGuess;
+      double[] result = integrateTrajectory(0.0, 0.0, vxGuess, vyGuess, vzGuess);
 
-      for (int i = 0; i < RK_STEPS; i++) {
-        double s1 = Math.sqrt(vx * vx + vy * vy + vz * vz);
-        double d1 = -ALPHA * s1;
-        double k1vx = d1 * vx, k1vy = d1 * vy, k1vz = d1 * vz - G;
+      double errX = result[0] - xTarget;
+      double errY = result[1] - yTarget;
+      double errZ = result[2] - DESIRED_HEIGHT;
 
-        double vx2 = vx + 0.5 * DT * k1vx, vy2 = vy + 0.5 * DT * k1vy, vz2 = vz + 0.5 * DT * k1vz;
-        double s2 = Math.sqrt(vx2 * vx2 + vy2 * vy2 + vz2 * vz2);
-        double d2 = -ALPHA * s2;
-        double k2vx = d2 * vx2, k2vy = d2 * vy2, k2vz = d2 * vz2 - G;
-
-        double vx3 = vx + 0.5 * DT * k2vx, vy3 = vy + 0.5 * DT * k2vy, vz3 = vz + 0.5 * DT * k2vz;
-        double s3 = Math.sqrt(vx3 * vx3 + vy3 * vy3 + vz3 * vz3);
-        double d3 = -ALPHA * s3;
-        double k3vx = d3 * vx3, k3vy = d3 * vy3, k3vz = d3 * vz3 - G;
-
-        double vx4 = vx + DT * k3vx, vy4 = vy + DT * k3vy, vz4 = vz + DT * k3vz;
-        double s4 = Math.sqrt(vx4 * vx4 + vy4 * vy4 + vz4 * vz4);
-        double d4 = -ALPHA * s4;
-        double k4vx = d4 * vx4, k4vy = d4 * vy4, k4vz = d4 * vz4 - G;
-
-        x += (DT / 6.0) * (vx + 2 * vx2 + 2 * vx3 + vx4);
-        y += (DT / 6.0) * (vy + 2 * vy2 + 2 * vy3 + vy4);
-        z += (DT / 6.0) * (vz + 2 * vz2 + 2 * vz3 + vz4);
-        vx += (DT / 6.0) * (k1vx + 2 * k2vx + 2 * k3vx + k4vx);
-        vy += (DT / 6.0) * (k1vy + 2 * k2vy + 2 * k3vy + k4vy);
-        vz += (DT / 6.0) * (k1vz + 2 * k2vz + 2 * k3vz + k4vz);
-      }
-
-      double errX = x - xTarget;
-      double errY = y - yTarget;
-      double errZ = z - DESIRED_HEIGHT;
-
-      // Correct vertical first with full 3D context, then horizontal
       vzGuess -= errZ * GAIN;
       vxGuess -= errX * GAIN;
       vyGuess -= errY * GAIN;
@@ -343,50 +353,8 @@ public class ShootingUtil {
    */
   public static double[] predictLandingPose(
       double xStart, double yStart, double vxLaunch, double vyLaunch, double vzLaunch) {
-
-    double x = xStart; // Start from where the robot will be at release
-    double y = yStart;
-    double z = 0.0;
-
-    double vx = vxLaunch;
-    double vy = vyLaunch;
-    double vz = vzLaunch;
-
-    for (int i = 0; i < RK_STEPS; i++) {
-      // k1 — derivatives at current state
-      double s1 = Math.sqrt(vx * vx + vy * vy + vz * vz);
-      double d1 = -ALPHA * s1;
-      double k1vx = d1 * vx, k1vy = d1 * vy, k1vz = d1 * vz - G;
-
-      // k2 — derivatives at half-step using k1
-      double vx2 = vx + 0.5 * DT * k1vx, vy2 = vy + 0.5 * DT * k1vy, vz2 = vz + 0.5 * DT * k1vz;
-      double s2 = Math.sqrt(vx2 * vx2 + vy2 * vy2 + vz2 * vz2);
-      double d2 = -ALPHA * s2;
-      double k2vx = d2 * vx2, k2vy = d2 * vy2, k2vz = d2 * vz2 - G;
-
-      // k3 — derivatives at half-step using k2
-      double vx3 = vx + 0.5 * DT * k2vx, vy3 = vy + 0.5 * DT * k2vy, vz3 = vz + 0.5 * DT * k2vz;
-      double s3 = Math.sqrt(vx3 * vx3 + vy3 * vy3 + vz3 * vz3);
-      double d3 = -ALPHA * s3;
-      double k3vx = d3 * vx3, k3vy = d3 * vy3, k3vz = d3 * vz3 - G;
-
-      // k4 — derivatives at full step using k3
-      double vx4 = vx + DT * k3vx, vy4 = vy + DT * k3vy, vz4 = vz + DT * k3vz;
-      double s4 = Math.sqrt(vx4 * vx4 + vy4 * vy4 + vz4 * vz4);
-      double d4 = -ALPHA * s4;
-      double k4vx = d4 * vx4, k4vy = d4 * vy4, k4vz = d4 * vz4 - G;
-
-      // Weighted position update (velocity at each stage)
-      x += (DT / 6.0) * (vx + 2 * vx2 + 2 * vx3 + vx4);
-      y += (DT / 6.0) * (vy + 2 * vy2 + 2 * vy3 + vy4);
-      z += (DT / 6.0) * (vz + 2 * vz2 + 2 * vz3 + vz4);
-
-      // Weighted velocity update
-      vx += (DT / 6.0) * (k1vx + 2 * k2vx + 2 * k3vx + k4vx);
-      vy += (DT / 6.0) * (k1vy + 2 * k2vy + 2 * k3vy + k4vy);
-      vz += (DT / 6.0) * (k1vz + 2 * k2vz + 2 * k3vz + k4vz);
-    }
-    return new double[] {x, y, z};
+    double[] result = integrateTrajectory(xStart, yStart, vxLaunch, vyLaunch, vzLaunch);
+    return new double[] {result[0], result[1], result[2]};
   }
 
   public static final double RADIUS = ShootingConstants.SHOOTER_RADIUS;
