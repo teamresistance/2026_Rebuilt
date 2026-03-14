@@ -203,33 +203,19 @@ public class ShootingUtil {
       double launchSpeed, double hoodAngleDeg, double deltaAzimuthDeg) {}
 
   /**
-   * Computes the required projectile launch parameters while compensating for robot motion.
+   * Runs the RK4 Newton solve loop, iterating launch velocity components toward the given
+   * horizontal and vertical targets. Corrects vertical first each iteration to minimize
+   * horizontal-vertical drag coupling error.
    *
-   * <p>This method performs all calculations in the floor (field) reference frame. It first
-   * computes the required floor-parallel projectile velocity assuming a stationary robot, then
-   * applies a Galilean transformation by subtracting the robot's floor velocity. From the corrected
-   * velocity vector, it computes the required total launch speed and azimuth correction.
-   *
-   * <p>The computed values are stored in static state variables and printed to standard output.
-   *
-   * @param d distance to the target along the floor (meters)
-   * @param floorAzimuthDeg absolute azimuth angle of the target in the floor frame (degrees)
-   * @param vX robot floor velocity in the X direction (m/s)
-   * @param vY robot floor velocity in the Y direction (m/s)
+   * @param vxGuess initial X velocity guess (m/s), field frame
+   * @param vyGuess initial Y velocity guess (m/s), field frame
+   * @param vzGuess initial Z velocity guess (m/s)
+   * @param xTarget horizontal X target position (m), relative to launch origin
+   * @param yTarget horizontal Y target position (m), relative to launch origin
+   * @return double[] {vxSolved, vySolved, vzSolved}
    */
-  public static BallisticSolution computeBallistics(
-      double d, double floorAzimuthDeg, double vX, double vY) {
-    double azRad = floorAzimuthDeg * ShootingConstants.DEG_TO_RAD;
-
-    // 1. Hub position is fixed in the Field Frame
-    double xHub = d * Math.cos(azRad);
-    double yHub = d * Math.sin(azRad);
-
-    // 2. ANALYTIC BASE (Initial guess to hit a stationary target distance d)
-    double vFloorField = (M / (K * T)) * (Math.exp((K * d) / M) - 1.0);
-    double vxGuess = vFloorField * Math.cos(azRad);
-    double vyGuess = vFloorField * Math.sin(azRad);
-    double vzGuess = VZ; // Simple gravity compensation
+  private static double[] solveVelocity(
+      double vxGuess, double vyGuess, double vzGuess, double xTarget, double yTarget) {
 
     for (int iter = 0; iter < SOLVE_ITERS; iter++) {
       double x = 0.0, y = 0.0, z = 0.0;
@@ -263,8 +249,8 @@ public class ShootingUtil {
         vz += (DT / 6.0) * (k1vz + 2 * k2vz + 2 * k3vz + k4vz);
       }
 
-      double errX = x - xHub; // use dxTarget for accel overload
-      double errY = y - yHub; // use dyTarget for accel overload
+      double errX = x - xTarget;
+      double errY = y - yTarget;
       double errZ = z - DESIRED_HEIGHT;
 
       // Correct vertical first with full 3D context, then horizontal
@@ -273,122 +259,74 @@ public class ShootingUtil {
       vyGuess -= errY * GAIN;
     }
 
-    // 4. GALILEAN TRANSFORMATION (The "Magic" Step)
-    // vxGuess is what the ball needs to be doing relative to the ground.
-    // The shooter only provides the difference between that and the robot's velocity.
-    double vxShooter = vxGuess - vX;
-    double vyShooter = vyGuess - vY;
+    return new double[] {vxGuess, vyGuess, vzGuess};
+  }
 
+  public static BallisticSolution computeBallistics(
+      double d, double floorAzimuthDeg, double vX, double vY) {
+    double azRad = floorAzimuthDeg * ShootingConstants.DEG_TO_RAD;
+
+    // Project robot forward to release point (no acceleration, constant velocity)
+    double xRel = vX * R;
+    double yRel = vY * R;
+    // Velocity at release is unchanged (zero acceleration)
+    double vxRobotRelease = vX;
+    double vyRobotRelease = vY;
+
+    // Hub position relative to the release point
+    double xHubField = d * Math.cos(azRad);
+    double yHubField = d * Math.sin(azRad);
+    double dxTarget = xHubField - xRel;
+    double dyTarget = yHubField - yRel;
+    double dRelative = Math.sqrt(dxTarget * dxTarget + dyTarget * dyTarget);
+
+    double vFloorField = (M / (K * T)) * (Math.exp((K * dRelative) / M) - 1.0);
+    double vxGuess = vFloorField * (dxTarget / dRelative);
+    double vyGuess = vFloorField * (dyTarget / dRelative);
+    double vzGuess = VZ;
+
+    double[] solved = solveVelocity(vxGuess, vyGuess, vzGuess, dxTarget, dyTarget);
+    double vxSolved = solved[0], vySolved = solved[1], vzSolved = solved[2];
+
+    double vxShooter = vxSolved - vxRobotRelease;
+    double vyShooter = vySolved - vyRobotRelease;
     double vFloorCorrected = Math.sqrt(vxShooter * vxShooter + vyShooter * vyShooter);
-
-    // vTotalNew now uses the specific vzGuess that hit the hub height
-    double vTotalNew = Math.sqrt(vFloorCorrected * vFloorCorrected + vzGuess * vzGuess);
-    double thetaDeg = Math.atan2(vzGuess, vFloorCorrected) * ShootingConstants.RAD_TO_DEG;
+    double vTotalNew = Math.sqrt(vFloorCorrected * vFloorCorrected + vzSolved * vzSolved);
+    double thetaDeg = Math.atan2(vzSolved, vFloorCorrected) * ShootingConstants.RAD_TO_DEG;
     double deltaFloorAngleDeg =
         (Math.atan2(vyShooter, vxShooter) - azRad) * ShootingConstants.RAD_TO_DEG;
 
     return new BallisticSolution(vTotalNew, thetaDeg, deltaFloorAngleDeg);
   }
 
-  /**
-   * Computes the required projectile launch parameters while compensating for robot motion.
-   *
-   * <p>This method performs all calculations in the floor (field) reference frame. It first
-   * computes the required floor-parallel projectile velocity assuming a stationary robot, then
-   * applies a Galilean transformation by subtracting the robot's floor velocity. From the corrected
-   * velocity vector, it computes the required total launch speed and azimuth correction. This
-   * version also accounts for robot acceleration by estimating the robot's velocity at the time of
-   * projectile release.
-   *
-   * <p>The computed values are stored in static state variables and printed to standard output.
-   *
-   * @param d distance to the target along the floor (meters)
-   * @param floorAzimuthDeg absolute azimuth angle of the target in the floor frame (degrees)
-   * @param vX robot floor velocity in the X direction (m/s)
-   * @param vY robot floor velocity in the Y direction (m/s)
-   * @param aX robot floor acceleration in the X direction (m/s²)
-   * @param aY robot floor acceleration in the Y direction (m/s²)
-   */
   public static BallisticSolution computeBallistics(
       double d, double floorAzimuthDeg, double vX, double vY, double aX, double aY) {
     double azRad = floorAzimuthDeg * ShootingConstants.DEG_TO_RAD;
 
-    // 1. PROJECT ROBOT AND TARGET RELATIVE TO RELEASE POINT
-    // Robot displacement from now until release (t=R)
     double xRel = vX * R + 0.5 * aX * R * R;
     double yRel = vY * R + 0.5 * aY * R * R;
-
-    // Robot velocity at release
     double vxRobotRelease = vX + aX * R;
     double vyRobotRelease = vY + aY * R;
 
-    // Hub position relative to the START position (field frame)
     double xHubField = d * Math.cos(azRad);
     double yHubField = d * Math.sin(azRad);
-
-    // Target displacement relative to the release point
     double dxTarget = xHubField - xRel;
     double dyTarget = yHubField - yRel;
     double dRelative = Math.sqrt(dxTarget * dxTarget + dyTarget * dyTarget);
 
-    // 2. INITIAL GUESS (Field Frame)
-    // We use the relative distance to get a better starting ground-velocity guess
     double vFloorGuess = (M / (K * T)) * (Math.exp((K * dRelative) / M) - 1.0);
     double vxGuess = vFloorGuess * (dxTarget / dRelative);
     double vyGuess = vFloorGuess * (dyTarget / dRelative);
-    double vzGuess = VZ; // Simple gravity compensation
+    double vzGuess = VZ;
 
-    for (int iter = 0; iter < SOLVE_ITERS; iter++) {
-      double x = 0.0, y = 0.0, z = 0.0;
-      double vx = vxGuess, vy = vyGuess, vz = vzGuess;
+    double[] solved = solveVelocity(vxGuess, vyGuess, vzGuess, dxTarget, dyTarget);
+    double vxSolved = solved[0], vySolved = solved[1], vzSolved = solved[2];
 
-      for (int i = 0; i < RK_STEPS; i++) {
-        double s1 = Math.sqrt(vx * vx + vy * vy + vz * vz);
-        double d1 = -ALPHA * s1;
-        double k1vx = d1 * vx, k1vy = d1 * vy, k1vz = d1 * vz - G;
-
-        double vx2 = vx + 0.5 * DT * k1vx, vy2 = vy + 0.5 * DT * k1vy, vz2 = vz + 0.5 * DT * k1vz;
-        double s2 = Math.sqrt(vx2 * vx2 + vy2 * vy2 + vz2 * vz2);
-        double d2 = -ALPHA * s2;
-        double k2vx = d2 * vx2, k2vy = d2 * vy2, k2vz = d2 * vz2 - G;
-
-        double vx3 = vx + 0.5 * DT * k2vx, vy3 = vy + 0.5 * DT * k2vy, vz3 = vz + 0.5 * DT * k2vz;
-        double s3 = Math.sqrt(vx3 * vx3 + vy3 * vy3 + vz3 * vz3);
-        double d3 = -ALPHA * s3;
-        double k3vx = d3 * vx3, k3vy = d3 * vy3, k3vz = d3 * vz3 - G;
-
-        double vx4 = vx + DT * k3vx, vy4 = vy + DT * k3vy, vz4 = vz + DT * k3vz;
-        double s4 = Math.sqrt(vx4 * vx4 + vy4 * vy4 + vz4 * vz4);
-        double d4 = -ALPHA * s4;
-        double k4vx = d4 * vx4, k4vy = d4 * vy4, k4vz = d4 * vz4 - G;
-
-        x += (DT / 6.0) * (vx + 2 * vx2 + 2 * vx3 + vx4);
-        y += (DT / 6.0) * (vy + 2 * vy2 + 2 * vy3 + vy4);
-        z += (DT / 6.0) * (vz + 2 * vz2 + 2 * vz3 + vz4);
-        vx += (DT / 6.0) * (k1vx + 2 * k2vx + 2 * k3vx + k4vx);
-        vy += (DT / 6.0) * (k1vy + 2 * k2vy + 2 * k3vy + k4vy);
-        vz += (DT / 6.0) * (k1vz + 2 * k2vz + 2 * k3vz + k4vz);
-      }
-
-      double errX = x - xHubField; // use dxTarget for accel overload
-      double errY = y - yHubField; // use dyTarget for accel overload
-      double errZ = z - DESIRED_HEIGHT;
-
-      // Correct vertical first with full 3D context, then horizontal
-      vzGuess -= errZ * GAIN;
-      vxGuess -= errX * GAIN;
-      vyGuess -= errY * GAIN;
-    }
-
-    // 4. TRANSFORM TO ROBOT FRAME
-    double vxShooter = vxGuess - vxRobotRelease;
-    double vyShooter = vyGuess - vyRobotRelease;
-
+    double vxShooter = vxSolved - vxRobotRelease;
+    double vyShooter = vySolved - vyRobotRelease;
     double vFloorFinal = Math.sqrt(vxShooter * vxShooter + vyShooter * vyShooter);
-    double vTotalNew = Math.sqrt(vFloorFinal * vFloorFinal + vzGuess * vzGuess);
-    double thetaDeg = Math.atan2(vzGuess, vFloorFinal) * ShootingConstants.RAD_TO_DEG;
-
-    // Azimuth is the angle the shooter must face relative to the field 0
+    double vTotalNew = Math.sqrt(vFloorFinal * vFloorFinal + vzSolved * vzSolved);
+    double thetaDeg = Math.atan2(vzSolved, vFloorFinal) * ShootingConstants.RAD_TO_DEG;
     double azimuthShooter = Math.atan2(vyShooter, vxShooter);
     double deltaFloorAngleDeg = (azimuthShooter - azRad) * ShootingConstants.RAD_TO_DEG;
 

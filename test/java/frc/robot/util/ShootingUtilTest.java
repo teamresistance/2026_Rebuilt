@@ -51,8 +51,6 @@ public class ShootingUtilTest {
                 * Math.sin(Math.toRadians(sol.deltaAzimuthDeg())),
             sol.launchSpeed() * Math.sin(Math.toRadians(sol.hoodAngleDeg())));
 
-    System.out.println(landing[0] + " " + landing[1] + " " + landing[2]);
-
     assertEquals(
         D,
         landing[0],
@@ -161,32 +159,6 @@ public class ShootingUtilTest {
     System.out.println("speeds " + base.launchSpeed() + " " + accel.launchSpeed());
     System.out.println("hood angles " + base.hoodAngleDeg() + " " + accel.hoodAngleDeg());
     System.out.println("azimuths " + base.deltaAzimuthDeg() + " " + accel.deltaAzimuthDeg());
-    double[] baseland =
-        ShootingUtil.predictLandingPose(
-            0,
-            0,
-            base.launchSpeed()
-                * Math.cos(Math.toRadians(base.hoodAngleDeg()))
-                * Math.cos(Math.toRadians(base.deltaAzimuthDeg())),
-            base.launchSpeed()
-                * Math.cos(Math.toRadians(base.hoodAngleDeg()))
-                * Math.sin(Math.toRadians(base.deltaAzimuthDeg())),
-            base.launchSpeed() * Math.sin(Math.toRadians(base.hoodAngleDeg())));
-    System.out.println("base land " + baseland[0] + " " + baseland[1] + " " + baseland[2] + " ");
-
-    double[] accelland =
-        ShootingUtil.predictLandingPose(
-            0,
-            0,
-            accel.launchSpeed()
-                * Math.cos(Math.toRadians(accel.hoodAngleDeg()))
-                * Math.cos(Math.toRadians(accel.deltaAzimuthDeg())),
-            accel.launchSpeed()
-                * Math.cos(Math.toRadians(accel.hoodAngleDeg()))
-                * Math.sin(Math.toRadians(accel.deltaAzimuthDeg())),
-            accel.launchSpeed() * Math.sin(Math.toRadians(accel.hoodAngleDeg())));
-    System.out.println(
-        "accel land " + accelland[0] + " " + accelland[1] + " " + accelland[2] + " ");
 
     assertEquals(
         base.launchSpeed(),
