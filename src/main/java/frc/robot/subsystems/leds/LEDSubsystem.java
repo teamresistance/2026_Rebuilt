@@ -1,5 +1,6 @@
 package frc.robot.subsystems.leds;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.hardware.CANdle;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -10,7 +11,7 @@ public class LEDSubsystem extends SubsystemBase {
 
   private final List<LEDStream> streams = new ArrayList<>();
   private LEDStream lastMode = null;
-  private final CANdle candle = new CANdle(Constants.CANDLE_ID);
+  private final CANdle candle = new CANdle(Constants.CANDLE_ID, new CANBus("drive"));
 
   /** Adds an LEDStream to the list of periodically checked streams. */
   public void addStream(LEDStream stream) {

@@ -21,6 +21,12 @@
           "data": {
             "name": "Closest Climb"
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Climb Up"
+          }
         }
       ]
     }

@@ -3,6 +3,7 @@ package frc.robot.subsystems.intake;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import frc.robot.Constants;
@@ -32,7 +33,7 @@ public class IntakeReal implements IntakeIO {
   public void activateIntake() {
     intaking = true;
     rejecting = false;
-    intakeMotor.setControl(new DutyCycleOut(1));
+    intakeMotor.setControl(new DutyCycleOut(0.5));
   }
 
   @Override
@@ -46,7 +47,7 @@ public class IntakeReal implements IntakeIO {
   public void stopIntake() {
     intaking = false;
     rejecting = false;
-    intakeMotor.set(0);
+    intakeMotor.setControl(new CoastOut());
   }
 
   @Override

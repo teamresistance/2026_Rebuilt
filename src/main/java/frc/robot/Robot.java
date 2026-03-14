@@ -145,6 +145,8 @@ public class Robot extends LoggedRobot {
   @Override
   public void teleopPeriodic() {
 
+    robotContainer.checkTurretStop();
+
     Logger.recordOutput("Shifts/Current Shift", ShiftUtil.getShift());
     Logger.recordOutput("Shifts/Time Left", ShiftUtil.getTimeLeftInCurrentShift());
 
