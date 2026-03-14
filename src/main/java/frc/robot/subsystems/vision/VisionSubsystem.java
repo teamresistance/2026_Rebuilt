@@ -93,6 +93,7 @@ public class VisionSubsystem extends SubsystemBase {
    * @throws IOException If the field layout cannot be loaded
    */
   public VisionSubsystem(PhotonCamera... cameras) throws IOException {
+    Logger.recordOutput("Vision/CameraPoses", CAMERA_POSES);
     this.cameras = cameras;
     try {
       aprilTagFieldLayout =
@@ -244,8 +245,8 @@ public class VisionSubsystem extends SubsystemBase {
         xyStdDev = Math.pow(avgDistance, 2.0) / tagPose3ds.size();
         thetaStdDev = Math.pow(avgDistance, 2.0) / tagPose3ds.size();
       } else {
-        xyStdDev = XY_STD_DEV_MODEL.predict(avgDistance);
-        thetaStdDev = THETA_STD_DEV_MODEL.predict(avgDistance);
+        xyStdDev = Math.pow(avgDistance, 2.0) / tagPose3ds.size();
+        thetaStdDev = Math.pow(avgDistance, 2.0) / tagPose3ds.size();
       }
 
       if (shouldUseMultiTag) {

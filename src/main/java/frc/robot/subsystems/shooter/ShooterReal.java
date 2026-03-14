@@ -7,6 +7,7 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.StrictFollower;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.MathUtil;
 import frc.robot.Constants;
@@ -65,7 +66,10 @@ public class ShooterReal implements ShooterIO {
                 new MotionMagicConfigs()
                     .withMotionMagicAcceleration(500)
                     .withMotionMagicCruiseVelocity(120))
-            .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake))
+            .withMotorOutput(
+                new MotorOutputConfigs()
+                    .withNeutralMode(NeutralModeValue.Brake)
+                    .withInverted(InvertedValue.Clockwise_Positive))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
                     .withStatorCurrentLimit(40)
@@ -76,7 +80,7 @@ public class ShooterReal implements ShooterIO {
 
     TalonFXConfiguration flywheelConfig =
         new TalonFXConfiguration()
-            .withSlot0(new Slot0Configs().withKP(100).withKI(0).withKD(0).withKS(0))
+            .withSlot0(new Slot0Configs().withKP(10).withKI(0).withKD(0).withKS(0))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
                     .withStatorCurrentLimit(0)

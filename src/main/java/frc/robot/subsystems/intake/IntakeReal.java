@@ -18,7 +18,6 @@ public class IntakeReal implements IntakeIO {
   public IntakeReal() {
     register();
 
-    // TODO: current limits
     TalonFXConfiguration config =
         new TalonFXConfiguration()
             .withCurrentLimits(

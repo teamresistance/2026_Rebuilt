@@ -4,6 +4,8 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.DriveMotorArrangement;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerMotorArrangement;
 import com.pathplanner.lib.commands.PathfindingCommand;
+import edu.wpi.first.net.WebServer;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -81,6 +83,9 @@ public class Robot extends LoggedRobot {
   public void robotInit() {
     CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
     // run warmup command to significantly reduce the delay in movement when auto starts
+
+    WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
+    // put elastic dashboard on bot
   }
 
   /** This function is called periodically during all modes. */

@@ -118,7 +118,7 @@ public class RobotContainer {
             .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming);
     driveAtAngleForBump.addRequirements(drive);
 
-    // angle assist vs.
+    // angle assist vs. slow driving
     driveShooting =
         new ConditionalCommand(
             DriveCommands.joystickDriveAtAngle(
