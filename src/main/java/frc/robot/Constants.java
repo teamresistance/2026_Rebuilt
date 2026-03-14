@@ -174,9 +174,6 @@ public final class Constants {
                 - Math.cos((1 / ROOT_MG_OVER_K) * G * MINIMUM_TIME_OF_FLIGHT))
             / (Math.sin((1 / ROOT_MG_OVER_K) * G * MINIMUM_TIME_OF_FLIGHT));
 
-    // Square of vertical velocity component (m^2/s^2) - used in total velocity calculations
-    public static final double VERTICAL_VELOCITY_COMPONENT_SQUARED = 48.0052946927;
-
     /*
      * ===============
      * Motor Adjustment Constants

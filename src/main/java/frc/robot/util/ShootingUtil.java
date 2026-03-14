@@ -171,7 +171,7 @@ public class ShootingUtil {
 
   // Constants
   /** Vertical velocity component (m/s) - gravitational component of projectile */
-  private static final double VY = ShootingConstants.VERTICAL_VELOCITY_COMPONENT;
+  private static final double VZ = ShootingConstants.VERTICAL_VELOCITY_COMPONENT;
 
   /** Mass coefficient (kg) - affects drag acceleration calculations */
   public static final double M = ShootingConstants.FUEL_MASS;
@@ -186,15 +186,16 @@ public class ShootingUtil {
   private static final double R = ShootingConstants.RELOAD_TIME;
 
   /** Inverse of flight time (1/T) - precomputed for efficiency in calculations */
-  private static final double INV_T = 1.0 / T;
+  private static final double GAIN = 1.0 / ((M / K) * (1.0 - Math.exp(-K * T / M)));
 
   /** Alpha constant for RK2 correction - derived from drag coefficient and mass */
   private static final double ALPHA = K / M;
 
-  private static final double HUB_HEIGHT = ShootingConstants.HUB_HEIGHT;
+  private static final double DESIRED_HEIGHT =
+      ShootingConstants.HUB_HEIGHT - ShootingConstants.TURRET_HEIGHT;
 
   private static final int RK_STEPS = 30; // Increased for sub-centimeter precision
-  private static final int SOLVE_ITERS = 3;
+  private static final int SOLVE_ITERS = 5;
   private static final double DT = T / RK_STEPS;
   private static final double G = 9.806;
 
@@ -228,45 +229,48 @@ public class ShootingUtil {
     double vFloorField = (M / (K * T)) * (Math.exp((K * d) / M) - 1.0);
     double vxGuess = vFloorField * Math.cos(azRad);
     double vyGuess = vFloorField * Math.sin(azRad);
-    double vzGuess = (VY + 0.5 * 9.806 * T); // Initial vertical guess to counter gravity
+    double vzGuess = VZ; // Simple gravity compensation
 
     for (int iter = 0; iter < SOLVE_ITERS; iter++) {
       double x = 0.0, y = 0.0, z = 0.0;
       double vx = vxGuess, vy = vyGuess, vz = vzGuess;
 
       for (int i = 0; i < RK_STEPS; i++) {
-        // Instantaneous 3D speed (The "True" Drag source)
-        double speed = Math.sqrt(vx * vx + vy * vy + vz * vz);
-        double dragFactor = -ALPHA * speed;
+        double s1 = Math.sqrt(vx * vx + vy * vy + vz * vz);
+        double d1 = -ALPHA * s1;
+        double k1vx = d1 * vx, k1vy = d1 * vy, k1vz = d1 * vz - G;
 
-        // RK2 Midpoint
-        double vxMid = vx + 0.5 * DT * (dragFactor * vx);
-        double vyMid = vy + 0.5 * DT * (dragFactor * vy);
-        double vzMid = vz + 0.5 * DT * (dragFactor * vz - G);
+        double vx2 = vx + 0.5 * DT * k1vx, vy2 = vy + 0.5 * DT * k1vy, vz2 = vz + 0.5 * DT * k1vz;
+        double s2 = Math.sqrt(vx2 * vx2 + vy2 * vy2 + vz2 * vz2);
+        double d2 = -ALPHA * s2;
+        double k2vx = d2 * vx2, k2vy = d2 * vy2, k2vz = d2 * vz2 - G;
 
-        double speedMid = Math.sqrt(vxMid * vxMid + vyMid * vyMid + vzMid * vzMid);
-        double dragFactorMid = -ALPHA * speedMid;
+        double vx3 = vx + 0.5 * DT * k2vx, vy3 = vy + 0.5 * DT * k2vy, vz3 = vz + 0.5 * DT * k2vz;
+        double s3 = Math.sqrt(vx3 * vx3 + vy3 * vy3 + vz3 * vz3);
+        double d3 = -ALPHA * s3;
+        double k3vx = d3 * vx3, k3vy = d3 * vy3, k3vz = d3 * vz3 - G;
 
-        // State Update
-        x += DT * vxMid;
-        y += DT * vyMid;
-        z += DT * vzMid;
+        double vx4 = vx + DT * k3vx, vy4 = vy + DT * k3vy, vz4 = vz + DT * k3vz;
+        double s4 = Math.sqrt(vx4 * vx4 + vy4 * vy4 + vz4 * vz4);
+        double d4 = -ALPHA * s4;
+        double k4vx = d4 * vx4, k4vy = d4 * vy4, k4vz = d4 * vz4 - G;
 
-        vx += DT * (dragFactorMid * vxMid);
-        vy += DT * (dragFactorMid * vyMid);
-        vz += DT * (dragFactorMid * vzMid - G);
+        x += (DT / 6.0) * (vx + 2 * vx2 + 2 * vx3 + vx4);
+        y += (DT / 6.0) * (vy + 2 * vy2 + 2 * vy3 + vy4);
+        z += (DT / 6.0) * (vz + 2 * vz2 + 2 * vz3 + vz4);
+        vx += (DT / 6.0) * (k1vx + 2 * k2vx + 2 * k3vx + k4vx);
+        vy += (DT / 6.0) * (k1vy + 2 * k2vy + 2 * k3vy + k4vy);
+        vz += (DT / 6.0) * (k1vz + 2 * k2vz + 2 * k3vz + k4vz);
       }
 
-      // Compute 3D Error
-      double errX = x - xHub;
-      double errY = y - yHub;
-      double errZ = z - HUB_HEIGHT;
+      double errX = x - xHub; // use dxTarget for accel overload
+      double errY = y - yHub; // use dyTarget for accel overload
+      double errZ = z - DESIRED_HEIGHT;
 
-      // Newton correction (using INV_T for horizontal,
-      // vertical requires less gain due to gravity's dominance)
-      vxGuess -= errX * INV_T;
-      vyGuess -= errY * INV_T;
-      vzGuess -= errZ * INV_T;
+      // Correct vertical first with full 3D context, then horizontal
+      vzGuess -= errZ * GAIN;
+      vxGuess -= errX * GAIN;
+      vyGuess -= errY * GAIN;
     }
 
     // 4. GALILEAN TRANSFORMATION (The "Magic" Step)
@@ -332,42 +336,48 @@ public class ShootingUtil {
     double vFloorGuess = (M / (K * T)) * (Math.exp((K * dRelative) / M) - 1.0);
     double vxGuess = vFloorGuess * (dxTarget / dRelative);
     double vyGuess = vFloorGuess * (dyTarget / dRelative);
-    double vzGuess = (HUB_HEIGHT / T) + (0.5 * 9.806 * T); // Simple gravity compensation
+    double vzGuess = VZ; // Simple gravity compensation
 
-    // 3. SOLVE LOOP
-    for (int iter = 0; iter < 4; iter++) { // 4 iterations to settle quadratic error
+    for (int iter = 0; iter < SOLVE_ITERS; iter++) {
       double x = 0.0, y = 0.0, z = 0.0;
       double vx = vxGuess, vy = vyGuess, vz = vzGuess;
 
       for (int i = 0; i < RK_STEPS; i++) {
-        double speed = Math.sqrt(vx * vx + vy * vy + vz * vz);
-        double dragFactor = -ALPHA * speed;
+        double s1 = Math.sqrt(vx * vx + vy * vy + vz * vz);
+        double d1 = -ALPHA * s1;
+        double k1vx = d1 * vx, k1vy = d1 * vy, k1vz = d1 * vz - G;
 
-        // RK2 Midpoint
-        double vxMid = vx + 0.5 * DT * (dragFactor * vx);
-        double vyMid = vy + 0.5 * DT * (dragFactor * vy);
-        double vzMid = vz + 0.5 * DT * (dragFactor * vz - G);
+        double vx2 = vx + 0.5 * DT * k1vx, vy2 = vy + 0.5 * DT * k1vy, vz2 = vz + 0.5 * DT * k1vz;
+        double s2 = Math.sqrt(vx2 * vx2 + vy2 * vy2 + vz2 * vz2);
+        double d2 = -ALPHA * s2;
+        double k2vx = d2 * vx2, k2vy = d2 * vy2, k2vz = d2 * vz2 - G;
 
-        double speedMid = Math.sqrt(vxMid * vxMid + vyMid * vyMid + vzMid * vzMid);
-        double dragMid = -ALPHA * speedMid;
+        double vx3 = vx + 0.5 * DT * k2vx, vy3 = vy + 0.5 * DT * k2vy, vz3 = vz + 0.5 * DT * k2vz;
+        double s3 = Math.sqrt(vx3 * vx3 + vy3 * vy3 + vz3 * vz3);
+        double d3 = -ALPHA * s3;
+        double k3vx = d3 * vx3, k3vy = d3 * vy3, k3vz = d3 * vz3 - G;
 
-        x += DT * vxMid;
-        y += DT * vyMid;
-        z += DT * vzMid;
-        vx += DT * (dragMid * vxMid);
-        vy += DT * (dragMid * vyMid);
-        vz += DT * (dragMid * vzMid - G);
+        double vx4 = vx + DT * k3vx, vy4 = vy + DT * k3vy, vz4 = vz + DT * k3vz;
+        double s4 = Math.sqrt(vx4 * vx4 + vy4 * vy4 + vz4 * vz4);
+        double d4 = -ALPHA * s4;
+        double k4vx = d4 * vx4, k4vy = d4 * vy4, k4vz = d4 * vz4 - G;
+
+        x += (DT / 6.0) * (vx + 2 * vx2 + 2 * vx3 + vx4);
+        y += (DT / 6.0) * (vy + 2 * vy2 + 2 * vy3 + vy4);
+        z += (DT / 6.0) * (vz + 2 * vz2 + 2 * vz3 + vz4);
+        vx += (DT / 6.0) * (k1vx + 2 * k2vx + 2 * k3vx + k4vx);
+        vy += (DT / 6.0) * (k1vy + 2 * k2vy + 2 * k3vy + k4vy);
+        vz += (DT / 6.0) * (k1vz + 2 * k2vz + 2 * k3vz + k4vz);
       }
 
-      // Error relative to the hub's position from the release point
-      double errX = x - dxTarget;
-      double errY = y - dyTarget;
-      double errZ = z - HUB_HEIGHT;
+      double errX = x - xHubField; // use dxTarget for accel overload
+      double errY = y - yHubField; // use dyTarget for accel overload
+      double errZ = z - DESIRED_HEIGHT;
 
-      // Apply corrections
-      vxGuess -= errX * INV_T;
-      vyGuess -= errY * INV_T;
-      vzGuess -= errZ * INV_T;
+      // Correct vertical first with full 3D context, then horizontal
+      vzGuess -= errZ * GAIN;
+      vxGuess -= errX * GAIN;
+      vyGuess -= errY * GAIN;
     }
 
     // 4. TRANSFORM TO ROBOT FRAME
@@ -395,9 +405,6 @@ public class ShootingUtil {
    */
   public static double[] predictLandingPose(
       double xStart, double yStart, double vxLaunch, double vyLaunch, double vzLaunch) {
-    final int RK_STEPS = 25;
-    final double DT = T / RK_STEPS;
-    final double G = 9.806;
 
     double x = xStart; // Start from where the robot will be at release
     double y = yStart;
@@ -408,27 +415,38 @@ public class ShootingUtil {
     double vz = vzLaunch;
 
     for (int i = 0; i < RK_STEPS; i++) {
-      double speed = Math.sqrt(vx * vx + vy * vy + vz * vz);
+      // k1 — derivatives at current state
+      double s1 = Math.sqrt(vx * vx + vy * vy + vz * vz);
+      double d1 = -ALPHA * s1;
+      double k1vx = d1 * vx, k1vy = d1 * vy, k1vz = d1 * vz - G;
 
-      // Midpoint accelerations
-      double ax = -ALPHA * speed * vx;
-      double ay = -ALPHA * speed * vy;
-      double az = -ALPHA * speed * vz - G;
+      // k2 — derivatives at half-step using k1
+      double vx2 = vx + 0.5 * DT * k1vx, vy2 = vy + 0.5 * DT * k1vy, vz2 = vz + 0.5 * DT * k1vz;
+      double s2 = Math.sqrt(vx2 * vx2 + vy2 * vy2 + vz2 * vz2);
+      double d2 = -ALPHA * s2;
+      double k2vx = d2 * vx2, k2vy = d2 * vy2, k2vz = d2 * vz2 - G;
 
-      // RK2 Midpoint velocity
-      double vxMid = vx + 0.5 * DT * ax;
-      double vyMid = vy + 0.5 * DT * ay;
-      double vzMid = vz + 0.5 * DT * az;
-      double speedMid = Math.sqrt(vxMid * vxMid + vyMid * vyMid + vzMid * vzMid);
+      // k3 — derivatives at half-step using k2
+      double vx3 = vx + 0.5 * DT * k2vx, vy3 = vy + 0.5 * DT * k2vy, vz3 = vz + 0.5 * DT * k2vz;
+      double s3 = Math.sqrt(vx3 * vx3 + vy3 * vy3 + vz3 * vz3);
+      double d3 = -ALPHA * s3;
+      double k3vx = d3 * vx3, k3vy = d3 * vy3, k3vz = d3 * vz3 - G;
 
-      // Update state
-      x += DT * vxMid;
-      y += DT * vyMid;
-      z += DT * vzMid;
+      // k4 — derivatives at full step using k3
+      double vx4 = vx + DT * k3vx, vy4 = vy + DT * k3vy, vz4 = vz + DT * k3vz;
+      double s4 = Math.sqrt(vx4 * vx4 + vy4 * vy4 + vz4 * vz4);
+      double d4 = -ALPHA * s4;
+      double k4vx = d4 * vx4, k4vy = d4 * vy4, k4vz = d4 * vz4 - G;
 
-      vx += DT * (-ALPHA * speedMid * vxMid);
-      vy += DT * (-ALPHA * speedMid * vyMid);
-      vz += DT * (-ALPHA * speedMid * vzMid - G);
+      // Weighted position update (velocity at each stage)
+      x += (DT / 6.0) * (vx + 2 * vx2 + 2 * vx3 + vx4);
+      y += (DT / 6.0) * (vy + 2 * vy2 + 2 * vy3 + vy4);
+      z += (DT / 6.0) * (vz + 2 * vz2 + 2 * vz3 + vz4);
+
+      // Weighted velocity update
+      vx += (DT / 6.0) * (k1vx + 2 * k2vx + 2 * k3vx + k4vx);
+      vy += (DT / 6.0) * (k1vy + 2 * k2vy + 2 * k3vy + k4vy);
+      vz += (DT / 6.0) * (k1vz + 2 * k2vz + 2 * k3vz + k4vz);
     }
     return new double[] {x, y, z};
   }

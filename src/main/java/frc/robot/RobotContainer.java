@@ -81,7 +81,6 @@ public class RobotContainer {
 
     drive = configureDrive();
     vision = configureAprilTagVision();
-    configureNamedCommands();
     ShootingMaps.configureShootingMaps();
 
     switch (Constants.CURRENT_MODE) {
@@ -161,9 +160,9 @@ public class RobotContainer {
     NamedCommands.registerCommand(
         "Climb Up",
         Commands.runOnce(climber::unbrake)
-            .andThen(climber::up)
+            .andThen(Commands.runOnce(climber::up))
             .andThen(new WaitUntilCommand(climber::atTarget))
-            .andThen(climber::brake));
+            .andThen(Commands.runOnce(climber::up)));
     NamedCommands.registerCommand("Stop", Commands.runOnce(drive::stop, drive));
     NamedCommands.registerCommand(
         "Shoot 5s", new ShootCommand(drive, shooter, Constants.CURRENT_SHOT_STYLE).withTimeout(5));

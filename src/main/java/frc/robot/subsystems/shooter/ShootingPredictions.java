@@ -17,6 +17,8 @@ public class ShootingPredictions {
    */
   private static final ShootingPredictions calculator = new ShootingPredictions();
 
+  private BallisticSolution lastRawSolution = new BallisticSolution(0, 0, 0);
+
   public static ShootingPredictions getCalculator() {
     return calculator;
   }
@@ -132,6 +134,8 @@ public class ShootingPredictions {
             axField,
             ayField);
 
+    lastRawSolution = calculation;
+
     // Store outputs from the calculators into this manager's public fields.
     double newVertical = calculation.hoodAngleDeg();
     double newOffset = calculation.deltaAzimuthDeg();
@@ -191,5 +195,9 @@ public class ShootingPredictions {
    */
   public double getHorizontalTotalShootingAngle() {
     return horizontalTotalShootingAngle;
+  }
+
+  public BallisticSolution getLastRawSolution() {
+    return lastRawSolution;
   }
 }

@@ -80,34 +80,57 @@ public class IdleShooterCommand extends Command {
           (Constants.ROBOT_TO_TURRET.plus(new Transform2d(0, 0, robotPose.getRotation())))
               .getTranslation();
       Translation2d turretVizPos = robotPose.getTranslation().plus(turretVizOffset);
+      // 5. Visualization — predicted release pose and ball trajectory
+      Rotation2d robotRotation = robotPose.getRotation();
+      double cosR = Math.cos(robotRotation.getRadians());
+      double sinR = Math.sin(robotRotation.getRadians());
+      double vxField = speeds.vxMetersPerSecond * cosR - speeds.vyMetersPerSecond * sinR;
+      double vyField = speeds.vxMetersPerSecond * sinR + speeds.vyMetersPerSecond * cosR;
+
+      Transform2d accel = drive.getAcceleration();
+      double axField = accel.getX() * cosR - accel.getY() * sinR;
+      double ayField = accel.getX() * sinR + accel.getY() * cosR;
+
+      double reloadTime = Constants.ShootingConstants.RELOAD_TIME;
+      double turretRelX =
+          turretVizPos.getX() + vxField * reloadTime + 0.5 * axField * reloadTime * reloadTime;
+      double turretRelY =
+          turretVizPos.getY() + vyField * reloadTime + 0.5 * ayField * reloadTime * reloadTime;
+
       Pose2d turretPose = new Pose2d(turretVizPos, robotPose.getRotation());
+      Pose2d releasePose = new Pose2d(turretRelX, turretRelY, robotPose.getRotation());
 
-      // Decompose launch velocity into field-frame components for trajectory prediction
-      double launchSpeed = ShootingPredictions.getCalculator().getLaunchVelocity();
-      double hoodRad =
-          Math.toRadians(ShootingPredictions.getCalculator().getVerticalShootingAngle());
-      double turretFieldRad =
-          Math.toRadians(ShootingPredictions.getCalculator().getHorizontalTotalShootingAngle());
+      // Robot velocity at release (field frame)
+      double vxRobotRelease = vxField + axField * reloadTime;
+      double vyRobotRelease = vyField + ayField * reloadTime;
 
-      double vxLaunch = launchSpeed * Math.cos(hoodRad) * Math.cos(turretFieldRad);
-      double vyLaunch = launchSpeed * Math.cos(hoodRad) * Math.sin(turretFieldRad);
+      // Use raw solver output for trajectory visualization
+      ShootingUtil.BallisticSolution raw = ShootingPredictions.getCalculator().getLastRawSolution();
+
+      double hoodRad = Math.toRadians(raw.hoodAngleDeg());
+      double turretFieldRad = Math.toRadians(raw.deltaAzimuthDeg()) + fieldRelativeAngleToHub;
+      double launchSpeed = raw.launchSpeed();
+
+      // Shooter-frame floor velocity components
+      double vFloorShooter = launchSpeed * Math.cos(hoodRad);
+      double vxShooter = vFloorShooter * Math.cos(turretFieldRad);
+      double vyShooter = vFloorShooter * Math.sin(turretFieldRad);
+
+      // Ground-frame launch velocity = shooter frame + robot velocity at release
+      double vxLaunch = vxShooter + vxRobotRelease;
+      double vyLaunch = vyShooter + vyRobotRelease;
       double vzLaunch = launchSpeed * Math.sin(hoodRad);
 
       double[] landing =
-          ShootingUtil.predictLandingPose(
-              turretVizPos.getX(), turretVizPos.getY(), vxLaunch, vyLaunch, vzLaunch);
+          ShootingUtil.predictLandingPose(turretRelX, turretRelY, vxLaunch, vyLaunch, vzLaunch);
 
-      // Log turret pose and predicted landing point
       Logger.recordOutput("Shooter/TurretPose", turretPose);
+      Logger.recordOutput("Shooter/ReleasePose", releasePose);
       Logger.recordOutput(
           "Shooter/PredictedLandingPose", new Pose2d(landing[0], landing[1], Rotation2d.kZero));
-
-      // Log trajectory line as a Pose2d array (start = turret, end = landing)
-      // AdvantageScope renders this as a line when logged as a pose array
       Logger.recordOutput(
           "Shooter/TrajectoryLine",
-          new Pose2d[] {turretPose, new Pose2d(landing[0], landing[1], Rotation2d.kZero)});
-
+          new Pose2d[] {releasePose, new Pose2d(landing[0], landing[1], Rotation2d.kZero)});
       Logger.recordOutput("Shooter/DistanceToHub", distanceToHub);
       Logger.recordOutput("Shooter/TurretPos", turretVizPos.toString());
     }
