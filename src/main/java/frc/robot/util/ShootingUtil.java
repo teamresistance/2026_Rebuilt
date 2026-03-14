@@ -209,28 +209,46 @@ public class ShootingUtil {
   private static double[] integrateTrajectory(
       double xStart, double yStart, double vx0, double vy0, double vz0) {
 
-    double x = xStart, y = yStart, z = 0.0;
-    double vx = vx0, vy = vy0, vz = vz0;
+    double x = xStart;
+    double y = yStart;
+    double z = 0.0;
+    double vx = vx0;
+    double vy = vy0;
+    double vz = vz0;
 
     for (int i = 0; i < RK_STEPS; i++) {
       double s1 = Math.sqrt(vx * vx + vy * vy + vz * vz);
       double d1 = -ALPHA * s1;
-      double k1vx = d1 * vx, k1vy = d1 * vy, k1vz = d1 * vz - G;
+      double k1vx = d1 * vx;
+      double k1vy = d1 * vy;
+      double k1vz = d1 * vz - G;
 
-      double vx2 = vx + 0.5 * DT * k1vx, vy2 = vy + 0.5 * DT * k1vy, vz2 = vz + 0.5 * DT * k1vz;
+      double vx2 = vx + 0.5 * DT * k1vx;
+      double vy2 = vy + 0.5 * DT * k1vy;
+      double vz2 = vz + 0.5 * DT * k1vz;
       double s2 = Math.sqrt(vx2 * vx2 + vy2 * vy2 + vz2 * vz2);
       double d2 = -ALPHA * s2;
-      double k2vx = d2 * vx2, k2vy = d2 * vy2, k2vz = d2 * vz2 - G;
+      double k2vx = d2 * vx2;
+      double k2vy = d2 * vy2;
+      double k2vz = d2 * vz2 - G;
 
-      double vx3 = vx + 0.5 * DT * k2vx, vy3 = vy + 0.5 * DT * k2vy, vz3 = vz + 0.5 * DT * k2vz;
+      double vx3 = vx + 0.5 * DT * k2vx;
+      double vy3 = vy + 0.5 * DT * k2vy;
+      double vz3 = vz + 0.5 * DT * k2vz;
       double s3 = Math.sqrt(vx3 * vx3 + vy3 * vy3 + vz3 * vz3);
       double d3 = -ALPHA * s3;
-      double k3vx = d3 * vx3, k3vy = d3 * vy3, k3vz = d3 * vz3 - G;
+      double k3vx = d3 * vx3;
+      double k3vy = d3 * vy3;
+      double k3vz = d3 * vz3 - G;
 
-      double vx4 = vx + DT * k3vx, vy4 = vy + DT * k3vy, vz4 = vz + DT * k3vz;
+      double vx4 = vx + DT * k3vx;
+      double vy4 = vy + DT * k3vy;
+      double vz4 = vz + DT * k3vz;
       double s4 = Math.sqrt(vx4 * vx4 + vy4 * vy4 + vz4 * vz4);
       double d4 = -ALPHA * s4;
-      double k4vx = d4 * vx4, k4vy = d4 * vy4, k4vz = d4 * vz4 - G;
+      double k4vx = d4 * vx4;
+      double k4vy = d4 * vy4;
+      double k4vz = d4 * vz4 - G;
 
       x += (DT / 6.0) * (vx + 2 * vx2 + 2 * vx3 + vx4);
       y += (DT / 6.0) * (vy + 2 * vy2 + 2 * vy3 + vy4);
@@ -296,7 +314,9 @@ public class ShootingUtil {
     double vzGuess = VZ;
 
     double[] solved = solveVelocity(vxGuess, vyGuess, vzGuess, dxTarget, dyTarget);
-    double vxSolved = solved[0], vySolved = solved[1], vzSolved = solved[2];
+    double vxSolved = solved[0];
+    double vySolved = solved[1];
+    double vzSolved = solved[2];
 
     double vxShooter = vxSolved - vxRobotRelease;
     double vyShooter = vySolved - vyRobotRelease;
@@ -330,7 +350,9 @@ public class ShootingUtil {
     double vzGuess = VZ;
 
     double[] solved = solveVelocity(vxGuess, vyGuess, vzGuess, dxTarget, dyTarget);
-    double vxSolved = solved[0], vySolved = solved[1], vzSolved = solved[2];
+    double vxSolved = solved[0];
+    double vySolved = solved[1];
+    double vzSolved = solved[2];
 
     double vxShooter = vxSolved - vxRobotRelease;
     double vyShooter = vySolved - vyRobotRelease;
