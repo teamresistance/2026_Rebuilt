@@ -117,6 +117,22 @@ public class ShiftUtil {
     return Constants.ShiftOwner.BOTH; // endgame
   }
 
+  /** Returns which alliance owns this shift as a hex code */
+  public static String getShiftColor() {
+    Constants.ShiftOwner currentShift = getShift();
+
+    switch (currentShift) {
+      case RED:
+        return "#FF0000"; // Red
+      case BLUE:
+        return "#0000FF"; // Blue
+      case BOTH:
+        return "#FF00FF"; // Purple
+      default:
+        return "Error"; // The color will not show up, signifying an error.
+    }
+  }
+
   /** Returns the number of seconds left in the current shift. Returns 0 after endgame. */
   public static double getTimeLeftInCurrentShift() {
     double elapsed = shiftTimer.get();

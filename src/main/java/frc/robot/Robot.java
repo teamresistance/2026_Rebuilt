@@ -147,7 +147,10 @@ public class Robot extends LoggedRobot {
 
     robotContainer.checkTurretStop();
 
-    Logger.recordOutput("Shifts/Current Shift", ShiftUtil.getShift());
+    Logger.recordOutput("Shifts/Current Shift", ShiftUtil.getShift()); // Returns text
+    Logger.recordOutput(
+        "Shifts/Current Shift Color",
+        ShiftUtil.getShiftColor()); // Returns hex code (select single color view in elastic)
     Logger.recordOutput("Shifts/Time Left", ShiftUtil.getTimeLeftInCurrentShift());
 
     // inform the operator that the shifts had an error and need to be assigned manually.

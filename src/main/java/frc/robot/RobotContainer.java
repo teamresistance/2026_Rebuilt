@@ -146,7 +146,7 @@ public class RobotContainer {
     SmartDashboard.putData("Manual Shift Setup", manualShiftAssigner);
 
     swivelStop.addOption("STOP", true);
-    swivelStop.addOption("GOOD", false);
+    swivelStop.setDefaultOption("GOOD", false);
     SmartDashboard.putData("Turret Swivel Stop", swivelStop);
 
     configureDriverFeedback();
