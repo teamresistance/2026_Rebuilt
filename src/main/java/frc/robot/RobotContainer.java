@@ -68,7 +68,7 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
-  private final SendableChooser<Boolean> swivelStop = new SendableChooser<>();
+  // private final SendableChooser<Boolean> swivelStop = new SendableChooser<>();
   private final SendableChooser<String> manualShiftAssigner = new SendableChooser<>();
 
   // bump zone and prebuilt commands
@@ -146,9 +146,9 @@ public class RobotContainer {
     manualShiftAssigner.setDefaultOption("None", "");
     SmartDashboard.putData("Manual Shift Setup", manualShiftAssigner);
 
-    swivelStop.addOption("STOP", true);
-    swivelStop.addOption("GOOD", false);
-    SmartDashboard.putData("Turret Swivel Stop", swivelStop);
+    // swivelStop.addOption("STOP", true);
+    // swivelStop.addOption("GOOD", false);
+    // SmartDashboard.putData("Turret Swivel Stop", swivelStop);
 
     configureDriverFeedback();
     autoChooser = configureAutos();
@@ -422,7 +422,7 @@ public class RobotContainer {
   }
 
   public void checkTurretStop() {
-    shooter.setSwivelStop(swivelStop.getSelected());
+    // shooter.setSwivelStop(swivelStop.getSelected());
   }
 
   /** Returns the autonomous command to schedule for the auto period. */

@@ -54,28 +54,8 @@ public class ShootingPredictions {
    */
   private double desiredAngularVelocity = 0;
 
-  // 20ms loop
-  private static final double LOOP_DT = 0.02;
-
-  // Maximum allowed change per second
-  private static final double MAX_HOOD_RATE_DEG_PER_SEC = 180.0;
-  private static final double MAX_TURRET_RATE_DEG_PER_SEC = 360.0;
-  private static final double MAX_LAUNCH_VELOCITY_RATE_MPS = 15.0;
-
-  // Derived per-cycle limits
-  private static final double MAX_HOOD_DELTA = MAX_HOOD_RATE_DEG_PER_SEC * LOOP_DT;
-
-  private static final double MAX_TURRET_DELTA = MAX_TURRET_RATE_DEG_PER_SEC * LOOP_DT;
-
-  private static final double MAX_LAUNCH_VELOCITY_DELTA = MAX_LAUNCH_VELOCITY_RATE_MPS * LOOP_DT;
-
-  private static double rateLimit(double current, double target, double maxDelta) {
+  private static double rateLimit(double current, double target) {
     double delta = MathUtil.inputModulus(target - current, -180.0, 180.0);
-
-    if (Math.abs(delta) > maxDelta) {
-      delta = Math.copySign(maxDelta, delta);
-    }
-
     return current + delta;
   }
 
@@ -143,12 +123,11 @@ public class ShootingPredictions {
     double newLaunchVelocity = calculation.launchSpeed();
 
     // Apply rate limiting
-    verticalShootingAngle = rateLimit(verticalShootingAngle, newVertical, MAX_HOOD_DELTA);
+    verticalShootingAngle = rateLimit(verticalShootingAngle, newVertical);
 
-    horizontalTotalShootingAngle =
-        rateLimit(horizontalTotalShootingAngle, newTotal, MAX_TURRET_DELTA);
+    horizontalTotalShootingAngle = rateLimit(horizontalTotalShootingAngle, newTotal);
 
-    launchVelocity = rateLimit(launchVelocity, newLaunchVelocity, MAX_LAUNCH_VELOCITY_DELTA);
+    launchVelocity = rateLimit(launchVelocity, newLaunchVelocity);
 
     // Keep offset consistent with total
     horizontalOffsetShootingAngle =
