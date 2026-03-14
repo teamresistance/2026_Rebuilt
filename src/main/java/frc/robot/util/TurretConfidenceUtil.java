@@ -15,7 +15,10 @@ public class TurretConfidenceUtil {
   // 0 = perfect turret
   // 1 = no compensation (stationary shooter)
   private static final double ROTATION_COMPENSATION_FACTOR =
-      0.02; // TODO: Tune this based on turret performance
+      0.1; // TODO: Tune this based on turret performance
+
+  private static final double DISTANCE_FACTOR =
+      0.4; // TODO: Tune this based on the impact distance from the goal has on shot confidence
 
   public static double calculateConfidence(SwerveDriveIO drive) {
     // Get current robot pose and velocity
@@ -35,7 +38,8 @@ public class TurretConfidenceUtil {
     // Calculate lateral velocity of the robot with the x and y velocity
     double lateralVelocity = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
 
-    // Translation drift during flight
+    // Translation drift during flight (how far the robot will move laterally while the shot is in
+    // the air)
     double translationError = lateralVelocity * timeOfFlight;
 
     // Rotational drift arc displacement at target distance
@@ -44,9 +48,14 @@ public class TurretConfidenceUtil {
     // Apply turret compensation
     double rotationError = rawRotationError * ROTATION_COMPENSATION_FACTOR;
 
+    double distanceError = distance * DISTANCE_FACTOR;
+
     // Combine errors
     double totalError =
-        Math.sqrt(translationError * translationError + rotationError * rotationError);
+        Math.cbrt(
+            translationError * translationError
+                + rotationError * rotationError
+                + distanceError * distanceError);
 
     // Convert miss distance to probability (Gaussian curve equation)
     double probability = Math.exp(-Math.pow(totalError, 2) / (2 * Math.pow(ERROR_STD_DEV, 2)));
