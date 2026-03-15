@@ -326,6 +326,9 @@ public class ShootingUtil {
     double deltaFloorAngleDeg =
         (Math.atan2(vyShooter, vxShooter) - azRad) * ShootingConstants.RAD_TO_DEG;
 
+    // Wrap the angle from 0 to 360 degrees.
+    deltaFloorAngleDeg = ((deltaFloorAngleDeg % 360.0) + 360.0) % 360.0;
+
     return new BallisticSolution(vTotalNew, thetaDeg, deltaFloorAngleDeg);
   }
 
@@ -362,6 +365,8 @@ public class ShootingUtil {
     double azimuthShooter = Math.atan2(vyShooter, vxShooter);
     double deltaFloorAngleDeg = (azimuthShooter - azRad) * ShootingConstants.RAD_TO_DEG;
 
+    // Wrap the angle from 0 to 360 degrees.
+    deltaFloorAngleDeg = ((deltaFloorAngleDeg % 360.0) + 360.0) % 360.0;
     return new BallisticSolution(vTotalNew, thetaDeg, deltaFloorAngleDeg);
   }
 
