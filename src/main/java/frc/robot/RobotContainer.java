@@ -269,14 +269,17 @@ public class RobotContainer {
                       isConfident =
                           TurretConfidenceUtil.calculateConfidence(drive)
                               > Constants.CONFIDENCE_THRESHOLD;
+                      break;
                     case CALC:
                       isConfident =
                           TurretConfidenceUtil.calculateConfidenceCalc(drive, shooter)
                               > Constants.CONFIDENCE_THRESHOLD;
+                      break;
                     default:
                       isConfident =
                           TurretConfidenceUtil.calculateConfidence(drive)
                               > Constants.CONFIDENCE_THRESHOLD;
+                      break;
                   }
                   if (isShooting) {
                     return isConfident
