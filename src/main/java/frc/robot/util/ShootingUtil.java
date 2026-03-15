@@ -386,7 +386,6 @@ public class ShootingUtil {
    * Computes the required angular velocity in RPS to launch the fuel at the desired launch speed.
    */
   public static double computeMotorAdjustment(double launchSpeed) {
-    System.out.println("Tangential velocity:" + 1.4 * launchSpeed);
     return E * launchSpeed / RADIUS / (2 * Math.PI);
   }
 }
