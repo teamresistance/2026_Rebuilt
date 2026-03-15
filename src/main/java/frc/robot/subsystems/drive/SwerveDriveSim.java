@@ -75,7 +75,6 @@ public class SwerveDriveSim implements SwerveDriveIO {
 
   @Override
   public void periodic() {
-
     driveSimulation.periodic();
     SimulatedArena.getInstance().simulationPeriodic();
     field2d.setRobotPose(getPose());
