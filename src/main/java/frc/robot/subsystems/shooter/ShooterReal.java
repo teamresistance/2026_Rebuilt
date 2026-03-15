@@ -128,6 +128,11 @@ public class ShooterReal implements ShooterIO {
     flywheelMotor2.setControl(new StrictFollower(Constants.SHOOTER_FLYWHEEL_ID));
   }
 
+  @Override
+  public double getFlywheelRPS() {
+    return flywheelMotor.getVelocity().getValueAsDouble();
+  }
+
   /**
    * Sets the turret hood's target (in degrees). Must be within {@code
    * Constants.SHOOTER_HOOD_MIN_PITCH} and {@code Constants.SHOOTER_HOOD_MAX_PITCH}

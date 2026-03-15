@@ -263,10 +263,21 @@ public class RobotContainer {
                 4,
                 () -> {
                   boolean isShooting = ShootingUtil.getShootingType(drive::getPose) == 0;
-                  boolean isConfident =
-                      TurretConfidenceUtil.calculateConfidence(drive)
-                          > Constants.CONFIDENCE_THRESHOLD;
-
+                  boolean isConfident;
+                  switch (Constants.CURRENT_SHOT_STYLE) {
+                    case MAPS:
+                      isConfident =
+                          TurretConfidenceUtil.calculateConfidence(drive)
+                              > Constants.CONFIDENCE_THRESHOLD;
+                    case CALC:
+                      isConfident =
+                          TurretConfidenceUtil.calculateConfidenceCalc(drive, shooter)
+                              > Constants.CONFIDENCE_THRESHOLD;
+                    default:
+                      isConfident =
+                          TurretConfidenceUtil.calculateConfidence(drive)
+                              > Constants.CONFIDENCE_THRESHOLD;
+                  }
                   if (isShooting) {
                     return isConfident
                         ? Constants.LEDMode.SHOOTING_CONFIDENT

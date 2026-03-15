@@ -32,6 +32,7 @@ public class IdleShooterCommand extends Command {
     if (calcMode == ShootingStyle.MAPS) {
       double distance =
           ShootingUtil.getVirtualDistanceToTarget(drive.getPose(), drive.getChassisSpeeds());
+
       turretAngleDeg =
           ShootingUtil.getAngleToAim(
               drive.getPose(), drive.getChassisSpeeds(), ShootingMaps.getTimeOfFlight(distance));
@@ -56,6 +57,10 @@ public class IdleShooterCommand extends Command {
           ShootingPredictions.getCalculator().getHorizontalTotalShootingAngle()
               - robotPose.getRotation().getDegrees();
       hoodAngleDeg = ShootingPredictions.getCalculator().getVerticalShootingAngle();
+
+      Logger.recordOutput(
+          "Shooter/Virtual Distance to Hub",
+          ShootingPredictions.getCalculator().getDistanceToHub());
     }
 
     shooter.setTurretTarget(turretAngleDeg);

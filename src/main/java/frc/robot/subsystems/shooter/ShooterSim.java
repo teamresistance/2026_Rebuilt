@@ -58,9 +58,9 @@ public class ShooterSim implements ShooterIO {
       ShootingStyle calcMode) {
     register();
 
-    this.calcMode = calcMode;
     this.poseSupplier = poseSupplier;
     this.speedsSupplier = speedsSupplier;
+    this.calcMode = calcMode;
 
     mech = new Mechanism2d(3, 3);
     root = mech.getRoot("turretRoot", 1.5, 0.5);
@@ -69,7 +69,7 @@ public class ShooterSim implements ShooterIO {
         root.append(new MechanismLigament2d("TurretBase", 0.6, 0, 12, new Color8Bit(Color.kBlack)));
 
     // Show the total horizontal shooting angle (green). This is the absolute
-    // horizontal angle the shooter should be set to in the faield frame.
+    // horizontal angle the shooter should be set to in the field frame.
     totalHorizontal =
         root.append(
             new MechanismLigament2d(
@@ -193,6 +193,11 @@ public class ShooterSim implements ShooterIO {
   @Override
   public void runFlywheelAtRPS(double rps) {
     shooting = rps >= 1;
+  }
+
+  @Override
+  public double getFlywheelRPS() {
+    return ShootingPredictions.getCalculator().getDesiredAngularVelocity();
   }
 
   public boolean isShooting() {

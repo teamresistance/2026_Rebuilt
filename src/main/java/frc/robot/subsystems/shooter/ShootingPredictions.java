@@ -62,6 +62,8 @@ public class ShootingPredictions {
    */
   private double lastFieldRelativeAngleToHub = 0;
 
+  private double distanceToHub = 0;
+
   /**
    * Most recently computed turret position in the field frame. Stored so updateAdvantageScope can
    * use the same origin as the solver.
@@ -96,7 +98,7 @@ public class ShootingPredictions {
 
     double dx = hub.getX() - turretPos.getX();
     double dy = hub.getY() - turretPos.getY();
-    double distanceToHub = Math.hypot(dx, dy);
+    distanceToHub = Math.hypot(dx, dy);
     double fieldRelativeAngleToHub = Math.atan2(dy, dx);
 
     // Store for use by updateAdvantageScope
@@ -263,5 +265,9 @@ public class ShootingPredictions {
 
   public BallisticSolution getLastRawSolution() {
     return lastRawSolution;
+  }
+
+  public double getDistanceToHub() {
+    return distanceToHub;
   }
 }
