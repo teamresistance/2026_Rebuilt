@@ -189,7 +189,7 @@ public final class Constants {
 
     public static final double SHOOTER_RADIUS = 0.0381; // (meters)
     public static final double SHOOTER_EFFICIENCY =
-        0.60; // worst-case placeholder. TODO: empirically calculate
+        1.45; // worst-case placeholder. TODO: empirically calculate
 
     /** Conversion factor from radians to degrees */
     public static final double RAD_TO_DEG = 180.0 / Math.PI;

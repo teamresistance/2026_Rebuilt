@@ -382,8 +382,11 @@ public class ShootingUtil {
   public static final double RADIUS = ShootingConstants.SHOOTER_RADIUS;
   public static final double E = ShootingConstants.SHOOTER_EFFICIENCY;
 
-  /** Computes the required angular velocity to launch the fuel at the desired launch speed. */
+  /**
+   * Computes the required angular velocity in RPS to launch the fuel at the desired launch speed.
+   */
   public static double computeMotorAdjustment(double launchSpeed) {
-    return launchSpeed / (E * RADIUS) / 2 / Math.PI;
+    System.out.println("Tangential velocity:" + 1.4 * launchSpeed);
+    return E * launchSpeed / RADIUS / (2 * Math.PI);
   }
 }

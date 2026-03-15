@@ -133,6 +133,9 @@ public class IdleShooterCommand extends Command {
           new Pose2d[] {releasePose, new Pose2d(landing[0], landing[1], Rotation2d.kZero)});
       Logger.recordOutput("Shooter/DistanceToHub", distanceToHub);
       Logger.recordOutput("Shooter/TurretPos", turretVizPos.toString());
+      Logger.recordOutput(
+          "Shooter/RotationsPerSecond",
+          ShootingPredictions.getCalculator().getDesiredAngularVelocity());
     }
 
     shooter.setTurretTarget(turretAngleDeg);

@@ -1,6 +1,5 @@
 package frc.robot.commands;
 
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.ShootingStyle;
 import frc.robot.subsystems.drive.SwerveDriveIO;
@@ -25,9 +24,7 @@ public class ShootCommand extends Command {
   @Override
   public void execute() {
     if (calcMode == ShootingStyle.CALC) {
-      shooter.runFlywheelAtRPS(
-          Units.radiansToRotations(
-              ShootingPredictions.getCalculator().getDesiredAngularVelocity()));
+      shooter.runFlywheelAtRPS(ShootingPredictions.getCalculator().getDesiredAngularVelocity());
       Logger.recordOutput(
           "Shooter/Desired Angular Velocity",
           ShootingPredictions.getCalculator().getDesiredAngularVelocity());
