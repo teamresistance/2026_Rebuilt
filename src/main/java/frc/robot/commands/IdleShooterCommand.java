@@ -139,6 +139,6 @@ public class IdleShooterCommand extends Command {
     }
 
     shooter.setTurretTarget(turretAngleDeg);
-    shooter.setHoodTarget(hoodAngleDeg);
+    shooter.setHoodTarget(90.0 - hoodAngleDeg);
   }
 }
