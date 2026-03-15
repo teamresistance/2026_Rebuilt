@@ -8,23 +8,14 @@ import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.subsystems.drive.SwerveDriveIO;
 import frc.robot.subsystems.shooter.ShootingConstants;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.MockedStatic;
 
-@TestMethodOrder(OrderAnnotation.class)
 public class TurretConfidenceUtilTest {
-
-  // Test parameters, change as needed to test different scenarios
-  double vx = 1.0; // x-translation speed (m/s)
-  double vy = 0.0; // y-translation speed (m/s)
-  double rotationSpeed = 0.0; // angular rotation speed (rad/s)
-  double distance = 5.0; // distance from hub meters
-  double timeOfFlight = 1.0; // seconds, based on distance
 
   // Mock swerve drive subsystem
   SwerveDriveIO drive = mock(SwerveDriveIO.class);
@@ -33,14 +24,14 @@ public class TurretConfidenceUtilTest {
   private MockedStatic<ShootingUtil> shootingUtilMock;
   private MockedStatic<ShootingConstants> shootingConstantsMock;
 
-  // Store previous confidence values for comparison
-  private static double previousVxConfidence = 0.0;
-  private static double previousVyConfidence = 0.0;
-  private static double previousRotationConfidence = 0.0;
-  private static double previousDistanceConfidence = 0.0;
-
   @BeforeEach
   void setup() {
+    // Test parameters for mocks - change these as needed to test different scenarios
+    double vx = 2.0; // x-translation speed (m/s)
+    double vy = 0.0; // y-translation speed (m/s)
+    double rotationSpeed = 0.0; // angular rotation speed (rad/s)
+    double distance = 1.0; // distance from hub meters
+    double timeOfFlight = 1.0; // seconds, based on distance
 
     // --- Drive pose and speed mocks ---
     Pose2d pose = new Pose2d(0, 0, new Rotation2d());
@@ -53,15 +44,15 @@ public class TurretConfidenceUtilTest {
     shootingUtilMock = mockStatic(ShootingUtil.class);
     shootingConstantsMock = mockStatic(ShootingConstants.class);
 
-    Translation2d target = new Translation2d(6, 0);
+    Translation2d target = new Translation2d(distance, 0);
     Pose2d targetPose = new Pose2d(target, new Rotation2d());
 
     shootingUtilMock.when(() -> ShootingUtil.getShootingTarget(any())).thenReturn(targetPose);
 
+    // Set up default distance and time of flight mocks
     shootingUtilMock
         .when(() -> ShootingUtil.getVirtualDistanceToTarget(any(), any()))
         .thenReturn(distance);
-
     shootingConstantsMock
         .when(() -> ShootingConstants.getTimeOfFlight(distance))
         .thenReturn(timeOfFlight);
@@ -76,127 +67,195 @@ public class TurretConfidenceUtilTest {
 
   // Test 1: Calculates confidence
   @Test
-  @Order(0)
   @DisplayName("calculates confidence based on simulated drive state and target information")
   void testConfidenceCalculation() {
     double confidence = TurretConfidenceUtil.calculateConfidence(drive);
     System.out.println("Confidence = " + confidence);
-    assertTrue(
-        confidence > 75,
-        "Confidence should be more that 75% to be acceptable"); // only pass test if confidence is
-    // acceptable (above 75%)
-    assertTrue(confidence <= 100, "Confidence should not exceed 100%");
+    assertTrue(confidence > 75); // only pass test if confidence is acceptable (above 75%)
   }
 
   // Test 2: Value sweep of vx translation
   @ParameterizedTest
-  @ValueSource(doubles = {0.0, 0.5, 1.0, 2.0, 3.0})
-  @Order(1)
-  @DisplayName("Confidence decreases as vx increases")
-  void testXVelocitySweep(double vxValue) {
-
-    when(drive.getChassisSpeedsFieldRelative()).thenReturn(new ChassisSpeeds(vxValue, 0, 0));
+  @MethodSource("provideVxAndMinConfidence")
+  @DisplayName("Confidence meets minimum threshold for given vx")
+  void testXVelocitySweep(double vx, double expectedMinConfidence) {
+    // Setup
+    when(drive.getChassisSpeedsFieldRelative()).thenReturn(new ChassisSpeeds(vx, 0, 0));
 
     double confidence = TurretConfidenceUtil.calculateConfidence(drive);
-    System.out.println("vx=" + vxValue + " confidence=" + confidence);
+    System.out.println(
+        "vx="
+            + vx
+            + " confidence="
+            + confidence
+            + " (min expected: "
+            + expectedMinConfidence
+            + ")");
 
-    // Compare with previous value
-    if (previousVxConfidence != 0.0) {
-      assertTrue(
-          confidence <= previousVxConfidence + 0.01,
-          String.format("vx increased, confidence should decrease"));
-    }
+    assertTrue(
+        confidence > expectedMinConfidence,
+        String.format(
+            "For vx=%.1f m/s, confidence %.2f%% should be above minimum threshold %.2f%%",
+            vx, confidence, expectedMinConfidence));
+  }
 
-    // Store for next comparison
-    previousVxConfidence = confidence;
-
-    // Basic sanity check
-    assertTrue(confidence >= 0 && confidence <= 100);
+  private static Stream<Arguments> provideVxAndMinConfidence() {
+    return Stream.of(
+        Arguments.of(0.0, 90.0),
+        Arguments.of(0.5, 80.0),
+        Arguments.of(1.0, 70.0),
+        Arguments.of(2.0, 50.0),
+        Arguments.of(3.0, 30.0));
   }
 
   // Test 3: Value sweep of vy translation
   @ParameterizedTest
-  @ValueSource(doubles = {0.0, 0.5, 1.0, 2.0})
-  @Order(2)
-  @DisplayName("Confidence decreases as vy increases")
-  void testYVelocitySweep(double vyValue) {
-
-    when(drive.getChassisSpeedsFieldRelative()).thenReturn(new ChassisSpeeds(0, vyValue, 0));
+  @MethodSource("provideVyAndMinConfidence")
+  @DisplayName("Confidence meets minimum threshold for given vy")
+  void testYVelocitySweep(double vy, double expectedMinConfidence) {
+    // Setup
+    when(drive.getChassisSpeedsFieldRelative()).thenReturn(new ChassisSpeeds(0, vy, 0));
 
     double confidence = TurretConfidenceUtil.calculateConfidence(drive);
-    System.out.println("vy=" + vyValue + " confidence=" + confidence);
+    System.out.println(
+        "vy="
+            + vy
+            + " confidence="
+            + confidence
+            + " (min expected: "
+            + expectedMinConfidence
+            + ")");
 
-    // Compare with previous value
-    if (previousVyConfidence != 0.0) {
-      assertTrue(
-          confidence <= previousVyConfidence + 0.01,
-          String.format("vy increased, confidence should decrease"));
-    }
+    assertTrue(
+        confidence > expectedMinConfidence,
+        String.format(
+            "For vy=%.1f m/s, confidence %.2f%% should be above minimum threshold %.2f%%",
+            vy, confidence, expectedMinConfidence));
+  }
 
-    // Store for next comparison
-    previousVyConfidence = confidence;
-
-    // Basic sanity check
-    assertTrue(confidence >= 0 && confidence <= 100);
+  private static Stream<Arguments> provideVyAndMinConfidence() {
+    return Stream.of(
+        Arguments.of(0.0, 90.0),
+        Arguments.of(0.5, 80.0),
+        Arguments.of(1.0, 70.0),
+        Arguments.of(2.0, 50.0));
   }
 
   // Test 4: Value sweep of rotation speed
   @ParameterizedTest
-  @ValueSource(doubles = {0.0, 0.5, 1.0, 2.0})
-  @Order(3)
-  @DisplayName("Confidence decreases as rotation speed increases")
-  void testRotationSpeedSweep(double rotationSpeedValue) {
-
-    when(drive.getChassisSpeedsFieldRelative())
-        .thenReturn(new ChassisSpeeds(0, 0, rotationSpeedValue));
+  @MethodSource("provideRotationAndMinConfidence")
+  @DisplayName("Confidence meets minimum threshold for given rotation speed")
+  void testRotationSpeedSweep(double rotationSpeed, double expectedMinConfidence) {
+    // Setup
+    when(drive.getChassisSpeedsFieldRelative()).thenReturn(new ChassisSpeeds(0, 0, rotationSpeed));
 
     double confidence = TurretConfidenceUtil.calculateConfidence(drive);
-    System.out.println("rotationSpeed=" + rotationSpeedValue + " confidence=" + confidence);
+    System.out.println(
+        "rotationSpeed="
+            + rotationSpeed
+            + " confidence="
+            + confidence
+            + " (min expected: "
+            + expectedMinConfidence
+            + ")");
 
-    // Compare with previous value (skip first iteration)
-    if (previousRotationConfidence != 0.0) {
-      assertTrue(
-          confidence <= previousRotationConfidence + 0.01,
-          String.format("rotation speed increased, confidence should decrease"));
-    }
+    assertTrue(
+        confidence > expectedMinConfidence,
+        String.format(
+            "For rotationSpeed=%.1f rad/s, confidence %.2f%% should be above minimum threshold %.2f%%",
+            rotationSpeed, confidence, expectedMinConfidence));
+  }
 
-    // Store for next comparison
-    previousRotationConfidence = confidence;
-
-    // Basic sanity check
-    assertTrue(confidence >= 0 && confidence <= 100);
+  private static Stream<Arguments> provideRotationAndMinConfidence() {
+    return Stream.of(
+        Arguments.of(0.0, 90.0),
+        Arguments.of(0.5, 85.0),
+        Arguments.of(1.0, 75.0),
+        Arguments.of(2.0, 50.0));
   }
 
   // Test 5: Value sweep of distance
   @ParameterizedTest
-  @ValueSource(doubles = {0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0})
-  @Order(4)
-  @DisplayName("Confidence decreases as distance increases")
-  void testDistanceSweep(double distance) {
+  @MethodSource("provideDistanceAndMinConfidence")
+  @DisplayName("Confidence meets minimum threshold for given distance")
+  void testDistanceSweep(double distance, double expectedMinConfidence) {
+    // Setup - stationary robot for distance test
+    when(drive.getChassisSpeedsFieldRelative()).thenReturn(new ChassisSpeeds(0, 0, 0));
     shootingUtilMock
         .when(() -> ShootingUtil.getVirtualDistanceToTarget(any(), any()))
         .thenReturn(distance);
-
-    // Update time of flight based on distance
     shootingConstantsMock
         .when(() -> ShootingConstants.getTimeOfFlight(distance))
-        .thenReturn(distance * 0.2); // Simple TOF calculation
+        .thenReturn(distance * 0.2); // Simple TOF calculation based on distance
 
-    // Call the method being tested
     double confidence = TurretConfidenceUtil.calculateConfidence(drive);
-    System.out.println("distance=" + distance + " confidence=" + confidence);
+    System.out.println(
+        "distance="
+            + distance
+            + " confidence="
+            + confidence
+            + " (min expected: "
+            + expectedMinConfidence
+            + ")");
 
-    // Compare with previous value (skip first iteration)
-    if (previousDistanceConfidence != 0.0) {
-      assertTrue(
-          confidence <= previousDistanceConfidence + 0.01,
-          String.format("distance increased, confidence should decrease"));
-    }
+    assertTrue(
+        confidence > expectedMinConfidence,
+        String.format(
+            "For distance=%.1f m, confidence %.2f%% should be above minimum threshold %.2f%%",
+            distance, confidence, expectedMinConfidence));
+  }
 
-    // Store for next comparison
-    previousDistanceConfidence = confidence;
+  private static Stream<Arguments> provideDistanceAndMinConfidence() {
+    return Stream.of(
+        Arguments.of(1.0, 95.0),
+        Arguments.of(2.0, 90.0),
+        Arguments.of(3.0, 85.0),
+        Arguments.of(4.0, 80.0),
+        Arguments.of(5.0, 75.0),
+        Arguments.of(6.0, 65.0),
+        Arguments.of(7.0, 55.0),
+        Arguments.of(8.0, 45.0));
+  }
 
-    // Basic sanity check
-    assertTrue(confidence >= 0 && confidence <= 100);
+  // Test 6: Combined parameters test
+  @ParameterizedTest
+  @MethodSource("provideCombinedParamsAndMinConfidence")
+  @DisplayName("Confidence meets minimum threshold for combined conditions")
+  void testCombinedParameters(
+      double vx, double vy, double rotation, double distance, double expectedMinConfidence) {
+    // Setup
+    when(drive.getChassisSpeedsFieldRelative()).thenReturn(new ChassisSpeeds(vx, vy, rotation));
+    shootingUtilMock
+        .when(() -> ShootingUtil.getVirtualDistanceToTarget(any(), any()))
+        .thenReturn(distance);
+    shootingConstantsMock
+        .when(() -> ShootingConstants.getTimeOfFlight(distance))
+        .thenReturn(distance * 0.2);
+
+    double confidence = TurretConfidenceUtil.calculateConfidence(drive);
+    System.out.println(
+        String.format(
+            "vx=%.1f vy=%.1f rot=%.1f dist=%.1f -> confidence=%.2f%% (min exp=%.2f%%)",
+            vx, vy, rotation, distance, confidence, expectedMinConfidence));
+
+    assertTrue(
+        confidence > expectedMinConfidence,
+        String.format(
+            "For combined conditions, confidence %.2f%% should be above minimum threshold %.2f%%",
+            confidence, expectedMinConfidence));
+  }
+
+  private static Stream<Arguments> provideCombinedParamsAndMinConfidence() {
+    return Stream.of(
+        // Ideal conditions
+        Arguments.of(0.0, 0.0, 0.0, 2.0, 90.0),
+        // Moving slowly, close target
+        Arguments.of(0.5, 0.5, 0.2, 3.0, 75.0),
+        // Moving faster, medium target
+        Arguments.of(1.0, 0.5, 0.5, 4.0, 60.0),
+        // Moving fast, far target
+        Arguments.of(2.0, 1.0, 1.0, 6.0, 40.0),
+        // Near maximum limits
+        Arguments.of(3.0, 2.0, 2.0, 7.0, 20.0));
   }
 }

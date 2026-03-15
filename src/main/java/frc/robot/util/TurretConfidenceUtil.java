@@ -18,7 +18,7 @@ public class TurretConfidenceUtil {
       0.1; // TODO: Tune this based on turret performance
 
   private static final double DISTANCE_FACTOR =
-      0.4; // TODO: Tune this based on the impact distance from the goal has on shot confidence
+      0.3; // TODO: Tune this based on the impact distance from the goal has on shot confidence
 
   public static double calculateConfidence(SwerveDriveIO drive) {
     // Get current robot pose and velocity
