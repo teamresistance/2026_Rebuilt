@@ -28,21 +28,20 @@ public class HoppertCommand extends Command {
 
     if (shooter.isShooting()) {
 
-      // wheels always running when shooting
-      hoppert.runHopperWheels();
+      //      // every 4s, switch to running it forwards and restart the timer
+      //      // forwards-ness lasts for 1 second
+      //      if (directionSwitchTimer.hasElapsed(4)) {
+      //        hoppert.runHopperForwards();
+      //        directionSwitchTimer.reset();
+      //      } else if (directionSwitchTimer.hasElapsed(1)) {
+      //        hoppert.runHopperBackwards();
+      //      }
+      hoppert.runHopperBackwards();
+      hoppert.runTowerForwards();
 
-      // every 4s, switch to running it forwards and restart the timer
-      // forwards-ness lasts for 1 second
-      if (directionSwitchTimer.hasElapsed(4)) {
-        hoppert.runHopperForwards();
-        directionSwitchTimer.reset();
-      } else if (directionSwitchTimer.hasElapsed(1)) {
-        hoppert.runHopperBackwards();
-      }
-
-      // only feed through tower when flywheel is ready
-      if (shooter.atTargetRPS()) {
-        hoppert.runTowerForwards();
+      // only feed when flywheel and tower is ready
+      if (shooter.atTargetRPS() && hoppert.towerAtSpeed()) {
+        hoppert.runHopperWheels();
       }
     } else {
       // do not run stuff when not shooting

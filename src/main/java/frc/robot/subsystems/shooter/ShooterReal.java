@@ -44,7 +44,7 @@ public class ShooterReal implements ShooterIO {
 
     TalonFXConfiguration hoodConfig =
         new TalonFXConfiguration()
-            .withSlot0(new Slot0Configs().withKP(6).withKI(0).withKD(0).withKS(0))
+            .withSlot0(new Slot0Configs().withKP(10).withKI(0).withKD(0).withKS(0))
             .withMotionMagic(
                 new MotionMagicConfigs()
                     .withMotionMagicAcceleration(300)
@@ -58,10 +58,9 @@ public class ShooterReal implements ShooterIO {
                     .withSupplyCurrentLimitEnable(true));
     hoodMotor.getConfigurator().apply(hoodConfig);
 
-    // TODO: tune me and get rid of the ultra slow starting values
     TalonFXConfiguration turretConfig =
         new TalonFXConfiguration()
-            .withSlot0(new Slot0Configs().withKP(3).withKI(0).withKD(0).withKS(0))
+            .withSlot0(new Slot0Configs().withKP(12).withKI(0).withKD(0).withKS(0))
             .withMotionMagic(
                 new MotionMagicConfigs()
                     .withMotionMagicAcceleration(500)
@@ -75,7 +74,15 @@ public class ShooterReal implements ShooterIO {
                     .withStatorCurrentLimit(40)
                     .withStatorCurrentLimitEnable(true)
                     .withSupplyCurrentLimit(40)
-                    .withSupplyCurrentLimitEnable(true));
+                    .withSupplyCurrentLimitEnable(true))
+            .withSoftwareLimitSwitch(
+                new SoftwareLimitSwitchConfigs()
+                    .withReverseSoftLimitThreshold(
+                        ShootingUtil.toTurretRevs(Constants.SHOOTER_TURRET_MIN_YAW))
+                    .withReverseSoftLimitEnable(true)
+                    .withForwardSoftLimitThreshold(
+                        ShootingUtil.toTurretRevs(Constants.SHOOTER_TURRET_MAX_YAW))
+                    .withForwardSoftLimitEnable(true));
     turretMotor.getConfigurator().apply(turretConfig);
 
     TalonFXConfiguration flywheelConfig =
@@ -83,20 +90,24 @@ public class ShooterReal implements ShooterIO {
             .withSlot0(new Slot0Configs().withKP(10).withKI(0).withKD(0).withKS(0))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
-                    .withStatorCurrentLimit(0)
+                    .withStatorCurrentLimit(40)
                     .withStatorCurrentLimitEnable(true)
                     .withSupplyCurrentLimit(40)
-                    .withSupplyCurrentLimitEnable(true));
+                    .withSupplyCurrentLimitEnable(true))
+            .withMotorOutput(
+                new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive));
     flywheelMotor.getConfigurator().apply(flywheelConfig);
 
     TalonFXConfiguration flywheelConfig2 =
         new TalonFXConfiguration()
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
-                    .withStatorCurrentLimit(0)
+                    .withStatorCurrentLimit(40)
                     .withStatorCurrentLimitEnable(true)
-                    .withSupplyCurrentLimit(0)
-                    .withSupplyCurrentLimitEnable(true));
+                    .withSupplyCurrentLimit(40)
+                    .withSupplyCurrentLimitEnable(true))
+            .withMotorOutput(
+                new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive));
     flywheelMotor2.getConfigurator().apply(flywheelConfig2);
   }
 
@@ -107,7 +118,9 @@ public class ShooterReal implements ShooterIO {
    */
   @Override
   public boolean atShootingSetpoints() {
-    return hoodMotor.getPosition().isNear(hoodTargetAngle, Constants.SHOOTER_HOOD_REVS_TOLERANCE)
+    return hoodMotor
+            .getPosition()
+            .isNear(ShootingUtil.toHoodRevs(hoodTargetAngle), Constants.SHOOTER_HOOD_REVS_TOLERANCE)
         && turretMotor
             .getPosition()
             .isNear(turretTargetAngle, Constants.SHOOTER_TURRET_REVS_TOLERANCE);
@@ -126,6 +139,7 @@ public class ShooterReal implements ShooterIO {
     if (rps == 0) {
       flywheelMotor.setControl(new CoastOut());
       flywheelMotor2.setControl(new CoastOut());
+      return;
     }
     flywheelMotor.setControl(new VelocityDutyCycle(rps));
     flywheelMotor2.setControl(new StrictFollower(Constants.SHOOTER_FLYWHEEL_ID));
@@ -140,6 +154,7 @@ public class ShooterReal implements ShooterIO {
     angle += verticalTrim; // add vertical trim to hood target angle
     if (angle < Constants.SHOOTER_HOOD_MAX_PITCH && angle > Constants.SHOOTER_HOOD_MIN_PITCH) {
       angle = angle - Constants.SHOOTER_HOOD_MIN_PITCH; // zero position is not zero degrees
+      hoodTargetAngle = angle;
       hoodMotor.setControl(
           new MotionMagicVoltage(ShootingUtil.toHoodRevs(angle)).withEnableFOC(true));
     }
@@ -166,7 +181,7 @@ public class ShooterReal implements ShooterIO {
       turretTargetAngle =
           turretAngle + horizontalTrim; // add horizontal trim to turret target angle
       turretMotor.setControl(
-          new MotionMagicVoltage(ShootingUtil.toTurretRevs(turretAngle)).withEnableFOC(true));
+          new MotionMagicVoltage(ShootingUtil.toTurretRevs(turretTargetAngle)).withEnableFOC(true));
     }
   }
 
@@ -176,8 +191,8 @@ public class ShooterReal implements ShooterIO {
    */
   @Override
   public void zeroHood(double newValueDegrees) {
-    if (newValueDegrees > Constants.SHOOTER_HOOD_MAX_PITCH
-        || newValueDegrees < Constants.SHOOTER_HOOD_MIN_PITCH) {
+    if (newValueDegrees < Constants.SHOOTER_HOOD_MAX_PITCH
+        && newValueDegrees > Constants.SHOOTER_HOOD_MIN_PITCH) {
       hoodMotor.setPosition(ShootingUtil.toHoodRevs(newValueDegrees));
     }
   }

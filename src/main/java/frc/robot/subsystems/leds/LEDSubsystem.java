@@ -2,7 +2,6 @@ package frc.robot.subsystems.leds;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.hardware.CANdle;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -12,7 +11,8 @@ import org.littletonrobotics.junction.Logger;
 public class LEDSubsystem extends SubsystemBase {
 
   private final List<LEDStream> streams = new ArrayList<>();
-  private LEDStream lastMode = null;
+  private LEDStream lastStream = null;
+  private Constants.LEDMode lastLEDMode = null;
   private final CANdle candle = new CANdle(Constants.CANDLE_ID, new CANBus("drive"));
 
   /** Adds an LEDStream to the list of periodically checked streams. */
@@ -32,10 +32,14 @@ public class LEDSubsystem extends SubsystemBase {
       }
     }
 
-    if (highest != null && !highest.equals(lastMode)) {
-      applyMode(highest);
-      Logger.recordOutput("LEDS/Active Stream", highest.name);
-      lastMode = highest;
+    if (highest != null) {
+      Constants.LEDMode currentMode = highest.getLEDMode();
+      if (!highest.equals(lastStream) || currentMode != lastLEDMode) {
+        applyMode(highest);
+        Logger.recordOutput("LEDS/Active Stream", highest.name);
+        lastStream = highest;
+        lastLEDMode = currentMode;
+      }
     }
   }
 
@@ -47,7 +51,7 @@ public class LEDSubsystem extends SubsystemBase {
     switch (ledMode) {
       case DISABLED:
         double voltage = RobotController.getBatteryVoltage();
-        if (voltage > 12.6) {
+        if (voltage >= 12.6) {
           candle.setControl(Constants.LED_ANIMATION_DISABLED_GOOD);
         } else if (voltage > 12.2) {
           candle.setControl(Constants.LED_ANIMATION_DISABLED_FINE);

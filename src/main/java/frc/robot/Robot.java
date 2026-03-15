@@ -150,9 +150,12 @@ public class Robot extends LoggedRobot {
   @Override
   public void teleopPeriodic() {
 
+    Logger.recordOutput("Shifts/IsOurs", ShiftUtil.isOurs(ShiftUtil.getShift()));
+
     robotContainer.checkTurretStop();
 
     Logger.recordOutput("Shifts/Current Shift", ShiftUtil.getShift());
+    Logger.recordOutput("Shifts/Current Shift Color", ShiftUtil.getShiftColor());
     Logger.recordOutput("Shifts/Time Left", ShiftUtil.getTimeLeftInCurrentShift());
 
     // inform the operator that the shifts had an error and need to be assigned manually.

@@ -169,7 +169,7 @@ public class RobotContainer {
     // TODO: outpost shoot for longer?
     NamedCommands.registerCommand("Toggle Intake", new ToggleIntakeCommand(intake));
     NamedCommands.registerCommand(
-        "Closest Climb Align",
+        "Closest Climb",
         new DeferredCommand(
             () ->
                 DriveCommands.followPosesWithMaxSpeed(
@@ -387,11 +387,25 @@ public class RobotContainer {
     // Switch to X pattern when X button is pressed
     driver.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
+    // rev mecanums
+    driver.b().whileTrue(Commands.run(hoppert::reverseHopperWheels));
+    driver.b().onFalse(Commands.runOnce(hoppert::stopHopper));
+
     driver.rightTrigger().whileTrue(new ShootCommand(drive, shooter));
     driver.rightTrigger().and(driver.y().negate()).whileTrue(driveShooting);
 
     // left trigger toggles intake
     driver.leftTrigger().onTrue(new ToggleIntakeCommand(intake));
+
+    // hold to zero
+    Command zeroCmd =
+        Commands.run(
+            () -> {
+              shooter.setHoodTarget(Constants.SHOOTER_HOOD_MIN_PITCH);
+              shooter.setTurretTarget(0);
+            });
+    zeroCmd.addRequirements(shooter);
+    driver.leftStick().whileTrue(zeroCmd);
 
     // POV for adjusting shooter trim, with up/down adjusting vertical and left/right adjusting
     // horizontal.
