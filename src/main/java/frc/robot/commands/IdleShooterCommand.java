@@ -32,7 +32,7 @@ public class IdleShooterCommand extends Command {
         ShootingUtil.getAngleToAim(
             drive.getPose(),
             drive.getChassisSpeeds(),
-            ShootingConstants.getTimeOfFlight(distance) - 0.5);
+            ShootingConstants.getTimeOfFlight(distance) - 0.4);
     double hoodAngle = ShootingConstants.getHoodAngle(distance);
 
     shooter.setTurretTarget(turretAngle);

@@ -87,10 +87,10 @@ public class ShooterReal implements ShooterIO {
 
     TalonFXConfiguration flywheelConfig =
         new TalonFXConfiguration()
-            .withSlot0(new Slot0Configs().withKP(10).withKI(0).withKD(0).withKS(0))
+            .withSlot0(new Slot0Configs().withKP(100).withKI(0).withKD(0).withKS(0))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
-                    .withStatorCurrentLimit(40)
+                    .withStatorCurrentLimit(50)
                     .withStatorCurrentLimitEnable(true)
                     .withSupplyCurrentLimit(40)
                     .withSupplyCurrentLimitEnable(true))
@@ -102,7 +102,7 @@ public class ShooterReal implements ShooterIO {
         new TalonFXConfiguration()
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
-                    .withStatorCurrentLimit(40)
+                    .withStatorCurrentLimit(50)
                     .withStatorCurrentLimitEnable(true)
                     .withSupplyCurrentLimit(40)
                     .withSupplyCurrentLimitEnable(true))

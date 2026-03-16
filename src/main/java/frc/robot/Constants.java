@@ -55,7 +55,7 @@ public final class Constants {
 
   public static final double SHOOTER_HOOD_MAX_PITCH = 43;
   public static final double SHOOTER_HOOD_MIN_PITCH = 17.5;
-  public static final double SHOOTER_TURRET_MAX_YAW = 135; // TODO: max min yaw
+  public static final double SHOOTER_TURRET_MAX_YAW = 130;
   public static final double SHOOTER_TURRET_MIN_YAW = -135;
   public static final double SHOOTER_TRIM_ADJUSTMENT_INCREMENT = 3; // TODO: number w/ driver
 
@@ -97,11 +97,8 @@ public final class Constants {
           .withFrameRate(5);
   public static final SolidColor LED_ANIMATION_ACTIVE =
       new SolidColor(LED_START_INDEX, LED_END_INDEX).withColor(new RGBWColor(255, 0, 255));
-  public static final LarsonAnimation LED_ANIMATION_INACTIVE =
-      new LarsonAnimation(LED_START_INDEX, LED_END_INDEX)
-          .withColor(new RGBWColor(0, 100, 0))
-          .withFrameRate(8)
-          .withSize(6);
+  public static final SolidColor LED_ANIMATION_INACTIVE =
+      new SolidColor(LED_START_INDEX, LED_END_INDEX).withColor(new RGBWColor(255, 255, 255));
   public static final StrobeAnimation LED_ANIMATION_BUMP =
       new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
           .withFrameRate(10)

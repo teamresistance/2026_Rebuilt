@@ -123,8 +123,8 @@ public class RobotContainer {
         new ConditionalCommand(
             DriveCommands.joystickDriveAtAngle(
                 drive,
-                () -> MathUtil.clamp(-driver.getLeftY(), -0.8, 0.8),
-                () -> MathUtil.clamp(-driver.getLeftX(), -0.8, 0.8),
+                () -> MathUtil.clamp(-driver.getLeftY(), -0.5, 0.5),
+                () -> MathUtil.clamp(-driver.getLeftX(), -0.5, 0.5),
                 () ->
                     drive
                         .getRotation()
@@ -132,9 +132,9 @@ public class RobotContainer {
                         .plus(Rotation2d.fromDegrees(-driver.getRightX() * 90))),
             DriveCommands.joystickDrive(
                 drive,
-                () -> MathUtil.clamp(-driver.getLeftY(), -0.8, 0.8),
-                () -> MathUtil.clamp(-driver.getLeftX(), -0.8, 0.8),
-                () -> MathUtil.clamp(-driver.getRightX(), -0.75, 0.75)),
+                () -> MathUtil.clamp(-driver.getLeftY(), -0.5, 0.5),
+                () -> MathUtil.clamp(-driver.getLeftX(), -0.5, 0.5),
+                () -> MathUtil.clamp(-driver.getRightX(), -0.4, 0.4)),
             () ->
                 Math.abs(shooter.getDriveAssistanceAngle()) > 2
                     && driver.y().negate().getAsBoolean());
@@ -164,8 +164,14 @@ public class RobotContainer {
             .andThen(new WaitUntilCommand(climber::atTarget))
             .andThen(climber::brake));
     NamedCommands.registerCommand("Stop", Commands.runOnce(drive::stop, drive));
-    NamedCommands.registerCommand("Shoot 5s", new ShootCommand(drive, shooter).withTimeout(5));
-    NamedCommands.registerCommand("Shoot 10s", new ShootCommand(drive, shooter).withTimeout(10));
+    NamedCommands.registerCommand(
+        "Shoot 5s",
+        (new ShootCommand(drive, shooter).alongWith(new HoppertCommand(hoppert, shooter, intake)))
+            .withTimeout(5));
+    NamedCommands.registerCommand(
+        "Shoot 10s",
+        (new ShootCommand(drive, shooter).alongWith(new HoppertCommand(hoppert, shooter, intake)))
+            .withTimeout(10));
     // TODO: outpost shoot for longer?
     NamedCommands.registerCommand("Toggle Intake", new ToggleIntakeCommand(intake));
     NamedCommands.registerCommand(
@@ -289,11 +295,7 @@ public class RobotContainer {
 
     // INTAKING (priority 2, flashing yellow)
     LEDStream intakeStream =
-        new LEDStream(
-            "intake",
-            2,
-            () -> Constants.LEDMode.INTAKING,
-            () -> driver.rightTrigger().getAsBoolean());
+        new LEDStream("intake", 2, () -> Constants.LEDMode.INTAKING, intake::isIntaking);
     leds.addStream(intakeStream);
 
     // DISABLED
@@ -319,7 +321,12 @@ public class RobotContainer {
     leds.addStream(bumpStream);
 
     // BUMP trigger (timed 1s when entering bump zone)
-    driver.y().negate().and(inBumpZone).onTrue(Commands.runOnce(() -> bumpStream.runForSeconds(1)));
+    driver
+        .y()
+        .negate()
+        .and(inBumpZone)
+        .and(() -> !DriverStation.isAutonomous())
+        .onTrue(Commands.runOnce(() -> bumpStream.runForSeconds(1)));
 
     // RUMBLE when 5s from next shift
     new Trigger(ShiftUtil::nearNextShift)
@@ -340,10 +347,15 @@ public class RobotContainer {
             drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
 
     // have hopper automatically deciding when to run or not to run
-    hoppert.setDefaultCommand(new HoppertCommand(hoppert, shooter));
+    hoppert.setDefaultCommand(new HoppertCommand(hoppert, shooter, intake));
 
     // when y (paddle) is not pressed and in bump zone, auto rotate.
-    driver.y().negate().and(inBumpZone).whileTrue(driveAtAngleForBump);
+    driver
+        .y()
+        .negate()
+        .and(inBumpZone)
+        .and(() -> !DriverStation.isAutonomous())
+        .whileTrue(driveAtAngleForBump);
 
     // climb raise
     driver
@@ -391,11 +403,20 @@ public class RobotContainer {
     driver.b().whileTrue(Commands.run(hoppert::reverseHopperWheels));
     driver.b().onFalse(Commands.runOnce(hoppert::stopHopper));
 
+    // shoot
     driver.rightTrigger().whileTrue(new ShootCommand(drive, shooter));
     driver.rightTrigger().and(driver.y().negate()).whileTrue(driveShooting);
+    driver
+        .rightTrigger()
+        .onFalse(
+            new ParallelDeadlineGroup(
+                    new ShootCommand(drive, shooter).withTimeout(0.7),
+                    Commands.runOnce(hoppert::runTowerForwards))
+                .andThen(Commands.runOnce(hoppert::stopTower)));
 
     // left trigger toggles intake
     driver.leftTrigger().onTrue(new ToggleIntakeCommand(intake));
+    driver.leftTrigger().onFalse(new ToggleIntakeCommand(intake));
 
     // hold to zero
     Command zeroCmd =

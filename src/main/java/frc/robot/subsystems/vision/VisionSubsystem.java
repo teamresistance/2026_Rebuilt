@@ -5,6 +5,7 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -31,7 +32,7 @@ public class VisionSubsystem extends SubsystemBase {
 
   private final PhotonCamera[] cameras;
   /* For shooting vs. path following in auto */
-  private static final double STD_DEV_SCALAR_SHOOTING = 1.6;
+  private static final double STD_DEV_SCALAR_SHOOTING = 1;
   private static final double THETA_STD_DEV_COEFFICIENT_SHOOTING = 0.075;
   private static final PolynomialRegression XY_STD_DEV_MODEL =
       new PolynomialRegression(
@@ -120,7 +121,7 @@ public class VisionSubsystem extends SubsystemBase {
     Pose2d currentPose = poseSupplier.get();
     visionUpdates = new ArrayList<>();
 
-    double singleTagAdjustment = 1.0;
+    double singleTagAdjustment = DriverStation.isAutonomous() ? 1.0 : 1.6;
     if (Constants.TUNING_MODE) SingleTagAdjustment.updateLoggedTagAdjustments();
 
     // Loop through all the cameras

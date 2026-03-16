@@ -34,18 +34,14 @@ public class LEDSubsystem extends SubsystemBase {
 
     if (highest != null) {
       Constants.LEDMode currentMode = highest.getLEDMode();
-      if (!highest.equals(lastStream) || currentMode != lastLEDMode) {
-        applyMode(highest);
-        Logger.recordOutput("LEDS/Active Stream", highest.name);
-        lastStream = highest;
-        lastLEDMode = currentMode;
-      }
+      applyMode(highest, currentMode);
+      Logger.recordOutput("LEDS/Active Stream", highest.name);
+      lastStream = highest;
+      lastLEDMode = currentMode;
     }
   }
 
-  // TODO: find a better way to do the brightness and framerate suppliers in offseason
-  private void applyMode(LEDStream mode) {
-    Constants.LEDMode ledMode = mode.getLEDMode();
+  private void applyMode(LEDStream mode, Constants.LEDMode ledMode) {
     Logger.recordOutput("LEDS/Active Mode", ledMode);
 
     switch (ledMode) {
@@ -60,22 +56,7 @@ public class LEDSubsystem extends SubsystemBase {
         }
         break;
       case RAINBOW:
-        //        if (mode.useFramerateSupplier && mode.useBrightnessSupplier) {
-        //          candle.setControl(
-        //              Constants.LED_ANIMATION_RAINBOW
-        //                  .withBrightness(mode.brightnessSupplier.getAsDouble())
-        //                  .withFrameRate(mode.framerateSupplier.getAsDouble()));
-        //        } else if (mode.useBrightnessSupplier) {
-        //          candle.setControl(
-        //              Constants.LED_ANIMATION_RAINBOW.withBrightness(
-        //                  mode.brightnessSupplier.getAsDouble()));
-        //        } else if (mode.useFramerateSupplier) {
-        //          candle.setControl(
-        //
-        // Constants.LED_ANIMATION_RAINBOW.withFrameRate(mode.framerateSupplier.getAsDouble()));
-        //        } else {
         candle.setControl(Constants.LED_ANIMATION_RAINBOW);
-        //        }
         break;
       case SHOOTING_CONFIDENT:
         candle.setControl(

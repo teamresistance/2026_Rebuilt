@@ -4,8 +4,9 @@
   "holonomicMode": true,
   "pathFolders": [
     "Intake Shoot Climb",
-    "New Folder",
     "Intake Shoot Outpost Shoot",
+    "debug",
+    "New New Folder",
     "Shoot Climb"
   ],
   "autoFolders": [

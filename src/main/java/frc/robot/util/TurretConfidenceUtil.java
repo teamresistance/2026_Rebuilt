@@ -15,7 +15,7 @@ public class TurretConfidenceUtil {
   // 0 = perfect turret
   // 1 = no compensation (stationary shooter)
   private static final double ROTATION_COMPENSATION_FACTOR =
-      0.1; // TODO: Tune this based on turret performance
+      0.3; // TODO: Tune this based on turret performance
 
   private static final double DISTANCE_FACTOR =
       0.3; // TODO: Tune this based on the impact distance from the goal has on shot confidence

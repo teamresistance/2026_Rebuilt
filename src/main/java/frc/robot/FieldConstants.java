@@ -1,5 +1,6 @@
 package frc.robot;
 
+import com.pathplanner.lib.util.FlippingUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 
@@ -76,16 +77,16 @@ public final class FieldConstants {
 
   // Y+ blue alliance passing target
   public static final Pose2d BLUE_TOP_FERRY_TARGET =
-      new Pose2d(APRILTAG_32.getX() + 3, 5.02, Rotation2d.kZero);
+      new Pose2d(APRILTAG_32.getX() + 1, 5.02, Rotation2d.kZero);
   // Y- blue alliance passing target
   public static final Pose2d BLUE_BOTTOM_FERRY_TARGET =
-      new Pose2d(APRILTAG_32.getX() + 3, 3.02, Rotation2d.kZero);
+      new Pose2d(APRILTAG_32.getX() + 1, 3.02, Rotation2d.kZero);
   // Y+ red alliance passing target
   public static final Pose2d RED_TOP_FERRY_TARGET =
-      new Pose2d(APRILTAG_16.getX() - 3, 5.02, Rotation2d.kZero);
+      new Pose2d(APRILTAG_16.getX() - 1, 5.02, Rotation2d.kZero);
   // Y- red alliance passing target
   public static final Pose2d RED_BOTTOM_FERRY_TARGET =
-      new Pose2d(APRILTAG_16.getX() - 3, 3.02, Rotation2d.kZero);
+      new Pose2d(APRILTAG_16.getX() - 1, 3.02, Rotation2d.kZero);
 
   public static final double BLUE_SHOOTING_ZONE_END = APRILTAG_20.getX() + 0.5;
   public static final double NEUTRAL_ZONE_BLUESIDE = APRILTAG_20.getX() + 0.5;
@@ -99,8 +100,10 @@ public final class FieldConstants {
   public static final double BUMPZONE_END_RED = APRILTAG_10.getX();
 
   // TODO: good positions when CAD ready or when robot
-  public static final Pose2d RED_LEFT_CLIMBER_ALIGN = new Pose2d(0.0, 0.0, Rotation2d.kZero);
-  public static final Pose2d RED_RIGHT_CLIMBER_ALIGN = new Pose2d(0.0, 0.0, Rotation2d.kZero);
-  public static final Pose2d BLUE_LEFT_CLIMBER_ALIGN = new Pose2d(0.0, 0.0, Rotation2d.kZero);
-  public static final Pose2d BLUE_RIGHT_CLIMBER_ALIGN = new Pose2d(0.0, 0.0, Rotation2d.kZero);
+  public static final Pose2d RED_LEFT_CLIMBER_ALIGN = new Pose2d(15.37, 3.6, Rotation2d.kZero);
+  public static final Pose2d RED_RIGHT_CLIMBER_ALIGN = new Pose2d(15.54, 5.14, Rotation2d.kPi);
+  public static final Pose2d BLUE_LEFT_CLIMBER_ALIGN =
+      FlippingUtil.flipFieldPose(RED_LEFT_CLIMBER_ALIGN);
+  public static final Pose2d BLUE_RIGHT_CLIMBER_ALIGN =
+      FlippingUtil.flipFieldPose(RED_RIGHT_CLIMBER_ALIGN);
 }
