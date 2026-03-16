@@ -13,7 +13,7 @@ public interface ShooterIO extends Subsystem {
 
   void setHoodTarget(double hoodTargetAngle);
 
-  void setTurretTarget(double turretTargetAngle);
+  void setTurretTarget(double turretTargetAngle, double omegaRadsPerSec);
 
   boolean atTargetRPS();
 

@@ -31,7 +31,7 @@ public class HoppertReal implements HoppertIO {
   public HoppertReal() {
     TalonFXConfiguration config =
         new TalonFXConfiguration()
-            .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake))
+            .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Coast))
             .withSlot0(new Slot0Configs().withKP(12));
     towerMotor.getConfigurator().apply(config);
 
@@ -43,7 +43,6 @@ public class HoppertReal implements HoppertIO {
                     .withInverted(InvertedValue.Clockwise_Positive));
     hopperRollerMotor.getConfigurator().apply(config2);
 
-    // TODO: me
     TalonFXConfiguration config3 =
         new TalonFXConfiguration()
             .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Coast));
@@ -59,6 +58,8 @@ public class HoppertReal implements HoppertIO {
     Logger.recordOutput("Hoppert/Wheels Active", hopperWheelsRunning);
     Logger.recordOutput("Hoppert/Tower Motor Active", towerMotorRunning);
     Logger.recordOutput("Hoppert/Tower Motor Reversed", towerMotorReversed);
+    Logger.recordOutput("Hoppert/TowerSpeed", towerMotor.getVelocity().getValueAsDouble());
+    Logger.recordOutput("Hoppert/TowerTemp", towerMotor.getDeviceTemp().getValueAsDouble());
   }
 
   @Override

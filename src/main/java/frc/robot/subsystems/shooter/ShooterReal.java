@@ -165,7 +165,7 @@ public class ShooterReal implements ShooterIO {
    * Constants.SHOOTER_TURRET_MIN_YAW} and {@code Constants.SHOOTER_TURRET_MAX_YAW}
    */
   @Override
-  public void setTurretTarget(double angle) {
+  public void setTurretTarget(double angle, double omegaRadsPerSec) {
     if (emergencyStopSwivel) {
       // stop swivel, aim with drive, offset from stopped position
       turretDriveAssistTargetAngle =
@@ -181,7 +181,9 @@ public class ShooterReal implements ShooterIO {
       turretTargetAngle =
           turretAngle + horizontalTrim; // add horizontal trim to turret target angle
       turretMotor.setControl(
-          new MotionMagicVoltage(ShootingUtil.toTurretRevs(turretTargetAngle)).withEnableFOC(true));
+          new MotionMagicVoltage(ShootingUtil.toTurretRevs(turretTargetAngle))
+              .withEnableFOC(true)
+              .withFeedForward(-omegaRadsPerSec));
     }
   }
 

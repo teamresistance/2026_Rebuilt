@@ -423,7 +423,7 @@ public class RobotContainer {
         Commands.run(
             () -> {
               shooter.setHoodTarget(Constants.SHOOTER_HOOD_MIN_PITCH);
-              shooter.setTurretTarget(0);
+              shooter.setTurretTarget(0, 0);
             });
     zeroCmd.addRequirements(shooter);
     driver.leftStick().whileTrue(zeroCmd);
