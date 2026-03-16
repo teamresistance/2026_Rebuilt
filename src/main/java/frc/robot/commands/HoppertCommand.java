@@ -23,13 +23,12 @@ public class HoppertCommand extends Command {
 
   @Override
   public void execute() {
-    boolean isShooting = shooter.isShooting();
 
-    if (isShooting) {
+    if (shooter.isShooting()) {
       hoppert.runHopperBackwards();
       hoppert.runTowerForwards();
 
-      if (shooter.atTargetRPS() && hoppert.towerAtSpeed()) {
+      if (shooter.atTargetRPS() && hoppert.towerAtSpeed() && shooter.atShootingSetpoints()) {
         hoppert.runHopperWheels();
       }
     } else {

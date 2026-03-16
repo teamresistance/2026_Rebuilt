@@ -32,7 +32,8 @@ public class BumpUtil {
                   speeds.vxMetersPerSecond * s, speeds.vyMetersPerSecond * s, Rotation2d.kZero));
       Logger.recordOutput(String.format("Bump/Bump Zone Virtual Pose (scale=%.2f)", s), pose);
 
-      boolean inYBounds = pose.getY() > 1.4 && pose.getY() < 6.6;
+      boolean inYBounds =
+          (pose.getY() > 1.5 && pose.getY() < 6.5) && !(pose.getY() > 3.4 && pose.getY() < 4.14);
 
       if (inYBounds) {
         if (isBlue) {

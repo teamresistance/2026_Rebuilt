@@ -77,16 +77,16 @@ public final class FieldConstants {
 
   // Y+ blue alliance passing target
   public static final Pose2d BLUE_TOP_FERRY_TARGET =
-      new Pose2d(APRILTAG_32.getX() + 1, 5.02, Rotation2d.kZero);
+      new Pose2d(APRILTAG_32.getX() + 0, 6.02, Rotation2d.kZero);
   // Y- blue alliance passing target
   public static final Pose2d BLUE_BOTTOM_FERRY_TARGET =
-      new Pose2d(APRILTAG_32.getX() + 1, 3.02, Rotation2d.kZero);
+      new Pose2d(APRILTAG_32.getX() + 0, 2.02, Rotation2d.kZero);
   // Y+ red alliance passing target
   public static final Pose2d RED_TOP_FERRY_TARGET =
-      new Pose2d(APRILTAG_16.getX() - 1, 5.02, Rotation2d.kZero);
+      new Pose2d(APRILTAG_16.getX() - 0, 6.02, Rotation2d.kZero);
   // Y- red alliance passing target
   public static final Pose2d RED_BOTTOM_FERRY_TARGET =
-      new Pose2d(APRILTAG_16.getX() - 1, 3.02, Rotation2d.kZero);
+      new Pose2d(APRILTAG_16.getX() - 0, 2.02, Rotation2d.kZero);
 
   public static final double BLUE_SHOOTING_ZONE_END = APRILTAG_20.getX() + 0.5;
   public static final double NEUTRAL_ZONE_BLUESIDE = APRILTAG_20.getX() + 0.5;

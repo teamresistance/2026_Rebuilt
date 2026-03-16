@@ -123,7 +123,9 @@ public class ShooterReal implements ShooterIO {
             .isNear(ShootingUtil.toHoodRevs(hoodTargetAngle), Constants.SHOOTER_HOOD_REVS_TOLERANCE)
         && turretMotor
             .getPosition()
-            .isNear(turretTargetAngle, Constants.SHOOTER_TURRET_REVS_TOLERANCE);
+            .isNear(
+                ShootingUtil.toTurretRevs(turretTargetAngle),
+                Constants.SHOOTER_TURRET_REVS_TOLERANCE);
   }
 
   /** Returns if the flywheel motors are at their target speed. */
@@ -249,5 +251,7 @@ public class ShooterReal implements ShooterIO {
     Logger.recordOutput("Shooter/Drive Assist Angle", turretDriveAssistTargetAngle);
     Logger.recordOutput("Shooter/Vertical Trim", verticalTrim);
     Logger.recordOutput("Shooter/Horizontal Trim", horizontalTrim);
+    Logger.recordOutput("Shooter/AtSetpoints HT", atShootingSetpoints());
+    Logger.recordOutput("Shooter/AtSetpoints F", atTargetRPS());
   }
 }

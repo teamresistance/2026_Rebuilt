@@ -377,21 +377,21 @@ public class RobotContainer {
                 .andThen(new WaitUntilCommand(climber::atTarget))
                 .andThen(climber::brake));
 
-    // auto-align to climber positions with bumpers (left/right bumper = left/right pos)
-    driver
-        .leftBumper()
-        .whileTrue(
-            new DeferredCommand(
-                () ->
-                    DriveCommands.followPosesWithMaxSpeed(
-                        drive, 0.5, drive.getPose(), OtherUtil.getClimberAlignPos(true))));
+    // reverse intake
+    driver.leftBumper().whileTrue(Commands.runOnce(intake::reverseIntake));
+    driver.leftBumper().onFalse(Commands.runOnce(intake::stopIntake));
+
+    // closest climb align
     driver
         .rightBumper()
         .whileTrue(
             new DeferredCommand(
                 () ->
                     DriveCommands.followPosesWithMaxSpeed(
-                        drive, 0.5, drive.getPose(), OtherUtil.getClimberAlignPos(false))));
+                        drive,
+                        0.5,
+                        drive.getPose(),
+                        OtherUtil.getClimberAlignPos(drive.getPose()))));
 
     // auto-aim hood and turret always
     shooter.setDefaultCommand(new IdleShooterCommand(drive, shooter));
@@ -399,7 +399,7 @@ public class RobotContainer {
     // Switch to X pattern when X button is pressed
     driver.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
-    // rev mecanums
+    // reverse mecanums
     driver.b().whileTrue(Commands.run(hoppert::reverseHopperWheels));
     driver.b().onFalse(Commands.runOnce(hoppert::stopHopper));
 

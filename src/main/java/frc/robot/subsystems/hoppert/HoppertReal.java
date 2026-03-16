@@ -97,13 +97,13 @@ public class HoppertReal implements HoppertIO {
 
   @Override
   public void runHopperWheels() {
-    hopperWheelsMotor.setControl(new DutyCycleOut(0.75));
+    hopperWheelsMotor.setControl(new DutyCycleOut(0.9));
     hopperWheelsRunning = true;
   }
 
   @Override
   public void reverseHopperWheels() {
-    hopperWheelsMotor.setControl(new DutyCycleOut(-0.75));
+    hopperWheelsMotor.setControl(new DutyCycleOut(-0.9));
     hopperWheelsRunning = true;
   }
 

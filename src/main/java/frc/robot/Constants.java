@@ -49,7 +49,7 @@ public final class Constants {
 
   public static final double SHOOTER_HOOD_REVS_PER_DEG = (4.0 * (175.0 / 10.0)) / 360.0;
   public static final double SHOOTER_TURRET_REVS_PER_DEG = (5 * 5 * 3.2) / 360.0;
-  public static final double SHOOTER_HOOD_REVS_TOLERANCE = 0.15;
+  public static final double SHOOTER_HOOD_REVS_TOLERANCE = 0.25;
   public static final double SHOOTER_TURRET_REVS_TOLERANCE = 0.5;
   public static final double SHOOTER_RPS_TOLERANCE = 1;
 
