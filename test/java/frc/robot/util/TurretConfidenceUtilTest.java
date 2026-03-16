@@ -65,16 +65,6 @@ public class TurretConfidenceUtilTest {
     clearInvocations(drive);
   }
 
-  // Test 1: Calculates confidence
-  @Test
-  @DisplayName("calculates confidence based on simulated drive state and target information")
-  void testConfidenceCalculation() {
-    double confidence = TurretConfidenceUtil.calculateConfidence(drive);
-    System.out.println("Confidence = " + confidence);
-    assertTrue(confidence > 75); // only pass test if confidence is acceptable (above 75%)
-  }
-
-  // Test 2: Value sweep of vx translation
   @ParameterizedTest
   @MethodSource("provideVxAndMinConfidence")
   @DisplayName("Confidence meets minimum threshold for given vx")
@@ -83,14 +73,8 @@ public class TurretConfidenceUtilTest {
     when(drive.getChassisSpeedsFieldRelative()).thenReturn(new ChassisSpeeds(vx, 0, 0));
 
     double confidence = TurretConfidenceUtil.calculateConfidence(drive);
-    System.out.println(
-        "vx="
-            + vx
-            + " confidence="
-            + confidence
-            + " (min expected: "
-            + expectedMinConfidence
-            + ")");
+    System.out.printf(
+        "vx=%.1f confidence=%.2f%% (min expected: %.2f%%)", vx, confidence, expectedMinConfidence);
 
     assertTrue(
         confidence > expectedMinConfidence,
@@ -108,7 +92,6 @@ public class TurretConfidenceUtilTest {
         Arguments.of(3.0, 30.0));
   }
 
-  // Test 3: Value sweep of vy translation
   @ParameterizedTest
   @MethodSource("provideVyAndMinConfidence")
   @DisplayName("Confidence meets minimum threshold for given vy")
@@ -117,14 +100,8 @@ public class TurretConfidenceUtilTest {
     when(drive.getChassisSpeedsFieldRelative()).thenReturn(new ChassisSpeeds(0, vy, 0));
 
     double confidence = TurretConfidenceUtil.calculateConfidence(drive);
-    System.out.println(
-        "vy="
-            + vy
-            + " confidence="
-            + confidence
-            + " (min expected: "
-            + expectedMinConfidence
-            + ")");
+    System.out.printf(
+        "vy=%.1f confidence=%.2f%% (min expected: %.2f%%)", vy, confidence, expectedMinConfidence);
 
     assertTrue(
         confidence > expectedMinConfidence,
@@ -141,7 +118,6 @@ public class TurretConfidenceUtilTest {
         Arguments.of(2.0, 50.0));
   }
 
-  // Test 4: Value sweep of rotation speed
   @ParameterizedTest
   @MethodSource("provideRotationAndMinConfidence")
   @DisplayName("Confidence meets minimum threshold for given rotation speed")
@@ -150,14 +126,9 @@ public class TurretConfidenceUtilTest {
     when(drive.getChassisSpeedsFieldRelative()).thenReturn(new ChassisSpeeds(0, 0, rotationSpeed));
 
     double confidence = TurretConfidenceUtil.calculateConfidence(drive);
-    System.out.println(
-        "rotationSpeed="
-            + rotationSpeed
-            + " confidence="
-            + confidence
-            + " (min expected: "
-            + expectedMinConfidence
-            + ")");
+    System.out.printf(
+        "rotationSpeed=%.1f confidence=%.2f%% (min expected: %.2f%%)",
+        rotationSpeed, confidence, expectedMinConfidence);
 
     assertTrue(
         confidence > expectedMinConfidence,
@@ -174,7 +145,6 @@ public class TurretConfidenceUtilTest {
         Arguments.of(2.0, 50.0));
   }
 
-  // Test 5: Value sweep of distance
   @ParameterizedTest
   @MethodSource("provideDistanceAndMinConfidence")
   @DisplayName("Confidence meets minimum threshold for given distance")
@@ -189,14 +159,9 @@ public class TurretConfidenceUtilTest {
         .thenReturn(distance * 0.2); // Simple TOF calculation based on distance
 
     double confidence = TurretConfidenceUtil.calculateConfidence(drive);
-    System.out.println(
-        "distance="
-            + distance
-            + " confidence="
-            + confidence
-            + " (min expected: "
-            + expectedMinConfidence
-            + ")");
+    System.out.printf(
+        "distance=%.1f confidence=%.2f%% (min expected: %.2f%%)",
+        distance, confidence, expectedMinConfidence);
 
     assertTrue(
         confidence > expectedMinConfidence,
@@ -217,7 +182,6 @@ public class TurretConfidenceUtilTest {
         Arguments.of(8.0, 45.0));
   }
 
-  // Test 6: Combined parameters test
   @ParameterizedTest
   @MethodSource("provideCombinedParamsAndMinConfidence")
   @DisplayName("Confidence meets minimum threshold for combined conditions")
@@ -230,13 +194,12 @@ public class TurretConfidenceUtilTest {
         .thenReturn(distance);
     shootingConstantsMock
         .when(() -> ShootingConstants.getTimeOfFlight(distance))
-        .thenReturn(distance * 0.2);
+        .thenReturn(distance * 0.2); // Simple TOF calculation
 
     double confidence = TurretConfidenceUtil.calculateConfidence(drive);
-    System.out.println(
-        String.format(
-            "vx=%.1f vy=%.1f rot=%.1f dist=%.1f -> confidence=%.2f%% (min exp=%.2f%%)",
-            vx, vy, rotation, distance, confidence, expectedMinConfidence));
+    System.out.printf(
+        "vx=%.1f vy=%.1f rot=%.1f dist=%.1f -> confidence=%.2f%% (min exp=%.2f%%)",
+        vx, vy, rotation, distance, confidence, expectedMinConfidence);
 
     assertTrue(
         confidence > expectedMinConfidence,
@@ -250,12 +213,12 @@ public class TurretConfidenceUtilTest {
         // Ideal conditions
         Arguments.of(0.0, 0.0, 0.0, 2.0, 90.0),
         // Moving slowly, close target
-        Arguments.of(0.5, 0.5, 0.2, 3.0, 75.0),
+        Arguments.of(0.5, 0.5, 0.2, 3.0, 85.0),
         // Moving faster, medium target
-        Arguments.of(1.0, 0.5, 0.5, 4.0, 60.0),
+        Arguments.of(1.0, 0.5, 0.5, 4.0, 75.0),
         // Moving fast, far target
-        Arguments.of(2.0, 1.0, 1.0, 6.0, 40.0),
+        Arguments.of(2.0, 1.0, 1.0, 6.0, 60.0),
         // Near maximum limits
-        Arguments.of(3.0, 2.0, 2.0, 7.0, 20.0));
+        Arguments.of(3.0, 2.0, 2.0, 7.0, 45.0));
   }
 }
