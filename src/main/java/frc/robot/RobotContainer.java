@@ -166,11 +166,13 @@ public class RobotContainer {
     NamedCommands.registerCommand("Stop", Commands.runOnce(drive::stop, drive));
     NamedCommands.registerCommand(
         "Shoot 5s",
-        (new ShootCommand(drive, shooter).alongWith(new HoppertCommand(hoppert, shooter, intake)))
+        (new ShootCommand(drive, shooter, () -> false)
+                .alongWith(new HoppertCommand(hoppert, shooter, intake)))
             .withTimeout(5));
     NamedCommands.registerCommand(
         "Shoot 10s",
-        (new ShootCommand(drive, shooter).alongWith(new HoppertCommand(hoppert, shooter, intake)))
+        (new ShootCommand(drive, shooter, () -> false)
+                .alongWith(new HoppertCommand(hoppert, shooter, intake)))
             .withTimeout(10));
     // TODO: outpost shoot for longer?
     NamedCommands.registerCommand("Toggle Intake", new ToggleIntakeCommand(intake));
@@ -178,8 +180,9 @@ public class RobotContainer {
         "Closest Climb",
         new DeferredCommand(
             () ->
-                DriveCommands.followPosesWithMaxSpeed(
-                    drive, 0.5, OtherUtil.getClimberAlignPos(drive.getPose()))));
+                DriveCommands.goToTransform(
+                    drive,
+                    GeomUtil.poseToTransform(OtherUtil.getClimberAlignPos(drive.getPose())))));
   }
 
   private LoggedDashboardChooser<Command> configureAutos() {
@@ -383,35 +386,38 @@ public class RobotContainer {
 
     // closest climb align
     driver
-        .rightBumper()
+        .x()
         .whileTrue(
             new DeferredCommand(
                 () ->
-                    DriveCommands.followPosesWithMaxSpeed(
+                    DriveCommands.goToTransform(
                         drive,
-                        0.5,
-                        drive.getPose(),
-                        OtherUtil.getClimberAlignPos(drive.getPose()))));
+                        GeomUtil.poseToTransform(OtherUtil.getClimberAlignPos(drive.getPose())))));
 
     // auto-aim hood and turret always
-    shooter.setDefaultCommand(new IdleShooterCommand(drive, shooter));
+    shooter.setDefaultCommand(
+        new IdleShooterCommand(drive, shooter, () -> driver.rightBumper().getAsBoolean()));
 
     // Switch to X pattern when X button is pressed
-    driver.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    //    driver.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
     // reverse mecanums
     driver.b().whileTrue(Commands.run(hoppert::reverseHopperWheels));
     driver.b().onFalse(Commands.runOnce(hoppert::stopHopper));
 
     // shoot
-    driver.rightTrigger().whileTrue(new ShootCommand(drive, shooter));
-    driver.rightTrigger().and(driver.y().negate()).whileTrue(driveShooting);
-    driver
-        .rightTrigger()
+    (driver.rightTrigger().or(driver.rightBumper()))
+        .whileTrue(new ShootCommand(drive, shooter, () -> driver.rightBumper().getAsBoolean()));
+    (driver.rightTrigger().or(driver.rightBumper()))
+        .and(driver.y().negate())
+        .whileTrue(driveShooting);
+    (driver.rightTrigger().or(driver.rightBumper()))
         .onFalse(
             new ParallelDeadlineGroup(
-                    new ShootCommand(drive, shooter).withTimeout(0.7),
-                    Commands.runOnce(hoppert::runTowerForwards))
+                    new ShootCommand(drive, shooter, () -> driver.rightBumper().getAsBoolean())
+                        .withTimeout(1.25),
+                    Commands.run(hoppert::runTowerForwards),
+                    Commands.run(hoppert::stopHopper))
                 .andThen(Commands.runOnce(hoppert::stopTower)));
 
     // left trigger toggles intake
@@ -432,8 +438,8 @@ public class RobotContainer {
     // horizontal.
     driver.povUp().onTrue(Commands.runOnce(() -> shooter.adjustVerticalTrim(true)));
     driver.povDown().onTrue(Commands.runOnce(() -> shooter.adjustVerticalTrim(false)));
-    driver.povRight().onTrue(Commands.runOnce(() -> shooter.adjustHorizontalTrim(true)));
-    driver.povLeft().onTrue(Commands.runOnce(() -> shooter.adjustHorizontalTrim(false)));
+    driver.povRight().onTrue(Commands.runOnce(() -> shooter.adjustHorizontalTrim(false)));
+    driver.povLeft().onTrue(Commands.runOnce(() -> shooter.adjustHorizontalTrim(true)));
   }
 
   /**

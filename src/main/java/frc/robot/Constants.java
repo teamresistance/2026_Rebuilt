@@ -51,7 +51,7 @@ public final class Constants {
   public static final double SHOOTER_TURRET_REVS_PER_DEG = (5 * 5 * 3.2) / 360.0;
   public static final double SHOOTER_HOOD_REVS_TOLERANCE = 0.25;
   public static final double SHOOTER_TURRET_REVS_TOLERANCE = 0.5;
-  public static final double SHOOTER_RPS_TOLERANCE = 1;
+  public static final double SHOOTER_RPS_TOLERANCE = 0.5;
 
   public static final double SHOOTER_HOOD_MAX_PITCH = 43;
   public static final double SHOOTER_HOOD_MIN_PITCH = 17.5;
@@ -84,13 +84,13 @@ public final class Constants {
   public static final RainbowAnimation LED_ANIMATION_RAINBOW =
       new RainbowAnimation(LED_START_INDEX, LED_END_INDEX).withFrameRate(60);
   public static final StrobeAnimation LED_ANIMATION_SHOOTING_CONFIDENT =
-      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX).withColor(new RGBWColor(50, 255, 50));
+      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX).withColor(new RGBWColor(0, 200, 0));
   public static final StrobeAnimation LED_ANIMATION_SHOOTING_DOUBTFUL =
-      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX).withColor(new RGBWColor(255, 50, 50));
+      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX).withColor(new RGBWColor(200, 0, 0));
   public static final StrobeAnimation LED_ANIMATION_PASSING_CONFIDENT =
       new StrobeAnimation(LED_START_INDEX, LED_END_INDEX).withColor(new RGBWColor(50, 50, 255));
   public static final StrobeAnimation LED_ANIMATION_PASSING_DOUBTFUL =
-      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX).withColor(new RGBWColor(255, 50, 50));
+      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX).withColor(new RGBWColor(200, 50, 50));
   public static final StrobeAnimation LED_ANIMATION_INTAKING =
       new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
           .withColor(new RGBWColor(255, 200, 0))

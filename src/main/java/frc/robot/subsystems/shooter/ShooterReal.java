@@ -60,7 +60,7 @@ public class ShooterReal implements ShooterIO {
 
     TalonFXConfiguration turretConfig =
         new TalonFXConfiguration()
-            .withSlot0(new Slot0Configs().withKP(12).withKI(0).withKD(0).withKS(0))
+            .withSlot0(new Slot0Configs().withKP(2).withKI(0).withKD(0).withKS(0))
             .withMotionMagic(
                 new MotionMagicConfigs()
                     .withMotionMagicAcceleration(500)
@@ -87,7 +87,7 @@ public class ShooterReal implements ShooterIO {
 
     TalonFXConfiguration flywheelConfig =
         new TalonFXConfiguration()
-            .withSlot0(new Slot0Configs().withKP(100).withKI(0).withKD(0).withKS(0))
+            .withSlot0(new Slot0Configs().withKP(1).withKI(0).withKD(0).withKS(0))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
                     .withStatorCurrentLimit(50)
@@ -95,7 +95,9 @@ public class ShooterReal implements ShooterIO {
                     .withSupplyCurrentLimit(40)
                     .withSupplyCurrentLimitEnable(true))
             .withMotorOutput(
-                new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive));
+                new MotorOutputConfigs()
+                    .withInverted(InvertedValue.Clockwise_Positive)
+                    .withPeakReverseDutyCycle(0));
     flywheelMotor.getConfigurator().apply(flywheelConfig);
 
     TalonFXConfiguration flywheelConfig2 =
@@ -185,7 +187,7 @@ public class ShooterReal implements ShooterIO {
       turretMotor.setControl(
           new MotionMagicVoltage(ShootingUtil.toTurretRevs(turretTargetAngle))
               .withEnableFOC(true)
-              .withFeedForward(-omegaRadsPerSec));
+              .withFeedForward(-omegaRadsPerSec * 2));
     }
   }
 

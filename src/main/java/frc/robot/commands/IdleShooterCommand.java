@@ -7,6 +7,7 @@ import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShootingConstants;
 import frc.robot.util.LoggedTunableNumber;
 import frc.robot.util.ShootingUtil;
+import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class IdleShooterCommand extends Command {
@@ -16,23 +17,28 @@ public class IdleShooterCommand extends Command {
 
   private final SwerveDriveIO drive;
   private final ShooterIO shooter;
+  private final BooleanSupplier passingSup;
 
-  public IdleShooterCommand(SwerveDriveIO _drive, ShooterIO _shooter) {
+  public IdleShooterCommand(SwerveDriveIO _drive, ShooterIO _shooter, BooleanSupplier _passingSup) {
     drive = _drive;
     shooter = _shooter;
+    passingSup = _passingSup;
     addRequirements(shooter);
   }
 
   @Override
   public void execute() {
 
+    boolean passing = passingSup.getAsBoolean();
+
     double distance =
-        ShootingUtil.getVirtualDistanceToTarget(drive.getPose(), drive.getChassisSpeeds());
+        ShootingUtil.getVirtualDistanceToTarget(drive.getPose(), drive.getChassisSpeeds(), passing);
     double turretAngle =
         ShootingUtil.getAngleToAim(
             drive.getPose(),
             drive.getChassisSpeeds(),
-            ShootingConstants.getTimeOfFlight(distance) - 0.4);
+            ShootingConstants.getTimeOfFlight(distance) - 0.4,
+            passing);
     double hoodAngle = ShootingConstants.getHoodAngle(distance);
 
     shooter.setTurretTarget(turretAngle, drive.getChassisSpeeds().omegaRadiansPerSecond);

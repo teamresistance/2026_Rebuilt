@@ -64,14 +64,14 @@ public class HoppertReal implements HoppertIO {
 
   @Override
   public void runHopperBackwards() {
-    hopperRollerMotor.setControl(new DutyCycleOut(-0.20));
+    hopperRollerMotor.setControl(new DutyCycleOut(-0.3));
     hopperRollersRunning = true;
     hopperRollersReversed = true;
   }
 
   @Override
   public void runHopperForwards() {
-    hopperRollerMotor.setControl(new DutyCycleOut(0.20));
+    hopperRollerMotor.setControl(new DutyCycleOut(0.3));
     hopperRollersRunning = true;
     hopperRollersReversed = false;
   }

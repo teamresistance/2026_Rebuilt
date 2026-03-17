@@ -32,7 +32,7 @@ public class IntakeReal implements IntakeIO {
   public void activateIntake() {
     intaking = true;
     rejecting = false;
-    intakeMotor.setControl(new DutyCycleOut(0.5));
+    intakeMotor.setControl(new DutyCycleOut(0.4));
   }
 
   @Override

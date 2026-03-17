@@ -17,7 +17,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Shoot 5s"
+                  "name": "Shoot 10s"
                 }
               }
             ]
@@ -27,6 +27,12 @@
           "type": "named",
           "data": {
             "name": "Closest Climb"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Climb Up"
           }
         }
       ]
