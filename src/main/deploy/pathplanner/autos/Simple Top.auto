@@ -5,15 +5,22 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "Bottom Outpost"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot 10s"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Center Top Slow"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Shoot 10s"
+                }
+              }
+            ]
           }
         },
         {
@@ -32,6 +39,6 @@
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "Simple (BACKUP)",
   "choreoAuto": false
 }

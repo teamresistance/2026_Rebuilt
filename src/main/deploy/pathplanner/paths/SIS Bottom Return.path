@@ -3,57 +3,41 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.560328102710413,
-        "y": 1.9412838801711827
+        "x": 7.7653922967189715,
+        "y": 3.420413694721826
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.9921667189059795,
-        "y": 1.0432489821466016
+        "x": 6.932625587394738,
+        "y": 2.9566289022236014
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 1.422880143112701,
-        "y": 2.049838998211092
+        "x": 5.953980028530669,
+        "y": 2.4888302425106996
       },
       "prevControl": {
-        "x": 1.3642145499473848,
-        "y": 1.657807002811562
+        "x": 6.279265015816224,
+        "y": 2.6032158715483784
       },
       "nextControl": {
-        "x": 1.5028645907849563,
-        "y": 2.5843339368972646
+        "x": 5.3682165581672034,
+        "y": 2.282848024936056
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 2.996744186046511,
-        "y": 2.6639534883720923
+        "x": 2.4993580599144076,
+        "y": 2.2947503566333807
       },
       "prevControl": {
-        "x": 2.420891834940056,
-        "y": 2.67372243405802
-      },
-      "nextControl": {
-        "x": 6.338297617724708,
-        "y": 2.607266294305824
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 6.355402504472272,
-        "y": 2.6639534883720923
-      },
-      "prevControl": {
-        "x": 2.755054899652123,
-        "y": 2.6064892517891005
+        "x": 3.611121930378924,
+        "y": 2.417003783231487
       },
       "nextControl": null,
       "isLocked": false,
@@ -62,17 +46,17 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 1.6961429915333905,
+      "waypointRelativePos": 0.6929861402771939,
       "rotationDegrees": 45.0
     }
   ],
   "constraintZones": [
     {
-      "name": "Slow Bump",
-      "minWaypointRelativePos": 1.75,
-      "maxWaypointRelativePos": 3.0,
+      "name": "Bump Slow",
+      "minWaypointRelativePos": 0.826787512588117,
+      "maxWaypointRelativePos": 1.8096676737160122,
       "constraints": {
-        "maxVelocity": 3.0,
+        "maxVelocity": 1.5,
         "maxAcceleration": 5.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 400.0,
@@ -92,13 +76,13 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 2.0,
+    "velocity": 0.0,
     "rotation": 45.0
   },
   "reversed": false,
-  "folder": "Intake Shoot Climb",
+  "folder": "SIS Bottom",
   "idealStartingState": {
-    "velocity": 0,
+    "velocity": 1.5,
     "rotation": 0.0
   },
   "useDefaultConstraints": true

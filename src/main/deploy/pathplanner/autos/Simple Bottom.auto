@@ -11,13 +11,13 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Center Top Slow"
+                  "pathName": "Center Bottom Slow"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "Shoot 10s"
+                  "name": "Shoot 5s"
                 }
               }
             ]
@@ -28,17 +28,11 @@
           "data": {
             "name": "Closest Climb"
           }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Climb Up"
-          }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": "Shoot Climb",
+  "folder": "Simple (BACKUP)",
   "choreoAuto": false
 }

@@ -1,0 +1,74 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "SIS Top Start"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Shoot 5s"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "SIS Top Cross"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "SIS Top Intake Prepare"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Toggle Intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "SIS Top Intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "SIS Top Return"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Toggle Intake"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot 10s"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "SIS",
+  "choreoAuto": false
+}

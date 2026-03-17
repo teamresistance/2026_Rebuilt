@@ -39,7 +39,7 @@ public class HoppertCommand extends Command {
 
       hoppert.runTowerForwards();
 
-      if (shootingTimer.hasElapsed(0.5)) {
+      if (shootingTimer.hasElapsed(0.25)) {
         hoppert.runHopperBackwards();
       }
 

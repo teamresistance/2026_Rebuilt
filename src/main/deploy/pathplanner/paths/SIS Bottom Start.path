@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.524455555555555,
-        "y": 4.054488888888889
+        "x": 3.443880171184022,
+        "y": 1.6478174037089879
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.318775291308075,
-        "y": 3.912377563164699
+        "x": 3.3345813837033598,
+        "y": 1.9243619312289288
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 0.9714111111111114,
-        "y": 4.950977777777777
+        "x": 3.1462910128388017,
+        "y": 2.3853209700427964
       },
       "prevControl": {
-        "x": 2.3746111111111112,
-        "y": 5.009444444444446
+        "x": 3.2167619623161263,
+        "y": 2.14545883197227
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 135.0
   },
   "reversed": false,
-  "folder": "Simple (BACKUP)",
+  "folder": "SIS Bottom",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 135.0
   },
   "useDefaultConstraints": false
 }
