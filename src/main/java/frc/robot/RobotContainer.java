@@ -297,9 +297,9 @@ public class RobotContainer {
     leds.addStream(shootingStream);
 
     // INTAKING (priority 2, flashing yellow)
-    LEDStream intakeStream =
-        new LEDStream("intake", 2, () -> Constants.LEDMode.INTAKING, intake::isIntaking);
-    leds.addStream(intakeStream);
+    //    LEDStream intakeStream =
+    //        new LEDStream("intake", 2, () -> Constants.LEDMode.INTAKING, intake::isIntaking);
+    //    leds.addStream(intakeStream);
 
     // DISABLED
     LEDStream disabledStream =
@@ -490,6 +490,14 @@ public class RobotContainer {
     }
 
     return autoCommand;
+  }
+
+  public void coastDisabled() {
+    shooter.coast();
+  }
+
+  public void brakeTeleop() {
+    shooter.brake();
   }
 
   /**

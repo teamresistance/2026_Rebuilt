@@ -28,4 +28,8 @@ public interface ShooterIO extends Subsystem {
   void adjustVerticalTrim(boolean up);
 
   void adjustHorizontalTrim(boolean right);
+
+  void brake();
+
+  void coast();
 }

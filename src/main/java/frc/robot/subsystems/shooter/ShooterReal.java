@@ -23,6 +23,9 @@ public class ShooterReal implements ShooterIO {
   private final TalonFX flywheelMotor2 =
       new TalonFX(Constants.SHOOTER_FLYWHEEL_ID_2, CANBus.roboRIO());
 
+  private TalonFXConfiguration turretConfig;
+  private TalonFXConfiguration hoodConfig;
+
   private double hoodTargetAngle = 0;
   private double turretTargetAngle = 0;
   private double turretDriveAssistTargetAngle = 0;
@@ -42,7 +45,7 @@ public class ShooterReal implements ShooterIO {
   /** Configures motors (control mode, pid, current limits) */
   public void configure() {
 
-    TalonFXConfiguration hoodConfig =
+    hoodConfig =
         new TalonFXConfiguration()
             .withSlot0(new Slot0Configs().withKP(10).withKI(0).withKD(0).withKS(0))
             .withMotionMagic(
@@ -58,7 +61,7 @@ public class ShooterReal implements ShooterIO {
                     .withSupplyCurrentLimitEnable(true));
     hoodMotor.getConfigurator().apply(hoodConfig);
 
-    TalonFXConfiguration turretConfig =
+    turretConfig =
         new TalonFXConfiguration()
             .withSlot0(new Slot0Configs().withKP(2).withKI(0).withKD(0).withKS(0))
             .withMotionMagic(
@@ -235,6 +238,38 @@ public class ShooterReal implements ShooterIO {
     } else {
       horizontalTrim -= Constants.SHOOTER_TRIM_ADJUSTMENT_INCREMENT;
     }
+  }
+
+  @Override
+  public void brake() {
+    turretMotor
+        .getConfigurator()
+        .apply(
+            hoodConfig.withMotorOutput(
+                new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake)));
+    //    hoodMotor
+    //        .getConfigurator()
+    //        .apply(
+    //            turretConfig.withMotorOutput(
+    //                new MotorOutputConfigs()
+    //                    .withNeutralMode(NeutralModeValue.Brake)
+    //                    .withInverted(InvertedValue.Clockwise_Positive)));
+  }
+
+  @Override
+  public void coast() {
+    turretMotor
+        .getConfigurator()
+        .apply(
+            hoodConfig.withMotorOutput(
+                new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Coast)));
+    //    hoodMotor
+    //        .getConfigurator()
+    //        .apply(
+    //            turretConfig.withMotorOutput(
+    //                new MotorOutputConfigs()
+    //                    .withNeutralMode(NeutralModeValue.Coast)
+    //                    .withInverted(InvertedValue.Clockwise_Positive)));
   }
 
   @Override

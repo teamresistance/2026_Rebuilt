@@ -135,4 +135,10 @@ public class ShooterSim implements ShooterIO {
       horizontalTrim -= Constants.SHOOTER_TRIM_ADJUSTMENT_INCREMENT;
     }
   }
+
+  @Override
+  public void brake() {}
+
+  @Override
+  public void coast() {}
 }

@@ -108,6 +108,7 @@ public class Robot extends LoggedRobot {
   /** This function is called once when the robot is disabled. */
   @Override
   public void disabledInit() {
+    robotContainer.coastDisabled();
     // Deliberately empty - no initialization needed when disabled
   }
 
@@ -124,6 +125,7 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) CommandScheduler.getInstance().schedule(autonomousCommand);
 
     robotContainer.runAutoLEDs();
+    robotContainer.brakeTeleop();
   }
 
   /** This function is called periodically during autonomous. */
@@ -145,6 +147,7 @@ public class Robot extends LoggedRobot {
 
     robotContainer.descendEnteringTeleop();
     robotContainer.setupShiftUtil();
+    robotContainer.brakeTeleop();
   }
 
   /** This function is called periodically during operator control. */

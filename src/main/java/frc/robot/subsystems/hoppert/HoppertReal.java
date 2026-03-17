@@ -41,7 +41,7 @@ public class HoppertReal implements HoppertIO {
                 new MotorOutputConfigs()
                     .withNeutralMode(NeutralModeValue.Coast)
                     .withInverted(InvertedValue.Clockwise_Positive))
-          .withSlot0(new Slot0Configs().withKP(1));
+            .withSlot0(new Slot0Configs().withKP(1));
     hopperRollerMotor.getConfigurator().apply(config2);
 
     TalonFXConfiguration config3 =
