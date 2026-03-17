@@ -246,15 +246,16 @@ public class ShooterReal implements ShooterIO {
         .getConfigurator()
         .apply(
             hoodConfig.withMotorOutput(
-                new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake)));
-    hoodMotor
-        .getConfigurator()
-        .apply(
-            turretConfig.withMotorOutput(
                 new MotorOutputConfigs()
                     .withNeutralMode(NeutralModeValue.Brake)
-                    .withInverted(InvertedValue.Clockwise_Positive)
                     .withInverted(InvertedValue.Clockwise_Positive)));
+    //    hoodMotor
+    //        .getConfigurator()
+    //        .apply(
+    //            turretConfig.withMotorOutput(
+    //                new MotorOutputConfigs()
+    //                    .withNeutralMode(NeutralModeValue.Brake)
+    //                    .withInverted(InvertedValue.Clockwise_Positive)));
   }
 
   @Override
@@ -266,11 +267,11 @@ public class ShooterReal implements ShooterIO {
                 new MotorOutputConfigs()
                     .withNeutralMode(NeutralModeValue.Coast)
                     .withInverted(InvertedValue.Clockwise_Positive)));
-    hoodMotor
-        .getConfigurator()
-        .apply(
-            turretConfig.withMotorOutput(
-                new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Coast)));
+    //    hoodMotor
+    //        .getConfigurator()
+    //        .apply(
+    //            turretConfig.withMotorOutput(
+    //                new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Coast)));
   }
 
   @Override
