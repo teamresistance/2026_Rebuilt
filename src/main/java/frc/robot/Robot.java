@@ -143,6 +143,7 @@ public class Robot extends LoggedRobot {
       autonomousCommand.cancel();
     }
 
+    robotContainer.descendEnteringTeleop();
     robotContainer.setupShiftUtil();
   }
 

@@ -63,8 +63,9 @@ public class ShooterReal implements ShooterIO {
             .withSlot0(new Slot0Configs().withKP(2).withKI(0).withKD(0).withKS(0))
             .withMotionMagic(
                 new MotionMagicConfigs()
-                    .withMotionMagicAcceleration(500)
-                    .withMotionMagicCruiseVelocity(120))
+                    .withMotionMagicAcceleration(600)
+                    .withMotionMagicCruiseVelocity(130)
+                    .withMotionMagicJerk(3000))
             .withMotorOutput(
                 new MotorOutputConfigs()
                     .withNeutralMode(NeutralModeValue.Brake)
@@ -87,7 +88,7 @@ public class ShooterReal implements ShooterIO {
 
     TalonFXConfiguration flywheelConfig =
         new TalonFXConfiguration()
-            .withSlot0(new Slot0Configs().withKP(1).withKI(0).withKD(0).withKS(0))
+            .withSlot0(new Slot0Configs().withKP(12).withKI(0).withKD(0).withKS(0))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
                     .withStatorCurrentLimit(50)

@@ -471,6 +471,16 @@ public class RobotContainer {
     shooter.setSwivelStop(swivelStop.getSelected());
   }
 
+  public void descendEnteringTeleop() {
+    CommandScheduler.getInstance()
+        .schedule(
+            Commands.runOnce(climber::unbrake)
+                .andThen(Commands.waitSeconds(0.1))
+                .andThen(climber::up)
+                .andThen(new WaitUntilCommand(climber::atTarget))
+                .andThen(climber::brake));
+  }
+
   /** Returns the autonomous command to schedule for the auto period. */
   public Command getAutonomousCommand() {
     Command autoCommand = autoChooser.get();

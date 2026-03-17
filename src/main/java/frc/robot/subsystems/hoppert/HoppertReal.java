@@ -40,7 +40,8 @@ public class HoppertReal implements HoppertIO {
             .withMotorOutput(
                 new MotorOutputConfigs()
                     .withNeutralMode(NeutralModeValue.Coast)
-                    .withInverted(InvertedValue.Clockwise_Positive));
+                    .withInverted(InvertedValue.Clockwise_Positive))
+          .withSlot0(new Slot0Configs().withKP(1));
     hopperRollerMotor.getConfigurator().apply(config2);
 
     TalonFXConfiguration config3 =
@@ -64,35 +65,35 @@ public class HoppertReal implements HoppertIO {
 
   @Override
   public void runHopperBackwards() {
-    hopperRollerMotor.setControl(new DutyCycleOut(-0.3));
+    hopperRollerMotor.setControl(new VelocityVoltage(-28));
     hopperRollersRunning = true;
     hopperRollersReversed = true;
   }
 
   @Override
   public void runHopperForwards() {
-    hopperRollerMotor.setControl(new DutyCycleOut(0.3));
+    hopperRollerMotor.setControl(new VelocityVoltage(28));
     hopperRollersRunning = true;
     hopperRollersReversed = false;
   }
 
   @Override
   public void runTowerBackwards() {
-    towerMotor.setControl(new VelocityVoltage(54).withEnableFOC(true));
+    towerMotor.setControl(new VelocityVoltage(58).withEnableFOC(true));
     towerMotorRunning = true;
     towerMotorReversed = true;
   }
 
   @Override
   public void runTowerForwards() {
-    towerMotor.setControl(new VelocityVoltage(-54).withEnableFOC(true));
+    towerMotor.setControl(new VelocityVoltage(-58).withEnableFOC(true));
     towerMotorRunning = true;
     towerMotorReversed = false;
   }
 
   @Override
   public boolean towerAtSpeed() {
-    return towerMotor.getVelocity().isNear(-54, 2);
+    return towerMotor.getVelocity().isNear(-58, 2);
   }
 
   @Override
