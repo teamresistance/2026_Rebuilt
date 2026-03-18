@@ -4,6 +4,7 @@
   "holonomicMode": true,
   "pathFolders": [
     "ISC Top",
+    "ISC Bottom",
     "SIS Bottom",
     "SIS Top",
     "Simple (BACKUP)"

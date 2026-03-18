@@ -84,6 +84,9 @@ public class Robot extends LoggedRobot {
     CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
     // run warmup command to significantly reduce the delay in movement when auto starts
 
+    // default
+    Logger.recordOutput("Shifts/Auto Winner Color", "#000000");
+
     WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
     // put elastic dashboard on bot
   }
@@ -158,9 +161,10 @@ public class Robot extends LoggedRobot {
 
     Constants.ShiftOwner owner = ShiftUtil.getShift();
     Logger.recordOutput("Shifts/IsOurs", ShiftUtil.isOurs(owner));
-    Logger.recordOutput("Shifts/Current Shift", owner);
-    Logger.recordOutput("Shifts/Current Shift Color", ShiftUtil.getShiftColor());
+    //    Logger.recordOutput("Shifts/Current Shift", owner);
+    //    Logger.recordOutput("Shifts/Current Shift Color", ShiftUtil.getShiftColor());
     Logger.recordOutput("Shifts/Time Left", ShiftUtil.getTimeLeftInCurrentShift());
+    Logger.recordOutput("Shifts/Auto Winner Color", ShiftUtil.getAutoWinnerColor());
 
     // inform the operator that the shifts had an error and need to be assigned manually.
     // if nothing is chosen yet from the chooser, it will just pass a blank string which will do

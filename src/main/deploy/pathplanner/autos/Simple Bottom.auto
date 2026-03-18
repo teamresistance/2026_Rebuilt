@@ -5,28 +5,33 @@
     "data": {
       "commands": [
         {
-          "type": "parallel",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "Center Bottom Slow"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Shoot 5s"
-                }
-              }
-            ]
+            "pathName": "Center Backup"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot 7s"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Center Bottom Slow"
           }
         },
         {
           "type": "named",
           "data": {
             "name": "Closest Climb"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Climb Up"
           }
         }
       ]

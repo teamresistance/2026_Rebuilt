@@ -5,22 +5,21 @@
     "data": {
       "commands": [
         {
-          "type": "parallel",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "Center Top Slow"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Shoot 10s"
-                }
-              }
-            ]
+            "pathName": "Center Backup"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot 5s"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Center Top Slow"
           }
         },
         {

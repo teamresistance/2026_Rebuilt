@@ -37,6 +37,7 @@ import frc.robot.subsystems.shooter.ShootingConstants;
 import frc.robot.subsystems.vision.*;
 import frc.robot.util.*;
 import java.io.IOException;
+import java.util.Set;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.photonvision.PhotonCamera;
@@ -168,12 +169,17 @@ public class RobotContainer {
         "Shoot 5s",
         (new ShootCommand(drive, shooter, () -> false)
                 .alongWith(new HoppertCommand(hoppert, shooter, intake)))
-            .withTimeout(6));
+            .withTimeout(5));
     NamedCommands.registerCommand(
         "Shoot 10s",
         (new ShootCommand(drive, shooter, () -> false)
                 .alongWith(new HoppertCommand(hoppert, shooter, intake)))
-            .withTimeout(11));
+            .withTimeout(10));
+    NamedCommands.registerCommand(
+        "Shoot 7s",
+        (new ShootCommand(drive, shooter, () -> false)
+                .alongWith(new HoppertCommand(hoppert, shooter, intake)))
+            .withTimeout(7));
     // TODO: outpost shoot for longer?
     NamedCommands.registerCommand("Toggle Intake", new ToggleIntakeCommand(intake));
     NamedCommands.registerCommand(
@@ -344,10 +350,23 @@ public class RobotContainer {
   /** Defines button bindings and control triggers */
   private void configureButtonBindings() {
 
-    // Normal field-relative drive
+    // Default: normal drive
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
+
+    // While right stick held: lock rotation to heading at moment of press
+    driver
+        .rightStick()
+        .whileTrue(
+            Commands.defer(
+                () ->
+                    DriveCommands.joystickDriveAtAngle(
+                        drive,
+                        () -> -driver.getLeftY(),
+                        () -> -driver.getLeftX(),
+                        drive::getRotation), // captured when stick is pressed
+                Set.of(drive)));
 
     // have hopper automatically deciding when to run or not to run
     hoppert.setDefaultCommand(new HoppertCommand(hoppert, shooter, intake));
@@ -360,9 +379,9 @@ public class RobotContainer {
         .and(() -> !DriverStation.isAutonomous())
         .whileTrue(driveAtAngleForBump);
 
-    // climb raise
+    // climb raise robot
     driver
-        .start()
+        .back()
         .onTrue(
             Commands.runOnce(climber::unbrake)
                 .andThen(Commands.waitSeconds(0.1))
@@ -370,9 +389,9 @@ public class RobotContainer {
                 .andThen(new WaitUntilCommand(climber::atTarget))
                 .andThen(climber::brake));
 
-    // climb descend
+    // climb descend robot
     driver
-        .back()
+        .start()
         .onTrue(
             Commands.runOnce(climber::unbrake)
                 .andThen(Commands.waitSeconds(0.1))
@@ -436,8 +455,8 @@ public class RobotContainer {
 
     // POV for adjusting shooter trim, with up/down adjusting vertical and left/right adjusting
     // horizontal.
-    driver.povUp().onTrue(Commands.runOnce(() -> shooter.adjustVerticalTrim(true)));
-    driver.povDown().onTrue(Commands.runOnce(() -> shooter.adjustVerticalTrim(false)));
+    //    driver.povUp().onTrue(Commands.runOnce(() -> shooter.adjustVerticalTrim(true)));
+    //    driver.povDown().onTrue(Commands.runOnce(() -> shooter.adjustVerticalTrim(false)));
     driver.povRight().onTrue(Commands.runOnce(() -> shooter.adjustHorizontalTrim(false)));
     driver.povLeft().onTrue(Commands.runOnce(() -> shooter.adjustHorizontalTrim(true)));
   }

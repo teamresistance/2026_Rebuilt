@@ -29,7 +29,15 @@ public class ShiftUtil {
       case RED -> "#FF0000"; // Red
       case BLUE -> "#0000FF"; // Blue
       case BOTH -> "#FF00FF"; // Purple
-      default -> "Error"; // The color will not show up, signifying an error.
+    };
+  }
+
+  public static String getShiftColor(Constants.ShiftOwner currentShift) {
+
+    return switch (currentShift) {
+      case RED -> "#FF0000"; // Red
+      case BLUE -> "#0000FF"; // Blue
+      case BOTH -> "#FF00FF"; // Purple
     };
   }
 
@@ -174,5 +182,9 @@ public class ShiftUtil {
     } else if (elapsed < 60.0 && elapsed > 55.0) {
       return true;
     } else return elapsed < 85.0 && elapsed > 80.0;
+  }
+
+  public static String getAutoWinnerColor() {
+    return ShiftUtil.getShiftColor(shift2);
   }
 }
