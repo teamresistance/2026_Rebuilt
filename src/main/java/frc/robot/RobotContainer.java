@@ -37,6 +37,7 @@ import frc.robot.subsystems.shooter.ShootingConstants;
 import frc.robot.subsystems.vision.*;
 import frc.robot.util.*;
 import java.io.IOException;
+import java.util.Set;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.photonvision.PhotonCamera;
@@ -50,8 +51,8 @@ import org.photonvision.PhotonCamera;
 public class RobotContainer {
   public final PhotonCamera frontLeftCamera = new PhotonCamera("front-left");
   public final PhotonCamera frontRightCamera = new PhotonCamera("front-right");
-  public final PhotonCamera backLeftCamera = new PhotonCamera("back_left");
-  public final PhotonCamera backRightCamera = new PhotonCamera("back_right");
+  public final PhotonCamera backLeftCamera = new PhotonCamera("back-left");
+  public final PhotonCamera backRightCamera = new PhotonCamera("back-right");
   private final Alert cameraFailureAlert;
 
   // Subsystems
@@ -118,13 +119,13 @@ public class RobotContainer {
             .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming);
     driveAtAngleForBump.addRequirements(drive);
 
-    // angle assist vs.
+    // angle assist vs. slow driving
     driveShooting =
         new ConditionalCommand(
             DriveCommands.joystickDriveAtAngle(
                 drive,
-                () -> MathUtil.clamp(-driver.getLeftY(), -0.8, 0.8),
-                () -> MathUtil.clamp(-driver.getLeftX(), -0.8, 0.8),
+                () -> MathUtil.clamp(-driver.getLeftY(), -0.5, 0.5),
+                () -> MathUtil.clamp(-driver.getLeftX(), -0.5, 0.5),
                 () ->
                     drive
                         .getRotation()
@@ -132,9 +133,9 @@ public class RobotContainer {
                         .plus(Rotation2d.fromDegrees(-driver.getRightX() * 90))),
             DriveCommands.joystickDrive(
                 drive,
-                () -> MathUtil.clamp(-driver.getLeftY(), -0.8, 0.8),
-                () -> MathUtil.clamp(-driver.getLeftX(), -0.8, 0.8),
-                () -> MathUtil.clamp(-driver.getRightX(), -0.75, 0.75)),
+                () -> MathUtil.clamp(-driver.getLeftY(), -0.5, 0.5),
+                () -> MathUtil.clamp(-driver.getLeftX(), -0.5, 0.5),
+                () -> MathUtil.clamp(-driver.getRightX(), -0.4, 0.4)),
             () ->
                 Math.abs(shooter.getDriveAssistanceAngle()) > 2
                     && driver.y().negate().getAsBoolean());
@@ -147,6 +148,7 @@ public class RobotContainer {
 
     swivelStop.addOption("STOP", true);
     swivelStop.addOption("GOOD", false);
+    swivelStop.setDefaultOption("GOOD", false);
     SmartDashboard.putData("Turret Swivel Stop", swivelStop);
 
     configureDriverFeedback();
@@ -163,16 +165,30 @@ public class RobotContainer {
             .andThen(new WaitUntilCommand(climber::atTarget))
             .andThen(climber::brake));
     NamedCommands.registerCommand("Stop", Commands.runOnce(drive::stop, drive));
-    NamedCommands.registerCommand("Shoot 5s", new ShootCommand(drive, shooter).withTimeout(5));
-    NamedCommands.registerCommand("Shoot 10s", new ShootCommand(drive, shooter).withTimeout(10));
+    NamedCommands.registerCommand(
+        "Shoot 5s",
+        (new ShootCommand(drive, shooter, () -> false)
+                .alongWith(new HoppertCommand(hoppert, shooter, intake)))
+            .withTimeout(5));
+    NamedCommands.registerCommand(
+        "Shoot 10s",
+        (new ShootCommand(drive, shooter, () -> false)
+                .alongWith(new HoppertCommand(hoppert, shooter, intake)))
+            .withTimeout(10));
+    NamedCommands.registerCommand(
+        "Shoot 7s",
+        (new ShootCommand(drive, shooter, () -> false)
+                .alongWith(new HoppertCommand(hoppert, shooter, intake)))
+            .withTimeout(7));
     // TODO: outpost shoot for longer?
     NamedCommands.registerCommand("Toggle Intake", new ToggleIntakeCommand(intake));
     NamedCommands.registerCommand(
-        "Closest Climb Align",
+        "Closest Climb",
         new DeferredCommand(
             () ->
-                DriveCommands.followPosesWithMaxSpeed(
-                    drive, 0.5, OtherUtil.getClimberAlignPos(drive.getPose()))));
+                DriveCommands.goToTransform(
+                    drive,
+                    GeomUtil.poseToTransform(OtherUtil.getClimberAlignPos(drive.getPose())))));
   }
 
   private LoggedDashboardChooser<Command> configureAutos() {
@@ -287,13 +303,14 @@ public class RobotContainer {
     leds.addStream(shootingStream);
 
     // INTAKING (priority 2, flashing yellow)
-    LEDStream intakeStream =
-        new LEDStream(
-            "intake",
-            2,
-            () -> Constants.LEDMode.INTAKING,
-            () -> driver.rightTrigger().getAsBoolean());
-    leds.addStream(intakeStream);
+    //    LEDStream intakeStream =
+    //        new LEDStream("intake", 2, () -> Constants.LEDMode.INTAKING, intake::isIntaking);
+    //    leds.addStream(intakeStream);
+
+    // DISABLED
+    LEDStream disabledStream =
+        new LEDStream("disabled", 999, () -> Constants.LEDMode.DISABLED, DriverStation::isDisabled);
+    leds.addStream(disabledStream);
 
     // ACTIVE/INACTIVE
     LEDStream activeInactiveStream =
@@ -313,7 +330,12 @@ public class RobotContainer {
     leds.addStream(bumpStream);
 
     // BUMP trigger (timed 1s when entering bump zone)
-    driver.y().negate().and(inBumpZone).onTrue(Commands.runOnce(() -> bumpStream.runForSeconds(1)));
+    driver
+        .y()
+        .negate()
+        .and(inBumpZone)
+        .and(() -> !DriverStation.isAutonomous())
+        .onTrue(Commands.runOnce(() -> bumpStream.runForSeconds(1)));
 
     // RUMBLE when 5s from next shift
     new Trigger(ShiftUtil::nearNextShift)
@@ -328,69 +350,115 @@ public class RobotContainer {
   /** Defines button bindings and control triggers */
   private void configureButtonBindings() {
 
-    // Normal field-relative drive
+    // Default: normal drive
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
 
+    // While right stick held: lock rotation to heading at moment of press
+    driver
+        .rightStick()
+        .whileTrue(
+            Commands.defer(
+                () ->
+                    DriveCommands.joystickDriveAtAngle(
+                        drive,
+                        () -> -driver.getLeftY(),
+                        () -> -driver.getLeftX(),
+                        drive::getRotation), // captured when stick is pressed
+                Set.of(drive)));
+
     // have hopper automatically deciding when to run or not to run
-    hoppert.setDefaultCommand(new HoppertCommand(hoppert, shooter));
+    hoppert.setDefaultCommand(new HoppertCommand(hoppert, shooter, intake));
 
     // when y (paddle) is not pressed and in bump zone, auto rotate.
-    driver.y().negate().and(inBumpZone).whileTrue(driveAtAngleForBump);
-
-    // climb raise
     driver
-        .start()
-        .onTrue(
-            Commands.runOnce(climber::unbrake)
-                .andThen(climber::up)
-                .andThen(new WaitUntilCommand(climber::atTarget))
-                .andThen(climber::brake));
+        .y()
+        .negate()
+        .and(inBumpZone)
+        .and(() -> !DriverStation.isAutonomous())
+        .whileTrue(driveAtAngleForBump);
 
-    // climb descend
+    // climb raise robot
     driver
         .back()
         .onTrue(
             Commands.runOnce(climber::unbrake)
+                .andThen(Commands.waitSeconds(0.1))
+                .andThen(climber::up)
+                .andThen(new WaitUntilCommand(climber::atTarget))
+                .andThen(climber::brake));
+
+    // climb descend robot
+    driver
+        .start()
+        .onTrue(
+            Commands.runOnce(climber::unbrake)
+                .andThen(Commands.waitSeconds(0.1))
                 .andThen(climber::down)
                 .andThen(new WaitUntilCommand(climber::atTarget))
                 .andThen(climber::brake));
 
-    // auto-align to climber positions with bumpers (left/right bumper = left/right pos)
+    // reverse intake
+    driver.leftBumper().whileTrue(Commands.runOnce(intake::reverseIntake));
+    driver.leftBumper().onFalse(Commands.runOnce(intake::stopIntake));
+
+    // closest climb align
     driver
-        .leftBumper()
+        .x()
         .whileTrue(
             new DeferredCommand(
                 () ->
-                    DriveCommands.followPosesWithMaxSpeed(
-                        drive, 0.5, drive.getPose(), OtherUtil.getClimberAlignPos(true))));
-    driver
-        .rightBumper()
-        .whileTrue(
-            new DeferredCommand(
-                () ->
-                    DriveCommands.followPosesWithMaxSpeed(
-                        drive, 0.5, drive.getPose(), OtherUtil.getClimberAlignPos(false))));
+                    DriveCommands.goToTransform(
+                        drive,
+                        GeomUtil.poseToTransform(OtherUtil.getClimberAlignPos(drive.getPose())))));
 
     // auto-aim hood and turret always
-    shooter.setDefaultCommand(new IdleShooterCommand(drive, shooter));
+    shooter.setDefaultCommand(
+        new IdleShooterCommand(drive, shooter, () -> driver.rightBumper().getAsBoolean()));
 
     // Switch to X pattern when X button is pressed
-    driver.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    //    driver.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
-    driver.rightTrigger().whileTrue(new ShootCommand(drive, shooter));
-    driver.rightTrigger().and(driver.y().negate()).whileTrue(driveShooting);
+    // reverse mecanums
+    driver.b().whileTrue(Commands.run(hoppert::reverseHopperWheels));
+    driver.b().onFalse(Commands.runOnce(hoppert::stopHopper));
+
+    // shoot
+    (driver.rightTrigger().or(driver.rightBumper()))
+        .whileTrue(new ShootCommand(drive, shooter, () -> driver.rightBumper().getAsBoolean()));
+    (driver.rightTrigger().or(driver.rightBumper()))
+        .and(driver.y().negate())
+        .whileTrue(driveShooting);
+    (driver.rightTrigger().or(driver.rightBumper()))
+        .onFalse(
+            new ParallelDeadlineGroup(
+                    new ShootCommand(drive, shooter, () -> driver.rightBumper().getAsBoolean())
+                        .withTimeout(1.25),
+                    Commands.run(hoppert::runTowerForwards),
+                    Commands.run(hoppert::stopHopper))
+                .andThen(Commands.runOnce(hoppert::stopTower)));
 
     // left trigger toggles intake
     driver.leftTrigger().onTrue(new ToggleIntakeCommand(intake));
+    driver.leftTrigger().onFalse(new ToggleIntakeCommand(intake));
+
+    // hold to zero
+    Command zeroCmd =
+        Commands.run(
+            () -> {
+              shooter.setHoodTarget(Constants.SHOOTER_HOOD_MIN_PITCH);
+              shooter.setTurretTarget(0, 0);
+            });
+    zeroCmd.addRequirements(shooter);
+    driver.leftStick().whileTrue(zeroCmd);
 
     // POV for adjusting shooter trim, with up/down adjusting vertical and left/right adjusting
     // horizontal.
-    driver.povUp().onTrue(Commands.runOnce(() -> shooter.adjustVerticalTrim(true)));
-    driver.povDown().onTrue(Commands.runOnce(() -> shooter.adjustVerticalTrim(false)));
-    driver.povRight().onTrue(Commands.runOnce(() -> shooter.adjustHorizontalTrim(true)));
-    driver.povLeft().onTrue(Commands.runOnce(() -> shooter.adjustHorizontalTrim(false)));
+    //    driver.povUp().onTrue(Commands.runOnce(() -> shooter.adjustVerticalTrim(true)));
+    //    driver.povDown().onTrue(Commands.runOnce(() -> shooter.adjustVerticalTrim(false)));
+    driver.povRight().onTrue(Commands.runOnce(() -> shooter.adjustHorizontalTrim(false)));
+    driver.povLeft().onTrue(Commands.runOnce(() -> shooter.adjustHorizontalTrim(true)));
   }
 
   /**
@@ -422,6 +490,16 @@ public class RobotContainer {
     shooter.setSwivelStop(swivelStop.getSelected());
   }
 
+  public void descendEnteringTeleop() {
+    CommandScheduler.getInstance()
+        .schedule(
+            Commands.runOnce(climber::unbrake)
+                .andThen(Commands.waitSeconds(0.1))
+                .andThen(climber::up)
+                .andThen(new WaitUntilCommand(climber::atTarget))
+                .andThen(climber::brake));
+  }
+
   /** Returns the autonomous command to schedule for the auto period. */
   public Command getAutonomousCommand() {
     Command autoCommand = autoChooser.get();
@@ -431,6 +509,14 @@ public class RobotContainer {
     }
 
     return autoCommand;
+  }
+
+  public void coastDisabled() {
+    shooter.coast();
+  }
+
+  public void brakeTeleop() {
+    shooter.brake();
   }
 
   /**

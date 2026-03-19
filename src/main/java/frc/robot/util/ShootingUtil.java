@@ -48,36 +48,61 @@ public class ShootingUtil {
     return degrees * Constants.SHOOTER_TURRET_REVS_PER_DEG;
   }
 
-  /**
-   * gets the shooting target based on the robot pose, bounds for zones defined in FieldConstants
-   */
-  public static Pose2d getShootingTarget(Pose2d pose) {
+  //  /**
+  //   * gets the shooting target based on the robot pose, bounds for zones defined in
+  // FieldConstants
+  //   */
+  //  public static Pose2d getShootingTarget(Pose2d pose) {
+  //    var allianceOpt = DriverStation.getAlliance();
+  //    if (allianceOpt.isEmpty()) {
+  //      return Pose2d.kZero;
+  //    }
+  //
+  //    boolean isTop = pose.getY() >= FieldConstants.TOP_BOTTOM_SPLIT_Y;
+  //
+  //    if (allianceOpt.get() == DriverStation.Alliance.Blue) {
+  //      if (pose.getX() <= FieldConstants.BLUE_SHOOTING_ZONE_END) {
+  //        return FieldConstants.BLUE_GOAL_CENTER;
+  //      }
+  //      if (pose.getX() > FieldConstants.NEUTRAL_ZONE_BLUESIDE) {
+  //        return isTop
+  //            ? FieldConstants.BLUE_TOP_FERRY_TARGET
+  //            : FieldConstants.BLUE_BOTTOM_FERRY_TARGET;
+  //      }
+  //    } else {
+  //      if (pose.getX() >= FieldConstants.RED_SHOOTING_ZONE_START) {
+  //        return FieldConstants.RED_GOAL_CENTER;
+  //      }
+  //      if (pose.getX() < FieldConstants.NEUTRAL_ZONE_REDSIDE) {
+  //        return isTop ? FieldConstants.RED_TOP_FERRY_TARGET :
+  // FieldConstants.RED_BOTTOM_FERRY_TARGET;
+  //      }
+  //    }
+  //
+  //    return Pose2d.kZero;
+  //  }
+
+  public static Pose2d getShootingTarget(Pose2d pose, boolean passing) {
     var allianceOpt = DriverStation.getAlliance();
     if (allianceOpt.isEmpty()) {
       return Pose2d.kZero;
     }
 
-    boolean isTop = pose.getY() >= FieldConstants.TOP_BOTTOM_SPLIT_Y;
-
     if (allianceOpt.get() == DriverStation.Alliance.Blue) {
-      if (pose.getX() <= FieldConstants.BLUE_SHOOTING_ZONE_END) {
-        return FieldConstants.BLUE_GOAL_CENTER;
-      }
-      if (pose.getX() > FieldConstants.NEUTRAL_ZONE_BLUESIDE) {
+      if (passing) {
+        boolean isTop = pose.getY() >= FieldConstants.TOP_BOTTOM_SPLIT_Y;
         return isTop
             ? FieldConstants.BLUE_TOP_FERRY_TARGET
             : FieldConstants.BLUE_BOTTOM_FERRY_TARGET;
       }
+      return FieldConstants.BLUE_GOAL_CENTER;
     } else {
-      if (pose.getX() >= FieldConstants.RED_SHOOTING_ZONE_START) {
-        return FieldConstants.RED_GOAL_CENTER;
-      }
-      if (pose.getX() < FieldConstants.NEUTRAL_ZONE_REDSIDE) {
+      if (passing) {
+        boolean isTop = pose.getY() >= FieldConstants.TOP_BOTTOM_SPLIT_Y;
         return isTop ? FieldConstants.RED_TOP_FERRY_TARGET : FieldConstants.RED_BOTTOM_FERRY_TARGET;
       }
+      return FieldConstants.RED_GOAL_CENTER;
     }
-
-    return Pose2d.kZero;
   }
 
   /** Returns a 0 if shooting to hub and a 1 if ferrying. */
@@ -109,9 +134,9 @@ public class ShootingUtil {
    * @return the angle to aim to the turret at, in degrees
    */
   public static double getAngleToAim(
-      Pose2d robotPose, ChassisSpeeds robotSpeeds, double estimatedAirtime) {
+      Pose2d robotPose, ChassisSpeeds robotSpeeds, double estimatedAirtime, boolean passing) {
 
-    Pose2d goalPose = ShootingUtil.getShootingTarget(robotPose);
+    Pose2d goalPose = ShootingUtil.getShootingTarget(robotPose, passing);
     Logger.recordOutput("Shooter/GoalPose", goalPose);
 
     Translation2d fieldVelocity =
@@ -145,9 +170,10 @@ public class ShootingUtil {
    * @param robotSpeeds robot chassis speeds, field-relative
    * @return the distance between the hub and the virtual turret pose
    */
-  public static double getVirtualDistanceToTarget(Pose2d robotPose, ChassisSpeeds robotSpeeds) {
+  public static double getVirtualDistanceToTarget(
+      Pose2d robotPose, ChassisSpeeds robotSpeeds, boolean passing) {
 
-    Pose2d goalPose = ShootingUtil.getShootingTarget(robotPose);
+    Pose2d goalPose = ShootingUtil.getShootingTarget(robotPose, passing);
     Logger.recordOutput("Shooter/GoalPose", goalPose);
 
     Translation2d fieldVelocity =

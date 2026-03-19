@@ -3,15 +3,16 @@
   "robotLength": 0.85,
   "holonomicMode": true,
   "pathFolders": [
-    "Intake Shoot Climb",
-    "New Folder",
-    "Intake Shoot Outpost Shoot",
-    "Shoot Climb"
+    "ISC Top",
+    "ISC Bottom",
+    "SIS Bottom",
+    "SIS Top",
+    "Simple (BACKUP)"
   ],
   "autoFolders": [
-    "Intake Shoot Climb",
-    "New Folder",
-    "Shoot Climb"
+    "ISC",
+    "SIS",
+    "Simple (BACKUP)"
   ],
   "defaultMaxVel": 4.68,
   "defaultMaxAccel": 5.0,

@@ -22,6 +22,25 @@ public class ShiftUtil {
     shiftTimer.start();
   }
 
+  public static String getShiftColor() {
+    Constants.ShiftOwner currentShift = getShift();
+
+    return switch (currentShift) {
+      case RED -> "#FF0000"; // Red
+      case BLUE -> "#0000FF"; // Blue
+      case BOTH -> "#FF00FF"; // Purple
+    };
+  }
+
+  public static String getShiftColor(Constants.ShiftOwner currentShift) {
+
+    return switch (currentShift) {
+      case RED -> "#FF0000"; // Red
+      case BLUE -> "#0000FF"; // Blue
+      case BOTH -> "#FF00FF"; // Purple
+    };
+  }
+
   /**
    * Automatically assigns shifts based on FMS game data. Called after a 1-second delay to ensure
    * the game-specific message has been sent
@@ -140,17 +159,17 @@ public class ShiftUtil {
     return Math.max(0.0, remaining);
   }
 
-  /** Returns if the provided {@code shiftOwner} matches our alliance color. */
   public static boolean isOurs(Constants.ShiftOwner shiftOwner) {
-    if (DriverStation.getAlliance().isPresent()) {
-      var us = DriverStation.getAlliance().get();
-      if (us == DriverStation.Alliance.Red) {
-        return (shiftOwner == Constants.ShiftOwner.RED);
-      } else if (us == DriverStation.Alliance.Blue) {
-        return (shiftOwner == Constants.ShiftOwner.BLUE);
-      }
-    }
-    return true; // just in case!
+    var alliance = DriverStation.getAlliance();
+    // fallback
+    return alliance
+        .map(
+            value ->
+                switch (value) {
+                  case Red -> shiftOwner == Constants.ShiftOwner.RED;
+                  case Blue -> shiftOwner == Constants.ShiftOwner.BLUE;
+                })
+        .orElse(true);
   }
 
   /** Returns true if within 5 seconds of the next shift */
@@ -163,5 +182,9 @@ public class ShiftUtil {
     } else if (elapsed < 60.0 && elapsed > 55.0) {
       return true;
     } else return elapsed < 85.0 && elapsed > 80.0;
+  }
+
+  public static String getAutoWinnerColor() {
+    return ShiftUtil.getShiftColor(shift2);
   }
 }

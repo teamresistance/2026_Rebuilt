@@ -5,7 +5,7 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.util.GeomUtil;
@@ -31,7 +31,7 @@ public class VisionSubsystem extends SubsystemBase {
 
   private final PhotonCamera[] cameras;
   /* For shooting vs. path following in auto */
-  private static final double STD_DEV_SCALAR_SHOOTING = 1.6;
+  private static final double STD_DEV_SCALAR_SHOOTING = 1;
   private static final double THETA_STD_DEV_COEFFICIENT_SHOOTING = 0.075;
   private static final PolynomialRegression XY_STD_DEV_MODEL =
       new PolynomialRegression(
@@ -93,6 +93,7 @@ public class VisionSubsystem extends SubsystemBase {
    * @throws IOException If the field layout cannot be loaded
    */
   public VisionSubsystem(PhotonCamera... cameras) throws IOException {
+    Logger.recordOutput("Vision/CameraPoses", CAMERA_POSES);
     this.cameras = cameras;
     try {
       aprilTagFieldLayout =
@@ -119,7 +120,7 @@ public class VisionSubsystem extends SubsystemBase {
     Pose2d currentPose = poseSupplier.get();
     visionUpdates = new ArrayList<>();
 
-    double singleTagAdjustment = 1.0;
+    double singleTagAdjustment = DriverStation.isAutonomous() ? 1.0 : 1.6;
     if (Constants.TUNING_MODE) SingleTagAdjustment.updateLoggedTagAdjustments();
 
     // Loop through all the cameras
@@ -136,25 +137,27 @@ public class VisionSubsystem extends SubsystemBase {
       PhotonPipelineResult unprocessedResult =
           unprocessedResults.get(unprocessedResults.size() - 1);
 
-      Logger.recordOutput(
-          LOGGING_KEY_PREFIX + instanceIndex + " Has Targets", unprocessedResult.hasTargets());
-      Logger.recordOutput(
-          LOGGING_KEY_PREFIX + instanceIndex + "LatencyMS",
-          unprocessedResult.metadata.getLatencyMillis());
+      //      Logger.recordOutput(
+      //          LOGGING_KEY_PREFIX + instanceIndex + " Has Targets",
+      // unprocessedResult.hasTargets());
+      //      Logger.recordOutput(
+      //          LOGGING_KEY_PREFIX + instanceIndex + "LatencyMS",
+      //          unprocessedResult.metadata.getLatencyMillis());
 
-      Logger.recordOutput(
-          "Photon/Raw Camera Data " + instanceIndex,
-          SmartDashboard.getRaw(
-              "photonvision/" + cameras[instanceIndex].getName() + "/rawBytes", new byte[] {}));
+      //      Logger.recordOutput(
+      //          "Photon/Raw Camera Data " + instanceIndex,
+      //          SmartDashboard.getRaw(
+      //              "photonvision/" + cameras[instanceIndex].getName() + "/rawBytes", new byte[]
+      // {}));
 
       // Continue if the camera doesn't have any targets
       if (!unprocessedResult.hasTargets()) {
-        Logger.recordOutput("Photon/Tags Used " + instanceIndex, 0);
+        //        Logger.recordOutput("Photon/Tags Used " + instanceIndex, 0);
         continue;
       }
 
       double timestamp = unprocessedResult.getTimestampSeconds();
-      Logger.recordOutput(LOGGING_KEY_PREFIX + instanceIndex + " Timestamp", timestamp);
+      //      Logger.recordOutput(LOGGING_KEY_PREFIX + instanceIndex + " Timestamp", timestamp);
 
       boolean shouldUseMultiTag = unprocessedResult.getMultiTagResult().isPresent();
 
@@ -176,7 +179,8 @@ public class VisionSubsystem extends SubsystemBase {
           }
         }
 
-        Logger.recordOutput("Photon/Camera Pose (Multi tag) " + instanceIndex, cameraPose);
+        //        Logger.recordOutput("Photon/Camera Pose (Multi tag) " + instanceIndex,
+        // cameraPose);
       } else {
         // If not using multitag, disambiguate and then use
         PhotonTrackedTarget target = unprocessedResult.targets.get(0);
@@ -215,7 +219,8 @@ public class VisionSubsystem extends SubsystemBase {
         tagPose3ds.add(tagPos);
 
         singleTagAdjustment = SingleTagAdjustment.getAdjustmentForTag(target.getFiducialId());
-        Logger.recordOutput("Photon/Camera Pose (Single Tag) " + instanceIndex, cameraPose);
+        //        Logger.recordOutput("Photon/Camera Pose (Single Tag) " + instanceIndex,
+        // cameraPose);
       }
 
       if (robotPose == null) {
@@ -244,8 +249,8 @@ public class VisionSubsystem extends SubsystemBase {
         xyStdDev = Math.pow(avgDistance, 2.0) / tagPose3ds.size();
         thetaStdDev = Math.pow(avgDistance, 2.0) / tagPose3ds.size();
       } else {
-        xyStdDev = XY_STD_DEV_MODEL.predict(avgDistance);
-        thetaStdDev = THETA_STD_DEV_MODEL.predict(avgDistance);
+        xyStdDev = Math.pow(avgDistance, 2.0) / tagPose3ds.size();
+        thetaStdDev = Math.pow(avgDistance, 2.0) / tagPose3ds.size();
       }
 
       if (shouldUseMultiTag) {
@@ -267,8 +272,8 @@ public class VisionSubsystem extends SubsystemBase {
                     singleTagAdjustment * xyStdDev * STD_DEV_SCALAR_SHOOTING,
                     singleTagAdjustment * thetaStdDev * STD_DEV_SCALAR_SHOOTING)));
 
-        Logger.recordOutput("VisionData/" + instanceIndex, robotPose);
-        Logger.recordOutput("Photon/Tags Used " + instanceIndex, tagPose3ds.size());
+        //        Logger.recordOutput("VisionData/" + instanceIndex, robotPose);
+        //        Logger.recordOutput("Photon/Tags Used " + instanceIndex, tagPose3ds.size());
       }
     }
 

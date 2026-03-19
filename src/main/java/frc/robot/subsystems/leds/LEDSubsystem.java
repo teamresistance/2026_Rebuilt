@@ -2,6 +2,7 @@ package frc.robot.subsystems.leds;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.hardware.CANdle;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import java.util.*;
@@ -10,7 +11,8 @@ import org.littletonrobotics.junction.Logger;
 public class LEDSubsystem extends SubsystemBase {
 
   private final List<LEDStream> streams = new ArrayList<>();
-  private LEDStream lastMode = null;
+  private LEDStream lastStream = null;
+  private Constants.LEDMode lastLEDMode = null;
   private final CANdle candle = new CANdle(Constants.CANDLE_ID, new CANBus("drive"));
 
   /** Adds an LEDStream to the list of periodically checked streams. */
@@ -30,35 +32,31 @@ public class LEDSubsystem extends SubsystemBase {
       }
     }
 
-    if (highest != null && !highest.equals(lastMode)) {
-      applyMode(highest);
+    if (highest != null) {
+      Constants.LEDMode currentMode = highest.getLEDMode();
+      applyMode(highest, currentMode);
       Logger.recordOutput("LEDS/Active Stream", highest.name);
-      lastMode = highest;
+      lastStream = highest;
+      lastLEDMode = currentMode;
     }
   }
 
-  // TODO: find a better way to do the brightness and framerate suppliers in offseason
-  private void applyMode(LEDStream mode) {
-    Constants.LEDMode ledMode = mode.getLEDMode();
+  private void applyMode(LEDStream mode, Constants.LEDMode ledMode) {
     Logger.recordOutput("LEDS/Active Mode", ledMode);
 
     switch (ledMode) {
-      case RAINBOW:
-        if (mode.useFramerateSupplier && mode.useBrightnessSupplier) {
-          candle.setControl(
-              Constants.LED_ANIMATION_RAINBOW
-                  .withBrightness(mode.brightnessSupplier.getAsDouble())
-                  .withFrameRate(mode.framerateSupplier.getAsDouble()));
-        } else if (mode.useBrightnessSupplier) {
-          candle.setControl(
-              Constants.LED_ANIMATION_RAINBOW.withBrightness(
-                  mode.brightnessSupplier.getAsDouble()));
-        } else if (mode.useFramerateSupplier) {
-          candle.setControl(
-              Constants.LED_ANIMATION_RAINBOW.withFrameRate(mode.framerateSupplier.getAsDouble()));
+      case DISABLED:
+        double voltage = RobotController.getBatteryVoltage();
+        if (voltage >= 12.6) {
+          candle.setControl(Constants.LED_ANIMATION_DISABLED_GOOD);
+        } else if (voltage > 12.2) {
+          candle.setControl(Constants.LED_ANIMATION_DISABLED_FINE);
         } else {
-          candle.setControl(Constants.LED_ANIMATION_RAINBOW);
+          candle.setControl(Constants.LED_ANIMATION_DISABLED_BAD);
         }
+        break;
+      case RAINBOW:
+        candle.setControl(Constants.LED_ANIMATION_RAINBOW);
         break;
       case SHOOTING_CONFIDENT:
         candle.setControl(
