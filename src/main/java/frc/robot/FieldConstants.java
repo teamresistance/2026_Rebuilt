@@ -100,10 +100,10 @@ public final class FieldConstants {
   public static final double BUMPZONE_END_RED = APRILTAG_10.getX();
 
   // TODO: good positions when CAD ready or when robot
-  public static final Pose2d RED_LEFT_CLIMBER_ALIGN = new Pose2d(15.37, 3.6, Rotation2d.kZero);
-  public static final Pose2d RED_RIGHT_CLIMBER_ALIGN = new Pose2d(15.54, 5.14, Rotation2d.kPi);
+  public static final Pose2d RED_LEFT_CLIMBER_ALIGN = new Pose2d(15.46, 3.5, Rotation2d.fromDegrees(0));
+  public static final Pose2d RED_RIGHT_CLIMBER_ALIGN = new Pose2d(15.49, 5.12, Rotation2d.fromDegrees(-180));
   public static final Pose2d BLUE_LEFT_CLIMBER_ALIGN =
-      FlippingUtil.flipFieldPose(RED_LEFT_CLIMBER_ALIGN);
+      new Pose2d(1.06, 4.58, Rotation2d.fromDegrees(-180));
   public static final Pose2d BLUE_RIGHT_CLIMBER_ALIGN =
-      FlippingUtil.flipFieldPose(RED_RIGHT_CLIMBER_ALIGN);
+      new Pose2d(1.01, 2.95, Rotation2d.fromDegrees(0));
 }
