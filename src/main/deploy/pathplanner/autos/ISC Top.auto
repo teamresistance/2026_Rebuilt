@@ -29,35 +29,15 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "sequential",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 1.5
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Shoot 10s"
-                      }
-                    }
-                  ]
-                }
-              },
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "ISC Top Return"
-                }
-              }
-            ]
+            "pathName": "ISC Top Return"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot 5s"
           }
         },
         {

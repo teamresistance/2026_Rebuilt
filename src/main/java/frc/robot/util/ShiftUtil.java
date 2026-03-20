@@ -20,7 +20,6 @@ public class ShiftUtil {
   public static void startShiftTimer() {
     shiftTimer.reset();
     shiftTimer.start();
-    shiftTimer.advanceIfElapsed(-1.0); // offset to account for 2s delay in match clock sync
   }
 
   public static String getShiftColor() {

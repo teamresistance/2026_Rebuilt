@@ -468,7 +468,8 @@ public class RobotContainer {
   public void setupShiftUtil() {
     CommandScheduler.getInstance()
         .schedule(
-            Commands.runOnce(ShiftUtil::startShiftTimer)
+            Commands.waitSeconds(2)
+                .andThen(Commands.runOnce(ShiftUtil::startShiftTimer))
                 .andThen(new WaitCommand(1))
                 .andThen(Commands.runOnce(ShiftUtil::assignShifts)));
   }

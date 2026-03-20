@@ -103,7 +103,7 @@ public final class FieldConstants {
   public static final Pose2d RED_RIGHT_CLIMBER_ALIGN =
       new Pose2d(15.49, 5.12, Rotation2d.fromDegrees(-180));
   public static final Pose2d BLUE_LEFT_CLIMBER_ALIGN =
-      new Pose2d(1.06, 4.58, Rotation2d.fromDegrees(-180));
+      new Pose2d(1.03, 4.58, Rotation2d.fromDegrees(-180));
   public static final Pose2d BLUE_RIGHT_CLIMBER_ALIGN =
       new Pose2d(1.01, 2.95, Rotation2d.fromDegrees(0));
 }

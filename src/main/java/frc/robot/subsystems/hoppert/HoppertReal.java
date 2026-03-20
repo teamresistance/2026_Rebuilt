@@ -39,7 +39,7 @@ public class HoppertReal implements HoppertIO {
         new TalonFXConfiguration()
             .withMotorOutput(
                 new MotorOutputConfigs()
-                    .withNeutralMode(NeutralModeValue.Coast)
+                    .withNeutralMode(NeutralModeValue.Brake)
                     .withInverted(InvertedValue.Clockwise_Positive))
             .withSlot0(new Slot0Configs().withKP(1));
     hopperRollerMotor.getConfigurator().apply(config2);
@@ -94,7 +94,7 @@ public class HoppertReal implements HoppertIO {
 
   @Override
   public boolean towerAtSpeed() {
-    return towerMotor.getVelocity().isNear(-58, 2);
+    return towerMotor.getVelocity().isNear(-58, 8);
   }
 
   @Override

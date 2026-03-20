@@ -6,7 +6,6 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.util.GeomUtil;
@@ -121,7 +120,7 @@ public class VisionSubsystem extends SubsystemBase {
     Pose2d currentPose = poseSupplier.get();
     visionUpdates = new ArrayList<>();
 
-    double singleTagAdjustment = DriverStation.isAutonomous() ? 1.0 : 1.6;
+    double singleTagAdjustment = DriverStation.isAutonomous() ? 0.75 : 1.6;
     if (Constants.TUNING_MODE) SingleTagAdjustment.updateLoggedTagAdjustments();
 
     // Loop through all the cameras
@@ -140,14 +139,15 @@ public class VisionSubsystem extends SubsystemBase {
 
       Logger.recordOutput(
           LOGGING_KEY_PREFIX + instanceIndex + " Has Targets", unprocessedResult.hasTargets());
-      Logger.recordOutput(
-          LOGGING_KEY_PREFIX + instanceIndex + "LatencyMS",
-          unprocessedResult.metadata.getLatencyMillis());
+      //      Logger.recordOutput(
+      //          LOGGING_KEY_PREFIX + instanceIndex + "LatencyMS",
+      //          unprocessedResult.metadata.getLatencyMillis());
 
-      Logger.recordOutput(
-          "Photon/Raw Camera Data " + instanceIndex,
-          SmartDashboard.getRaw(
-              "photonvision/" + cameras[instanceIndex].getName() + "/rawBytes", new byte[] {}));
+      //      Logger.recordOutput(
+      //          "Photon/Raw Camera Data " + instanceIndex,
+      //          SmartDashboard.getRaw(
+      //              "photonvision/" + cameras[instanceIndex].getName() + "/rawBytes", new byte[]
+      // {}));
 
       // Continue if the camera doesn't have any targets
       if (!unprocessedResult.hasTargets()) {

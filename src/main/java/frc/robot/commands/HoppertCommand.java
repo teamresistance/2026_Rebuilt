@@ -81,7 +81,9 @@ public class HoppertCommand extends Command {
   // Pulses: backwards -> off -> forwards, timer-driven
   private void runMode3() {
 
-    hoppert.runHopperWheels();
+    if (hoppert.towerAtSpeed() && shooter.atTargetRPS()) {
+      hoppert.runHopperWheels();
+    }
     hoppert.runTowerForwards();
 
     switch (pulseState) {
@@ -106,6 +108,9 @@ public class HoppertCommand extends Command {
           pulseTimer.restart();
         }
       }
+    }
+    if (hoppert.towerAtSpeed() && shooter.atTargetRPS()) {
+      hoppert.runHopperWheels();
     }
   }
 }
