@@ -6,6 +6,7 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.util.GeomUtil;
@@ -137,22 +138,20 @@ public class VisionSubsystem extends SubsystemBase {
       PhotonPipelineResult unprocessedResult =
           unprocessedResults.get(unprocessedResults.size() - 1);
 
-      //      Logger.recordOutput(
-      //          LOGGING_KEY_PREFIX + instanceIndex + " Has Targets",
-      // unprocessedResult.hasTargets());
-      //      Logger.recordOutput(
-      //          LOGGING_KEY_PREFIX + instanceIndex + "LatencyMS",
-      //          unprocessedResult.metadata.getLatencyMillis());
+      Logger.recordOutput(
+          LOGGING_KEY_PREFIX + instanceIndex + " Has Targets", unprocessedResult.hasTargets());
+      Logger.recordOutput(
+          LOGGING_KEY_PREFIX + instanceIndex + "LatencyMS",
+          unprocessedResult.metadata.getLatencyMillis());
 
-      //      Logger.recordOutput(
-      //          "Photon/Raw Camera Data " + instanceIndex,
-      //          SmartDashboard.getRaw(
-      //              "photonvision/" + cameras[instanceIndex].getName() + "/rawBytes", new byte[]
-      // {}));
+      Logger.recordOutput(
+          "Photon/Raw Camera Data " + instanceIndex,
+          SmartDashboard.getRaw(
+              "photonvision/" + cameras[instanceIndex].getName() + "/rawBytes", new byte[] {}));
 
       // Continue if the camera doesn't have any targets
       if (!unprocessedResult.hasTargets()) {
-        //        Logger.recordOutput("Photon/Tags Used " + instanceIndex, 0);
+        Logger.recordOutput("Photon/Tags Used " + instanceIndex, 0);
         continue;
       }
 
@@ -179,8 +178,7 @@ public class VisionSubsystem extends SubsystemBase {
           }
         }
 
-        //        Logger.recordOutput("Photon/Camera Pose (Multi tag) " + instanceIndex,
-        // cameraPose);
+        Logger.recordOutput("Photon/Camera Pose (Multi tag) " + instanceIndex, cameraPose);
       } else {
         // If not using multitag, disambiguate and then use
         PhotonTrackedTarget target = unprocessedResult.targets.get(0);

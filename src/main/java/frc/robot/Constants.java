@@ -53,7 +53,7 @@ public final class Constants {
   public static final double SHOOTER_HOOD_MAX_PITCH = 43;
   public static final double SHOOTER_HOOD_MIN_PITCH = 17.5;
   public static final double SHOOTER_TURRET_MAX_YAW = 130;
-  public static final double SHOOTER_TURRET_MIN_YAW = -135;
+  public static final double SHOOTER_TURRET_MIN_YAW = -130;
   public static final double SHOOTER_TRIM_ADJUSTMENT_INCREMENT = 3; // TODO: number w/ driver
 
   public static final Transform2d ROBOT_TO_TURRET =

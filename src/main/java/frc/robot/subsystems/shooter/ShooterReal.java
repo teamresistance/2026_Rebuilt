@@ -276,22 +276,22 @@ public class ShooterReal implements ShooterIO {
 
   @Override
   public void periodic() {
-    Logger.recordOutput("Shooter/Flywheel Target RPS", flywheelTargetRPS);
-    Logger.recordOutput(
-        "Shooter/Flywheel Real RPS", flywheelMotor.getVelocity().getValueAsDouble());
-    Logger.recordOutput("Shooter/Turret Target Angle", turretTargetAngle);
-    Logger.recordOutput(
-        "Shooter/Turret Real Angle",
-        ShootingUtil.toTurretDegrees(turretMotor.getPosition().getValueAsDouble()));
-    Logger.recordOutput("Shooter/Hood Target Angle", hoodTargetAngle);
-    Logger.recordOutput(
-        "Shooter/Hood Real Angle",
-        ShootingUtil.toTurretDegrees(
-            ShootingUtil.toHoodDegrees(hoodMotor.getPosition().getValueAsDouble())));
-    Logger.recordOutput("Shooter/Drive Assist Angle", turretDriveAssistTargetAngle);
-    Logger.recordOutput("Shooter/Vertical Trim", verticalTrim);
+    //    Logger.recordOutput("Shooter/Flywheel Target RPS", flywheelTargetRPS);
+    //    Logger.recordOutput(
+    //        "Shooter/Flywheel Real RPS", flywheelMotor.getVelocity().getValueAsDouble());
+    //    Logger.recordOutput("Shooter/Turret Target Angle", turretTargetAngle);
+    //    Logger.recordOutput(
+    //        "Shooter/Turret Real Angle",
+    //        ShootingUtil.toTurretDegrees(turretMotor.getPosition().getValueAsDouble()));
+    //    Logger.recordOutput("Shooter/Hood Target Angle", hoodTargetAngle);
+    //    Logger.recordOutput(
+    //        "Shooter/Hood Real Angle",
+    //        ShootingUtil.toTurretDegrees(
+    //            ShootingUtil.toHoodDegrees(hoodMotor.getPosition().getValueAsDouble())));
+//    Logger.recordOutput("Shooter/Drive Assist Angle", turretDriveAssistTargetAngle);
+//    Logger.recordOutput("Shooter/Vertical Trim", verticalTrim);
     Logger.recordOutput("Shooter/Horizontal Trim", horizontalTrim);
-    Logger.recordOutput("Shooter/AtSetpoints HT", atShootingSetpoints());
-    Logger.recordOutput("Shooter/AtSetpoints F", atTargetRPS());
+    //    Logger.recordOutput("Shooter/AtSetpoints HT", atShootingSetpoints());
+    //    Logger.recordOutput("Shooter/AtSetpoints F", atTargetRPS());
   }
 }
