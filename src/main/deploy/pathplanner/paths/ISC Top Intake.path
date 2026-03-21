@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.30527817403709,
-        "y": 4.054407988587732
+        "x": 7.791269614835947,
+        "y": 6.900912981455065
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.05944365192582,
-        "y": 4.455506419400857
+        "x": 9.2274607703281,
+        "y": 5.969329529243937
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 0.9714111111111114,
-        "y": 4.950977777777777
+        "x": 7.791269614835947,
+        "y": 4.468445078459343
       },
       "prevControl": {
-        "x": 2.046504992867333,
-        "y": 4.934236804564907
+        "x": 7.830085592011411,
+        "y": 4.908359486447931
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,7 +33,7 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 0.5,
+    "maxVelocity": 1.25,
     "maxAcceleration": 5.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 400.0,
@@ -41,13 +41,13 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0,
-    "rotation": 180.0
+    "velocity": 0.0,
+    "rotation": 135.0
   },
   "reversed": false,
-  "folder": "Simple (BACKUP)",
+  "folder": "ISC Top",
   "idealStartingState": {
-    "velocity": 0,
+    "velocity": 1.5,
     "rotation": 180.0
   },
   "useDefaultConstraints": false

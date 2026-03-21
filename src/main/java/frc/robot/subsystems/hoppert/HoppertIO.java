@@ -16,7 +16,11 @@ public interface HoppertIO extends Subsystem {
 
   void runTowerForwards();
 
+  boolean towerAtSpeed();
+
   void runHopperWheels();
+
+  void reverseHopperWheels();
 
   void stopHopper();
 

@@ -49,7 +49,17 @@ public class HoppertSim implements HoppertIO {
   }
 
   @Override
+  public boolean towerAtSpeed() {
+    return true; // i cba to do this
+  }
+
+  @Override
   public void runHopperWheels() {
+    hopperWheelsRunning = true;
+  }
+
+  @Override
+  public void reverseHopperWheels() {
     hopperWheelsRunning = true;
   }
 

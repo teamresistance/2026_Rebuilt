@@ -7,7 +7,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.FieldConstants;
 import java.util.function.Supplier;
-import org.littletonrobotics.junction.Logger;
 
 public class BumpUtil {
 
@@ -20,7 +19,6 @@ public class BumpUtil {
     ChassisSpeeds speeds = speedsSupplier.get();
     Pose2d basePose = poseSupplier.get();
 
-    // check multiple scaled virtual poses ahead of the robot (0.25x, 0.5x, 0.75x)
     double[] scales = {0.25, 0.5, 0.75};
     boolean isBlue =
         DriverStation.getAlliance().isPresent()
@@ -31,17 +29,22 @@ public class BumpUtil {
           basePose.plus(
               new Transform2d(
                   speeds.vxMetersPerSecond * s, speeds.vyMetersPerSecond * s, Rotation2d.kZero));
-      Logger.recordOutput(String.format("Bump/Bump Zone Virtual Pose (scale=%.2f)", s), pose);
+      //      Logger.recordOutput("Bump/Bump Zone Virtual Pose "+s, pose);
 
-      if (isBlue) {
-        if (pose.getX() < FieldConstants.BUMPZONE_END_BLUE
-            && pose.getX() > FieldConstants.BUMPZONE_START_BLUE) {
-          return true;
-        }
-      } else {
-        if (pose.getX() < FieldConstants.BUMPZONE_END_RED
-            && pose.getX() > FieldConstants.BUMPZONE_START_RED) {
-          return true;
+      boolean inYBounds =
+          (pose.getY() > 1.5 && pose.getY() < 6.5) && !(pose.getY() > 3.4 && pose.getY() < 4.14);
+
+      if (inYBounds) {
+        if (isBlue) {
+          if (pose.getX() < FieldConstants.BUMPZONE_END_BLUE
+              && pose.getX() > FieldConstants.BUMPZONE_START_BLUE) {
+            return true;
+          }
+        } else {
+          if (pose.getX() < FieldConstants.BUMPZONE_END_RED
+              && pose.getX() > FieldConstants.BUMPZONE_START_RED) {
+            return true;
+          }
         }
       }
     }

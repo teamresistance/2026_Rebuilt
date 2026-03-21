@@ -15,7 +15,7 @@ public class TurretConfidenceUtil {
   // 0 = perfect turret
   // 1 = no compensation (stationary shooter)
   private static final double ROTATION_COMPENSATION_FACTOR =
-      0.1; // TODO: Tune this based on turret performance
+      0.3; // TODO: Tune this based on turret performance
 
   private static final double DISTANCE_FACTOR =
       0.3; // TODO: Tune this based on the impact distance from the goal has on shot confidence
@@ -26,14 +26,16 @@ public class TurretConfidenceUtil {
     ChassisSpeeds speeds = drive.getChassisSpeedsFieldRelative();
 
     // Update target position based on current robot pose
-    Translation2d targetPosition = ShootingUtil.getShootingTarget(drive.getPose()).getTranslation();
+    Translation2d targetPosition =
+        ShootingUtil.getShootingTarget(drive.getPose(), false).getTranslation();
 
     // Distance to target calculated with field-relative coordinates
     double distance = pose.getTranslation().getDistance(targetPosition);
 
     // Time of flight calculation based on distance and current velocity
     double timeOfFlight =
-        ShootingConstants.getTimeOfFlight(ShootingUtil.getVirtualDistanceToTarget(pose, speeds));
+        ShootingConstants.getTimeOfFlight(
+            ShootingUtil.getVirtualDistanceToTarget(pose, speeds, false));
 
     // Calculate lateral velocity of the robot with the x and y velocity
     double lateralVelocity = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
@@ -61,6 +63,6 @@ public class TurretConfidenceUtil {
     double probability = Math.exp(-Math.pow(totalError, 2) / (2 * Math.pow(ERROR_STD_DEV, 2)));
 
     // Scale to percentage for easier interpretation
-    return probability * 100;
+    return Math.round(probability * 100);
   }
 }

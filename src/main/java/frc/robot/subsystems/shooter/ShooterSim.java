@@ -87,7 +87,7 @@ public class ShooterSim implements ShooterIO {
   }
 
   @Override
-  public void setTurretTarget(double angle) {
+  public void setTurretTarget(double angle, double omegaRadsPerSec) {
     double turretAngle =
         MathUtil.clamp(angle, Constants.SHOOTER_TURRET_MIN_YAW, Constants.SHOOTER_TURRET_MAX_YAW);
     if (Math.abs(angle - turretAngle) > 2.0) {
@@ -135,4 +135,10 @@ public class ShooterSim implements ShooterIO {
       horizontalTrim -= Constants.SHOOTER_TRIM_ADJUSTMENT_INCREMENT;
     }
   }
+
+  @Override
+  public void brake() {}
+
+  @Override
+  public void coast() {}
 }

@@ -4,6 +4,8 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.DriveMotorArrangement;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerMotorArrangement;
 import com.pathplanner.lib.commands.PathfindingCommand;
+import edu.wpi.first.net.WebServer;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -81,6 +83,12 @@ public class Robot extends LoggedRobot {
   public void robotInit() {
     CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
     // run warmup command to significantly reduce the delay in movement when auto starts
+
+    // default
+    Logger.recordOutput("Shifts/Auto Winner Color", "#000000");
+
+    WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
+    // put elastic dashboard on bot
   }
 
   /** This function is called periodically during all modes. */
@@ -103,6 +111,7 @@ public class Robot extends LoggedRobot {
   /** This function is called once when the robot is disabled. */
   @Override
   public void disabledInit() {
+    robotContainer.coastDisabled();
     // Deliberately empty - no initialization needed when disabled
   }
 
@@ -119,6 +128,7 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) CommandScheduler.getInstance().schedule(autonomousCommand);
 
     robotContainer.runAutoLEDs();
+    robotContainer.brakeTeleop();
   }
 
   /** This function is called periodically during autonomous. */
@@ -138,7 +148,9 @@ public class Robot extends LoggedRobot {
       autonomousCommand.cancel();
     }
 
+    robotContainer.descendEnteringTeleop();
     robotContainer.setupShiftUtil();
+    robotContainer.brakeTeleop();
   }
 
   /** This function is called periodically during operator control. */
@@ -147,17 +159,21 @@ public class Robot extends LoggedRobot {
 
     robotContainer.checkTurretStop();
 
-    Logger.recordOutput("Shifts/Current Shift", ShiftUtil.getShift());
+    Constants.ShiftOwner owner = ShiftUtil.getShift();
+    Logger.recordOutput("Shifts/IsOurs", ShiftUtil.isOurs(owner));
+    //    Logger.recordOutput("Shifts/Current Shift", owner);
+    //    Logger.recordOutput("Shifts/Current Shift Color", ShiftUtil.getShiftColor());
     Logger.recordOutput("Shifts/Time Left", ShiftUtil.getTimeLeftInCurrentShift());
+    Logger.recordOutput("Shifts/Auto Winner Color", ShiftUtil.getAutoWinnerColor());
 
     // inform the operator that the shifts had an error and need to be assigned manually.
     // if nothing is chosen yet from the chooser, it will just pass a blank string which will do
     // nothing and the operator will continue to see that they are not assigned
-    boolean shiftsAssigned = ShiftUtil.isAssigned();
-    Logger.recordOutput("Shifts/Assigned", shiftsAssigned);
-    if (!shiftsAssigned) {
-      ShiftUtil.assignShifts(robotContainer.getShiftChosen());
-    }
+    //    boolean shiftsAssigned = ShiftUtil.isAssigned();
+    //    Logger.recordOutput("Shifts/Assigned", shiftsAssigned);
+    //    if (!shiftsAssigned) {
+    //      ShiftUtil.assignShifts(robotContainer.getShiftChosen());
+    //    }
 
     // Calculate and update the shot confidence value from the utility class and publish it to the
     // dashboard for operator awareness

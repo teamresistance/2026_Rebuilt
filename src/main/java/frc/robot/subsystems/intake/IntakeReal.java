@@ -18,13 +18,12 @@ public class IntakeReal implements IntakeIO {
   public IntakeReal() {
     register();
 
-    // TODO: current limits
     TalonFXConfiguration config =
         new TalonFXConfiguration()
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
                     .withSupplyCurrentLimitEnable(true)
-                    .withSupplyCurrentLimit(0));
+                    .withSupplyCurrentLimit(30));
 
     intakeMotor.getConfigurator().apply(config);
   }
@@ -33,7 +32,7 @@ public class IntakeReal implements IntakeIO {
   public void activateIntake() {
     intaking = true;
     rejecting = false;
-    intakeMotor.setControl(new DutyCycleOut(0.5));
+    intakeMotor.setControl(new DutyCycleOut(0.4));
   }
 
   @Override

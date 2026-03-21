@@ -7,13 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Bottom Outpost"
+            "pathName": "Center Backup"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Shoot 10s"
+            "name": "Shoot 7s"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Center Bottom Slow"
           }
         },
         {
@@ -32,6 +38,6 @@
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "Simple (BACKUP)",
   "choreoAuto": false
 }

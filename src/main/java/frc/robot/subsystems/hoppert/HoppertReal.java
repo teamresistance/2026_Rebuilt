@@ -2,10 +2,11 @@ package frc.robot.subsystems.hoppert;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.StaticBrake;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -30,19 +31,19 @@ public class HoppertReal implements HoppertIO {
   public HoppertReal() {
     TalonFXConfiguration config =
         new TalonFXConfiguration()
-            .withMotorOutput(
-                new MotorOutputConfigs()
-                    .withNeutralMode(NeutralModeValue.Brake)
-                    .withInverted(InvertedValue.Clockwise_Positive));
+            .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Coast))
+            .withSlot0(new Slot0Configs().withKP(12));
     towerMotor.getConfigurator().apply(config);
 
-    // TODO: me
     TalonFXConfiguration config2 =
         new TalonFXConfiguration()
-            .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Coast));
+            .withMotorOutput(
+                new MotorOutputConfigs()
+                    .withNeutralMode(NeutralModeValue.Coast)
+                    .withInverted(InvertedValue.Clockwise_Positive))
+            .withSlot0(new Slot0Configs().withKP(1));
     hopperRollerMotor.getConfigurator().apply(config2);
 
-    // TODO: me
     TalonFXConfiguration config3 =
         new TalonFXConfiguration()
             .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Coast));
@@ -58,39 +59,52 @@ public class HoppertReal implements HoppertIO {
     Logger.recordOutput("Hoppert/Wheels Active", hopperWheelsRunning);
     Logger.recordOutput("Hoppert/Tower Motor Active", towerMotorRunning);
     Logger.recordOutput("Hoppert/Tower Motor Reversed", towerMotorReversed);
+    Logger.recordOutput("Hoppert/TowerSpeed", towerMotor.getVelocity().getValueAsDouble());
+    Logger.recordOutput("Hoppert/TowerTemp", towerMotor.getDeviceTemp().getValueAsDouble());
   }
 
   @Override
   public void runHopperBackwards() {
-    hopperRollerMotor.setControl(new DutyCycleOut(-0.5));
+    hopperRollerMotor.setControl(new VelocityVoltage(-28));
     hopperRollersRunning = true;
     hopperRollersReversed = true;
   }
 
   @Override
   public void runHopperForwards() {
-    hopperRollerMotor.setControl(new DutyCycleOut(0.5));
+    hopperRollerMotor.setControl(new VelocityVoltage(28));
     hopperRollersRunning = true;
     hopperRollersReversed = false;
   }
 
   @Override
   public void runTowerBackwards() {
-    towerMotor.setControl(new DutyCycleOut(-0.75).withEnableFOC(true));
+    towerMotor.setControl(new VelocityVoltage(58).withEnableFOC(true));
     towerMotorRunning = true;
     towerMotorReversed = true;
   }
 
   @Override
   public void runTowerForwards() {
-    towerMotor.setControl(new DutyCycleOut(-0.75).withEnableFOC(true));
+    towerMotor.setControl(new VelocityVoltage(-58).withEnableFOC(true));
     towerMotorRunning = true;
     towerMotorReversed = false;
   }
 
   @Override
+  public boolean towerAtSpeed() {
+    return towerMotor.getVelocity().isNear(-58, 2);
+  }
+
+  @Override
   public void runHopperWheels() {
-    hopperWheelsMotor.setControl(new DutyCycleOut(0.5));
+    hopperWheelsMotor.setControl(new DutyCycleOut(0.9));
+    hopperWheelsRunning = true;
+  }
+
+  @Override
+  public void reverseHopperWheels() {
+    hopperWheelsMotor.setControl(new DutyCycleOut(-0.9));
     hopperWheelsRunning = true;
   }
 
@@ -104,7 +118,7 @@ public class HoppertReal implements HoppertIO {
 
   @Override
   public void stopTower() {
-    towerMotor.setControl(new StaticBrake());
+    towerMotor.setControl(new CoastOut());
     hopperRollersRunning = false;
   }
 }
