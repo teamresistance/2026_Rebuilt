@@ -5,7 +5,6 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants.DriveMotorArrangement;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerMotorArrangement;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import edu.wpi.first.net.WebServer;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -165,7 +164,6 @@ public class Robot extends LoggedRobot {
     //    Logger.recordOutput("Shifts/Current Shift", owner);
     //    Logger.recordOutput("Shifts/Current Shift Color", ShiftUtil.getShiftColor());
     Logger.recordOutput("Shifts/Time Left", ShiftUtil.getTimeLeftInCurrentShift());
-    Logger.recordOutput("Shifts/mt", DriverStation.getMatchTime());
     Logger.recordOutput("Shifts/Auto Winner Color", ShiftUtil.getAutoWinnerColor());
 
     // inform the operator that the shifts had an error and need to be assigned manually.

@@ -46,40 +46,6 @@ public class HoppertCommand extends Command {
 
   @Override
   public void execute() {
-    if (shooter.isShooting()) {
-      switch (MODE) {
-        case 1 -> runMode1();
-        case 2 -> runMode2();
-        case 3 -> runMode3();
-      }
-    } else {
-      hoppert.stopHopper();
-      hoppert.stopTower();
-    }
-  }
-
-  // Original behavior
-  private void runMode1() {
-    hoppert.runHopperBackwards();
-    hoppert.runTowerForwards();
-
-    if (shooter.atTargetRPS() && hoppert.towerAtSpeed() && shooter.atShootingSetpoints()) {
-      hoppert.runHopperWheels();
-    }
-  }
-
-  // Hopper forwards instead of backwards
-  private void runMode2() {
-    hoppert.runHopperForwards();
-    hoppert.runTowerForwards();
-
-    if (shooter.atTargetRPS() && hoppert.towerAtSpeed() && shooter.atShootingSetpoints()) {
-      hoppert.runHopperWheels();
-    }
-  }
-
-  // Pulses: backwards -> off -> forwards, timer-driven
-  private void runMode3() {
 
     if (hoppert.towerAtSpeed() && shooter.atTargetRPS()) {
       hoppert.runHopperWheels();
