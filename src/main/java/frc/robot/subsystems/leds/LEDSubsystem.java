@@ -6,7 +6,6 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import java.util.*;
-import org.littletonrobotics.junction.Logger;
 
 public class LEDSubsystem extends SubsystemBase {
 
@@ -35,14 +34,14 @@ public class LEDSubsystem extends SubsystemBase {
     if (highest != null) {
       Constants.LEDMode currentMode = highest.getLEDMode();
       applyMode(highest, currentMode);
-      Logger.recordOutput("LEDS/Active Stream", highest.name);
+      //      Logger.recordOutput("LEDS/Active Stream", highest.name);
       lastStream = highest;
       lastLEDMode = currentMode;
     }
   }
 
   private void applyMode(LEDStream mode, Constants.LEDMode ledMode) {
-    Logger.recordOutput("LEDS/Active Mode", ledMode);
+    //    Logger.recordOutput("LEDS/Active Mode", ledMode);
 
     switch (ledMode) {
       case DISABLED:

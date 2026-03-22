@@ -99,11 +99,11 @@ public final class FieldConstants {
   public static final double BUMPZONE_END_RED = APRILTAG_10.getX();
 
   public static final Pose2d RED_LEFT_CLIMBER_ALIGN =
-      new Pose2d(15.46, 3.5, Rotation2d.fromDegrees(0));
+      new Pose2d(15.46, 3.54, Rotation2d.fromDegrees(0));
   public static final Pose2d RED_RIGHT_CLIMBER_ALIGN =
-      new Pose2d(15.49, 5.12, Rotation2d.fromDegrees(-180));
+      new Pose2d(15.49, 5.08, Rotation2d.fromDegrees(-180));
   public static final Pose2d BLUE_LEFT_CLIMBER_ALIGN =
-      new Pose2d(1.03, 4.58, Rotation2d.fromDegrees(-180));
+      new Pose2d(1.03, 4.54, Rotation2d.fromDegrees(-180));
   public static final Pose2d BLUE_RIGHT_CLIMBER_ALIGN =
-      new Pose2d(1.01, 2.95, Rotation2d.fromDegrees(0));
+      new Pose2d(1.01, 2.99, Rotation2d.fromDegrees(0));
 }

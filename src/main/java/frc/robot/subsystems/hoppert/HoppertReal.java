@@ -54,14 +54,15 @@ public class HoppertReal implements HoppertIO {
 
   @Override
   public void periodic() {
-    Logger.recordOutput("Hoppert/Rollers Active", hopperRollersRunning);
-    Logger.recordOutput("Hoppert/Wheels Active", hopperWheelsRunning);
-    Logger.recordOutput("Hoppert/Tower Motor Active", towerMotorRunning);
-    Logger.recordOutput("Hoppert/TowerSpeed", towerMotor.getVelocity().getValueAsDouble());
+    //    Logger.recordOutput("Hoppert/Rollers Active", hopperRollersRunning);
+    //    Logger.recordOutput("Hoppert/Wheels Active", hopperWheelsRunning);
+    //    Logger.recordOutput("Hoppert/Tower Motor Active", towerMotorRunning);
+    //    Logger.recordOutput("Hoppert/TowerSpeed", towerMotor.getVelocity().getValueAsDouble());
     Logger.recordOutput("Hoppert/TowerTemp", towerMotor.getDeviceTemp().getValueAsDouble());
-    Logger.recordOutput("Hoppert/TowerCurrent", towerMotor.getSupplyCurrent().getValueAsDouble());
-    Logger.recordOutput(
-        "Hoppert/BottomCurrent", hopperRollerMotor.getSupplyCurrent().getValueAsDouble());
+    //    Logger.recordOutput("Hoppert/TowerCurrent",
+    // towerMotor.getSupplyCurrent().getValueAsDouble());
+    //    Logger.recordOutput(
+    //        "Hoppert/BottomCurrent", hopperRollerMotor.getSupplyCurrent().getValueAsDouble());
   }
 
   @Override

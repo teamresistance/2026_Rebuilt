@@ -23,12 +23,6 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "Toggle Intake"
-          }
-        },
-        {
           "type": "path",
           "data": {
             "pathName": "Center Bottom Slow"
@@ -44,6 +38,12 @@
           "type": "named",
           "data": {
             "name": "Climb Up"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Toggle Intake"
           }
         }
       ]

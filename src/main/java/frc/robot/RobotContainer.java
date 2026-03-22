@@ -66,6 +66,7 @@ public class RobotContainer {
 
   // Controller
   private final CommandXboxController driver = new CommandXboxController(0);
+  private final CommandXboxController coDriver = new CommandXboxController(1);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -129,7 +130,7 @@ public class RobotContainer {
                 () ->
                     drive
                         .getRotation()
-                        .plus(Rotation2d.fromDegrees(shooter.getDriveAssistanceAngle()))
+                        .plus(Rotation2d.fromDegrees(shooter.getDriveAssistanceAngle() + 180))
                         .plus(Rotation2d.fromDegrees(-driver.getRightX() * 90))),
             DriveCommands.joystickDrive(
                 drive,
@@ -289,7 +290,11 @@ public class RobotContainer {
                         : Constants.LEDMode.PASSING_DOUBTFUL;
                   }
                 },
-                () -> driver.rightTrigger().getAsBoolean())
+                () ->
+                    driver
+                        .rightTrigger()
+                        .or((coDriver.rightTrigger().or(coDriver.rightBumper())))
+                        .getAsBoolean())
             .withFramerateSupplier(
                 () -> {
                   double confidence = TurretConfidenceUtil.calculateConfidence(drive);
@@ -426,11 +431,14 @@ public class RobotContainer {
 
     // shoot
     (driver.rightTrigger().or(driver.rightBumper()))
+        .or(coDriver.rightTrigger().or(coDriver.rightBumper()))
         .whileTrue(new ShootCommand(drive, shooter, () -> driver.rightBumper().getAsBoolean()));
     (driver.rightTrigger().or(driver.rightBumper()))
+        .or((coDriver.rightTrigger().or(coDriver.rightBumper())))
         .and(driver.y().negate())
         .whileTrue(driveShooting);
     (driver.rightTrigger().or(driver.rightBumper()))
+        .or((coDriver.rightTrigger().or(coDriver.rightBumper())))
         .onFalse(
             new ParallelDeadlineGroup(
                     new ShootCommand(drive, shooter, () -> driver.rightBumper().getAsBoolean())
@@ -457,8 +465,14 @@ public class RobotContainer {
     // horizontal.
     //    driver.povUp().onTrue(Commands.runOnce(() -> shooter.adjustVerticalTrim(true)));
     //    driver.povDown().onTrue(Commands.runOnce(() -> shooter.adjustVerticalTrim(false)));
-    driver.povRight().onTrue(Commands.runOnce(() -> shooter.adjustHorizontalTrim(false)));
-    driver.povLeft().onTrue(Commands.runOnce(() -> shooter.adjustHorizontalTrim(true)));
+    driver
+        .povRight()
+        .or(coDriver.povRight())
+        .onTrue(Commands.runOnce(() -> shooter.adjustHorizontalTrim(false)));
+    driver
+        .povLeft()
+        .or(coDriver.povRight())
+        .onTrue(Commands.runOnce(() -> shooter.adjustHorizontalTrim(true)));
   }
 
   /**
