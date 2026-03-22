@@ -151,7 +151,7 @@ public class VisionSubsystem extends SubsystemBase {
 
       // Continue if the camera doesn't have any targets
       if (!unprocessedResult.hasTargets()) {
-        Logger.recordOutput("Photon/Tags Used " + instanceIndex, 0);
+        //        Logger.recordOutput("Photon/Tags Used " + instanceIndex, 0);
         continue;
       }
 
@@ -178,7 +178,8 @@ public class VisionSubsystem extends SubsystemBase {
           }
         }
 
-        Logger.recordOutput("Photon/Camera Pose (Multi tag) " + instanceIndex, cameraPose);
+        //        Logger.recordOutput("Photon/Camera Pose (Multi tag) " + instanceIndex,
+        // cameraPose);
       } else {
         // If not using multitag, disambiguate and then use
         PhotonTrackedTarget target = unprocessedResult.targets.get(0);
