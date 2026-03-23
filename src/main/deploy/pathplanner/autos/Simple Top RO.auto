@@ -7,13 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "ISC Top Cross"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "ISC Top Intake Prepare"
+            "pathName": "Offset Backup"
           }
         },
         {
@@ -23,27 +17,15 @@
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "ISC Top Intake"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "ISC Top Return"
-          }
-        },
-        {
           "type": "named",
           "data": {
-            "name": "Shoot 5s"
+            "name": "Shoot 7s"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "ISC Top ALTC"
+            "pathName": "Offset CTS"
           }
         },
         {
@@ -57,11 +39,17 @@
           "data": {
             "name": "Climb Up"
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Toggle Intake"
+          }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": "ISC",
+  "folder": "Simple (BACKUP)",
   "choreoAuto": false
 }

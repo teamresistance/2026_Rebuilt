@@ -8,17 +8,14 @@ import frc.robot.subsystems.shooter.ShootingConstants;
 
 public class TurretConfidenceUtil {
 
-  // TODO: Tune the standard deviation to the robot's accuracy
   private static final double ERROR_STD_DEV = 2.5;
 
   // Portion of rotation error that remains after turret compensation
   // 0 = perfect turret
   // 1 = no compensation (stationary shooter)
-  private static final double ROTATION_COMPENSATION_FACTOR =
-      0.3; // TODO: Tune this based on turret performance
+  private static final double ROTATION_COMPENSATION_FACTOR = 0.3;
 
-  private static final double DISTANCE_FACTOR =
-      0.3; // TODO: Tune this based on the impact distance from the goal has on shot confidence
+  private static final double DISTANCE_FACTOR = 0.3;
 
   public static double calculateConfidence(SwerveDriveIO drive) {
     // Get current robot pose and velocity

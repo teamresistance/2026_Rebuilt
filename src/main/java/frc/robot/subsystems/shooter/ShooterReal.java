@@ -2,10 +2,7 @@ package frc.robot.subsystems.shooter;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.*;
-import com.ctre.phoenix6.controls.CoastOut;
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.controls.StrictFollower;
-import com.ctre.phoenix6.controls.VelocityDutyCycle;
+import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -101,7 +98,8 @@ public class ShooterReal implements ShooterIO {
             .withMotorOutput(
                 new MotorOutputConfigs()
                     .withInverted(InvertedValue.Clockwise_Positive)
-                    .withPeakReverseDutyCycle(0));
+                    .withPeakReverseDutyCycle(0))
+            .withMotionMagic(new MotionMagicConfigs().withMotionMagicAcceleration(10000));
     flywheelMotor.getConfigurator().apply(flywheelConfig);
 
     TalonFXConfiguration flywheelConfig2 =
@@ -149,7 +147,7 @@ public class ShooterReal implements ShooterIO {
       flywheelMotor2.setControl(new CoastOut());
       return;
     }
-    flywheelMotor.setControl(new VelocityDutyCycle(rps));
+    flywheelMotor.setControl(new MotionMagicVelocityVoltage(rps));
     flywheelMotor2.setControl(new StrictFollower(Constants.SHOOTER_FLYWHEEL_ID));
   }
 
@@ -279,19 +277,19 @@ public class ShooterReal implements ShooterIO {
     Logger.recordOutput("Shooter/Flywheel Target RPS", flywheelTargetRPS);
     Logger.recordOutput(
         "Shooter/Flywheel Real RPS", flywheelMotor.getVelocity().getValueAsDouble());
-    Logger.recordOutput("Shooter/Turret Target Angle", turretTargetAngle);
-    Logger.recordOutput(
-        "Shooter/Turret Real Angle",
-        ShootingUtil.toTurretDegrees(turretMotor.getPosition().getValueAsDouble()));
-    Logger.recordOutput("Shooter/Hood Target Angle", hoodTargetAngle);
-    Logger.recordOutput(
-        "Shooter/Hood Real Angle",
-        ShootingUtil.toTurretDegrees(
-            ShootingUtil.toHoodDegrees(hoodMotor.getPosition().getValueAsDouble())));
-    Logger.recordOutput("Shooter/Drive Assist Angle", turretDriveAssistTargetAngle);
-    Logger.recordOutput("Shooter/Vertical Trim", verticalTrim);
+    //    Logger.recordOutput("Shooter/Turret Target Angle", turretTargetAngle);
+    //    Logger.recordOutput(
+    //        "Shooter/Turret Real Angle",
+    //        ShootingUtil.toTurretDegrees(turretMotor.getPosition().getValueAsDouble()));
+    //    Logger.recordOutput("Shooter/Hood Target Angle", hoodTargetAngle);
+    //    Logger.recordOutput(
+    //        "Shooter/Hood Real Angle",
+    //        ShootingUtil.toTurretDegrees(
+    //            ShootingUtil.toHoodDegrees(hoodMotor.getPosition().getValueAsDouble())));
+    //    Logger.recordOutput("Shooter/Drive Assist Angle", turretDriveAssistTargetAngle);
+    //    Logger.recordOutput("Shooter/Vertical Trim", verticalTrim);
     Logger.recordOutput("Shooter/Horizontal Trim", horizontalTrim);
-    Logger.recordOutput("Shooter/AtSetpoints HT", atShootingSetpoints());
-    Logger.recordOutput("Shooter/AtSetpoints F", atTargetRPS());
+    //    Logger.recordOutput("Shooter/AtSetpoints HT", atShootingSetpoints());
+    //    Logger.recordOutput("Shooter/AtSetpoints F", atTargetRPS());
   }
 }

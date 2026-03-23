@@ -120,7 +120,7 @@ public class VisionSubsystem extends SubsystemBase {
     Pose2d currentPose = poseSupplier.get();
     visionUpdates = new ArrayList<>();
 
-    double singleTagAdjustment = DriverStation.isAutonomous() ? 1.0 : 1.6;
+    double singleTagAdjustment = DriverStation.isAutonomous() ? 0.75 : 1.6;
     if (Constants.TUNING_MODE) SingleTagAdjustment.updateLoggedTagAdjustments();
 
     // Loop through all the cameras
@@ -137,9 +137,8 @@ public class VisionSubsystem extends SubsystemBase {
       PhotonPipelineResult unprocessedResult =
           unprocessedResults.get(unprocessedResults.size() - 1);
 
-      //      Logger.recordOutput(
-      //          LOGGING_KEY_PREFIX + instanceIndex + " Has Targets",
-      // unprocessedResult.hasTargets());
+      Logger.recordOutput(
+          LOGGING_KEY_PREFIX + instanceIndex + " Has Targets", unprocessedResult.hasTargets());
       //      Logger.recordOutput(
       //          LOGGING_KEY_PREFIX + instanceIndex + "LatencyMS",
       //          unprocessedResult.metadata.getLatencyMillis());

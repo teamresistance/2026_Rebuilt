@@ -2,10 +2,7 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
-import com.ctre.phoenix6.controls.LarsonAnimation;
-import com.ctre.phoenix6.controls.RainbowAnimation;
-import com.ctre.phoenix6.controls.SolidColor;
-import com.ctre.phoenix6.controls.StrobeAnimation;
+import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.signals.RGBWColor;
 import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -56,7 +53,7 @@ public final class Constants {
   public static final double SHOOTER_HOOD_MAX_PITCH = 43;
   public static final double SHOOTER_HOOD_MIN_PITCH = 17.5;
   public static final double SHOOTER_TURRET_MAX_YAW = 130;
-  public static final double SHOOTER_TURRET_MIN_YAW = -135;
+  public static final double SHOOTER_TURRET_MIN_YAW = -130;
   public static final double SHOOTER_TRIM_ADJUSTMENT_INCREMENT = 3; // TODO: number w/ driver
 
   public static final Transform2d ROBOT_TO_TURRET =
@@ -97,8 +94,9 @@ public final class Constants {
           .withFrameRate(5);
   public static final SolidColor LED_ANIMATION_ACTIVE =
       new SolidColor(LED_START_INDEX, LED_END_INDEX).withColor(new RGBWColor(255, 0, 255));
-  public static final SolidColor LED_ANIMATION_INACTIVE =
-      new SolidColor(LED_START_INDEX, LED_END_INDEX).withColor(new RGBWColor(255, 255, 255));
+  public static final EmptyAnimation LED_ANIMATION_INACTIVE = new EmptyAnimation(0);
+  //  public static final SolidColor LED_ANIMATION_INACTIVE =
+  //      new SolidColor(LED_START_INDEX, LED_END_INDEX).withColor(new RGBWColor(255, 255, 255));
   public static final StrobeAnimation LED_ANIMATION_BUMP =
       new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
           .withFrameRate(10)
@@ -108,18 +106,21 @@ public final class Constants {
           .withFrameRate(20)
           .withColor(new RGBWColor(255, 150, 0))
           .withSize(20);
-  public static final StrobeAnimation LED_ANIMATION_DISABLED_GOOD =
-      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
-          .withColor(new RGBWColor(0, 15, 0))
-          .withFrameRate(1);
-  public static final StrobeAnimation LED_ANIMATION_DISABLED_FINE =
-      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
-          .withColor(new RGBWColor(15, 3, 0))
-          .withFrameRate(1);
-  public static final StrobeAnimation LED_ANIMATION_DISABLED_BAD =
-      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
-          .withColor(new RGBWColor(15, 0, 0))
-          .withFrameRate(1);
+  public static final EmptyAnimation LED_ANIMATION_DISABLED_GOOD = new EmptyAnimation(0);
+  public static final EmptyAnimation LED_ANIMATION_DISABLED_FINE = new EmptyAnimation(0);
+  public static final EmptyAnimation LED_ANIMATION_DISABLED_BAD = new EmptyAnimation(0);
+  //  public static final StrobeAnimation LED_ANIMATION_DISABLED_GOOD =
+  //      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
+  //          .withColor(new RGBWColor(0, 15, 0))
+  //          .withFrameRate(1);
+  //  public static final StrobeAnimation LED_ANIMATION_DISABLED_FINE =
+  //      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
+  //          .withColor(new RGBWColor(15, 3, 0))
+  //          .withFrameRate(1);
+  //  public static final StrobeAnimation LED_ANIMATION_DISABLED_BAD =
+  //      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
+  //          .withColor(new RGBWColor(15, 0, 0))
+  //          .withFrameRate(1);
 
   // at what confidence is it considered "confident" instead of "doubtful" TODO: me
   public static final double CONFIDENCE_THRESHOLD = 0.5;
