@@ -72,11 +72,24 @@ public final class Constants {
     INACTIVE,
     BUMP,
     AUTO,
-    DISABLED
+    DISABLED,
+    TEMPERATURE_WARNING,
+    TEMPERATURE_CRITICAL
   }
+
 
   public static final int LED_START_INDEX = 0;
   public static final int LED_END_INDEX = 161;
+
+  public static final StrobeAnimation LED_ANIMATION_TEMP_WARNING =
+    new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
+        .withColor(new RGBWColor(255, 100, 0))  // Orange
+        .withFrameRate(2);
+
+  public static final StrobeAnimation LED_ANIMATION_TEMP_CRITICAL =
+    new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
+        .withColor(new RGBWColor(255, 0, 0))    // Red
+        .withFrameRate(10);
 
   public static final RainbowAnimation LED_ANIMATION_RAINBOW =
       new RainbowAnimation(LED_START_INDEX, LED_END_INDEX).withFrameRate(60);

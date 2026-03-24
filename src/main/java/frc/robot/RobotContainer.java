@@ -41,6 +41,8 @@ import java.util.Set;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.photonvision.PhotonCamera;
+import frc.robot.subsystems.temperature.TemperatureMonitor;
+
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -54,6 +56,7 @@ public class RobotContainer {
   public final PhotonCamera backLeftCamera = new PhotonCamera("back-left");
   public final PhotonCamera backRightCamera = new PhotonCamera("back-right");
   private final Alert cameraFailureAlert;
+  private final TemperatureMonitor tempMonitor = new TemperatureMonitor();
 
   // Subsystems
   private final SwerveDriveIO drive;
@@ -103,7 +106,9 @@ public class RobotContainer {
         shooter = new ShooterReal();
         hoppert = new HoppertReal();
         climber = new ClimberReal();
+        registerMotorsForTempMonitoring();
     }
+  
 
     configureNamedCommands();
 
@@ -191,6 +196,18 @@ public class RobotContainer {
                     drive,
                     GeomUtil.poseToTransform(OtherUtil.getClimberAlignPos(drive.getPose())))));
   }
+
+
+    private void registerMotorsForTempMonitoring() {
+        if (shooter instanceof ShooterReal) {
+            ShooterReal shooterReal = (ShooterReal) shooter;
+            tempMonitor.registerMotor("Shooter Hood", shooterReal.getHoodMotor());
+            tempMonitor.registerMotor("Shooter Turret", shooterReal.getTurretMotor());
+            tempMonitor.registerMotor("Shooter Flywheel 1", shooterReal.getFlywheelMotor());
+            tempMonitor.registerMotor("Shooter Flywheel 2", shooterReal.getFlywheelMotor2());
+        }
+    }
+
 
   private LoggedDashboardChooser<Command> configureAutos() {
     // Set up auto routines
@@ -490,6 +507,7 @@ public class RobotContainer {
   /**
    * Creates an LEDStream that runs the auto animation 20 seconds and then is never accessed again.
    */
+  
   public void runAutoLEDs() {
     LEDStream autoStream = new LEDStream("auto", 100, () -> Constants.LEDMode.AUTO);
     leds.addStream(autoStream);

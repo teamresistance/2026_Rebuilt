@@ -104,6 +104,10 @@ public class Robot extends LoggedRobot {
     // the Command-based framework to work.
     CommandScheduler.getInstance().run();
 
+SmartDashboard.putNumber("Temp/Highest", tempMonitor.getHighestTemperature());
+SmartDashboard.putString("Temp/Hottest Motor", tempMonitor.getHottestMotor());
+SmartDashboard.putBoolean("Temp/Any Overheating", tempMonitor.isAnyMotorOverheating());
+
     // Return to normal thread priority
     Threads.setCurrentThreadPriority(false, 10);
   }

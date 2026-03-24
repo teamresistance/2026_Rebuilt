@@ -31,6 +31,10 @@ public class ShooterReal implements ShooterIO {
   private double horizontalTrim = 0.0;
 
   private boolean emergencyStopSwivel = false;
+  public TalonFX getHoodMotor() { return hoodMotor; }
+  public TalonFX getTurretMotor() { return turretMotor; }
+  public TalonFX getFlywheelMotor() { return flywheelMotor; }
+  public TalonFX getFlywheelMotor2() { return flywheelMotor2; }
 
   /** Real implementation of a turret shooter. */
   public ShooterReal() {
