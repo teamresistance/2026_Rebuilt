@@ -372,6 +372,20 @@ public class RobotContainer {
   /** Defines button bindings and control triggers */
   private void configureButtonBindings() {
 
+    driver.povUp().onTrue(
+    Commands.runOnce(() -> {
+        double distance = ShootingUtil.getVirtualDistanceToTarget(
+            drive.getPose(), drive.getChassisSpeeds(), false);
+        ShootingHeatMap.recordShot(drive.getPose(), distance, true); // Success
+    }));
+
+driver.povDown().onTrue(
+    Commands.runOnce(() -> {
+        double distance = ShootingUtil.getVirtualDistanceToTarget(
+            drive.getPose(), drive.getChassisSpeeds(), false);
+        ShootingHeatMap.recordShot(drive.getPose(), distance, false); // Miss
+    }));
+
     // Default: normal drive
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
