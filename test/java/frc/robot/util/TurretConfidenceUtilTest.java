@@ -48,7 +48,9 @@ public class TurretConfidenceUtilTest {
     Translation2d target = new Translation2d(distance, 0);
     Pose2d targetPose = new Pose2d(target, new Rotation2d());
 
-    shootingUtilMock.when(() -> ShootingUtil.getShootingTarget(any(), anyBoolean())).thenReturn(targetPose);
+    shootingUtilMock
+        .when(() -> ShootingUtil.getShootingTarget(any(), anyBoolean()))
+        .thenReturn(targetPose);
 
     // Set up default distance and time of flight mocks
     shootingUtilMock
