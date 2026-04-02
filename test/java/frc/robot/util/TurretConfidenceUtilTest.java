@@ -2,6 +2,7 @@ package frc.robot.util;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.*;
 
 import edu.wpi.first.math.geometry.*;
@@ -47,11 +48,11 @@ public class TurretConfidenceUtilTest {
     Translation2d target = new Translation2d(distance, 0);
     Pose2d targetPose = new Pose2d(target, new Rotation2d());
 
-    shootingUtilMock.when(() -> ShootingUtil.getShootingTarget(any())).thenReturn(targetPose);
+    shootingUtilMock.when(() -> ShootingUtil.getShootingTarget(any(), anyBoolean())).thenReturn(targetPose);
 
     // Set up default distance and time of flight mocks
     shootingUtilMock
-        .when(() -> ShootingUtil.getVirtualDistanceToTarget(any(), any()))
+        .when(() -> ShootingUtil.getVirtualDistanceToTarget(any(), any(), anyBoolean()))
         .thenReturn(distance);
     shootingConstantsMock
         .when(() -> ShootingConstants.getTimeOfFlight(distance))
@@ -152,7 +153,7 @@ public class TurretConfidenceUtilTest {
     // Setup - stationary robot for distance test
     when(drive.getChassisSpeedsFieldRelative()).thenReturn(new ChassisSpeeds(0, 0, 0));
     shootingUtilMock
-        .when(() -> ShootingUtil.getVirtualDistanceToTarget(any(), any()))
+        .when(() -> ShootingUtil.getVirtualDistanceToTarget(any(), any(), anyBoolean()))
         .thenReturn(distance);
     shootingConstantsMock
         .when(() -> ShootingConstants.getTimeOfFlight(distance))
@@ -190,7 +191,7 @@ public class TurretConfidenceUtilTest {
     // Setup
     when(drive.getChassisSpeedsFieldRelative()).thenReturn(new ChassisSpeeds(vx, vy, rotation));
     shootingUtilMock
-        .when(() -> ShootingUtil.getVirtualDistanceToTarget(any(), any()))
+        .when(() -> ShootingUtil.getVirtualDistanceToTarget(any(), any(), anyBoolean()))
         .thenReturn(distance);
     shootingConstantsMock
         .when(() -> ShootingConstants.getTimeOfFlight(distance))
