@@ -31,6 +31,11 @@ public class HoppertSim implements HoppertIO {
   }
 
   @Override
+  public double getMecanumCurrent() {
+    return 0;
+  }
+
+  @Override
   public void runHopperForwards() {
     hopperRollersRunning = true;
     hopperRollersReversed = false;

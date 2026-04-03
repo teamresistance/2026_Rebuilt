@@ -44,7 +44,7 @@ public class ShooterReal implements ShooterIO {
 
     hoodConfig =
         new TalonFXConfiguration()
-            .withSlot0(new Slot0Configs().withKP(10).withKI(0).withKD(0).withKS(0))
+            .withSlot0(new Slot0Configs().withKP(10).withKI(0).withKD(0))
             .withMotionMagic(
                 new MotionMagicConfigs()
                     .withMotionMagicAcceleration(300)
@@ -86,9 +86,16 @@ public class ShooterReal implements ShooterIO {
                     .withForwardSoftLimitEnable(true));
     turretMotor.getConfigurator().apply(turretConfig);
 
-    TalonFXConfiguration flywheelConfig =
+    TalonFXConfiguration flywheelConfig = // ks 0.05 kv 0.128 OR kP 12
         new TalonFXConfiguration()
-            .withSlot0(new Slot0Configs().withKP(12).withKI(0).withKD(0).withKS(0))
+            .withSlot0(
+                new Slot0Configs()
+                    .withKP(0)
+                    .withKI(0)
+                    .withKD(0)
+                    .withKS(0)
+                    .withKV(0.128)
+                    .withKS(0.05))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
                     .withStatorCurrentLimit(50)

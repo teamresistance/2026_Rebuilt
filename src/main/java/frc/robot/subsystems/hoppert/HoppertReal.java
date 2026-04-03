@@ -54,10 +54,10 @@ public class HoppertReal implements HoppertIO {
 
   @Override
   public void periodic() {
-    //    Logger.recordOutput("Hoppert/Rollers Active", hopperRollersRunning);
-    //    Logger.recordOutput("Hoppert/Wheels Active", hopperWheelsRunning);
-    //    Logger.recordOutput("Hoppert/Tower Motor Active", towerMotorRunning);
-    //    Logger.recordOutput("Hoppert/TowerSpeed", towerMotor.getVelocity().getValueAsDouble());
+    Logger.recordOutput("Hoppert/Rollers Active", hopperRollersRunning);
+    Logger.recordOutput("Hoppert/Wheels Active", hopperWheelsRunning);
+    Logger.recordOutput("Hoppert/Tower Motor Active", towerMotorRunning);
+    Logger.recordOutput("Hoppert/TowerSpeed", towerMotor.getVelocity().getValueAsDouble());
     Logger.recordOutput("Hoppert/TowerTemp", towerMotor.getDeviceTemp().getValueAsDouble());
     //    Logger.recordOutput("Hoppert/TowerCurrent",
     // towerMotor.getSupplyCurrent().getValueAsDouble());
@@ -66,8 +66,13 @@ public class HoppertReal implements HoppertIO {
   }
 
   @Override
+  public double getMecanumCurrent() {
+    return hopperWheelsMotor.getStatorCurrent().getValueAsDouble();
+  }
+
+  @Override
   public void runHopperBackwards() {
-    hopperRollerMotor.setControl(new VelocityVoltage(-32));
+    hopperRollerMotor.setControl(new VelocityVoltage(-30));
     hopperRollersRunning = true;
     hopperRollersReversed = true;
   }
@@ -100,13 +105,13 @@ public class HoppertReal implements HoppertIO {
 
   @Override
   public void runHopperWheels() {
-    hopperWheelsMotor.setControl(new DutyCycleOut(0.9));
+    hopperWheelsMotor.setControl(new DutyCycleOut(1));
     hopperWheelsRunning = true;
   }
 
   @Override
   public void reverseHopperWheels() {
-    hopperWheelsMotor.setControl(new DutyCycleOut(-0.9));
+    hopperWheelsMotor.setControl(new DutyCycleOut(-0.3));
     hopperWheelsRunning = true;
   }
 
@@ -121,6 +126,6 @@ public class HoppertReal implements HoppertIO {
   @Override
   public void stopTower() {
     towerMotor.setControl(new CoastOut());
-    hopperRollersRunning = false;
+    towerMotorRunning = false;
   }
 }

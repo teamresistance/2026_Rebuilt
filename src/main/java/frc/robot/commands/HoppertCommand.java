@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.hoppert.HoppertIO;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.shooter.ShooterIO;
+import org.littletonrobotics.junction.Logger;
 
 public class HoppertCommand extends Command {
 
@@ -15,6 +16,12 @@ public class HoppertCommand extends Command {
   private static final double PULSE_BACKWARDS_DURATION = 1.4;
   private static final double PULSE_OFF_DURATION = 0.3;
   private static final double PULSE_FORWARDS_DURATION = 0;
+
+  private static final double HOPPER_WHEELS_DELAY = 0.75;
+
+  private static final double OVERCURRENT_THRESHOLD = 80.0;
+  private static final double OVERCURRENT_TRIGGER_DURATION = 0.5;
+  private static final double REVERSE_DURATION = 0.25;
 
   private enum PulseState {
     BACKWARDS,
@@ -27,7 +34,13 @@ public class HoppertCommand extends Command {
   private final IntakeIO intake;
 
   private final Timer pulseTimer = new Timer();
+  private final Timer startTimer = new Timer();
+  private final Timer overcurrentTimer = new Timer();
+  private final Timer reverseTimer = new Timer();
+
   private PulseState pulseState = PulseState.BACKWARDS;
+  private boolean isOvercurrentTriggered = false;
+  private boolean overcurrentTimerRunning = false;
 
   public HoppertCommand(HoppertIO hoppert, ShooterIO shooter, IntakeIO intake) {
     this.hoppert = hoppert;
@@ -42,14 +55,60 @@ public class HoppertCommand extends Command {
       pulseState = PulseState.BACKWARDS;
       pulseTimer.restart();
     }
+    startTimer.restart();
+    isOvercurrentTriggered = false;
+    overcurrentTimerRunning = false;
+    overcurrentTimer.stop();
+    overcurrentTimer.reset();
+    reverseTimer.stop();
+    reverseTimer.reset();
   }
 
   @Override
   public void execute() {
 
-    if (hoppert.towerAtSpeed() && shooter.atTargetRPS()) {
-      hoppert.runHopperWheels();
+    // Overcurrent detection
+    if (hoppert.getMecanumCurrent() > OVERCURRENT_THRESHOLD) {
+      Logger.recordOutput("Hoppert/JamDetected", true);
+      if (!overcurrentTimerRunning) {
+        overcurrentTimer.restart();
+        overcurrentTimerRunning = true;
+      } else if (overcurrentTimer.hasElapsed(OVERCURRENT_TRIGGER_DURATION)) {
+        Logger.recordOutput("Hoppert/DeJamming", true);
+        isOvercurrentTriggered = true;
+        reverseTimer.restart();
+        overcurrentTimerRunning = false;
+        overcurrentTimer.stop();
+        overcurrentTimer.reset();
+      }
+    } else {
+      Logger.recordOutput("Hoppert/JamDetected", false);
+      Logger.recordOutput("Hoppert/DeJamming", false);
+      overcurrentTimerRunning = false;
+      overcurrentTimer.stop();
+      overcurrentTimer.reset();
     }
+
+    // Reverse wheels if overcurrent was triggered, until reverse duration elapses
+    if (isOvercurrentTriggered) {
+      hoppert.reverseHopperWheels();
+      if (reverseTimer.hasElapsed(REVERSE_DURATION)) {
+        isOvercurrentTriggered = false;
+        reverseTimer.stop();
+        reverseTimer.reset();
+      }
+      return;
+    }
+
+    if (!shooter.isShooting()) {
+      hoppert.stopHopper();
+      if (pulseTimer.hasElapsed(PULSE_OFF_DURATION)) {
+        pulseState = PulseState.FORWARDS;
+        pulseTimer.restart();
+      }
+      return;
+    }
+
     hoppert.runTowerForwards();
 
     switch (pulseState) {
@@ -75,7 +134,8 @@ public class HoppertCommand extends Command {
         }
       }
     }
-    if (hoppert.towerAtSpeed() && shooter.atTargetRPS()) {
+
+    if (startTimer.hasElapsed(HOPPER_WHEELS_DELAY)) {
       hoppert.runHopperWheels();
     }
   }
