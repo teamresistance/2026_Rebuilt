@@ -26,5 +26,7 @@ public interface HoppertIO extends Subsystem {
 
   void stopHopper();
 
+  void stopWheels();
+
   void stopTower();
 }

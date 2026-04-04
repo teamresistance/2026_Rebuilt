@@ -3,8 +3,9 @@
   "robotLength": 0.85,
   "holonomicMode": true,
   "pathFolders": [
-    "ISC Top",
     "ISC Bottom",
+    "ISC Top",
+    "OUTPOST",
     "SIS Bottom",
     "SIS Top",
     "Simple (BACKUP)"

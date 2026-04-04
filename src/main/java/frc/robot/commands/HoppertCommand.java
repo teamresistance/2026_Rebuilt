@@ -14,7 +14,7 @@ public class HoppertCommand extends Command {
 
   // Mode 3 pulse timings (seconds)
   private static final double PULSE_BACKWARDS_DURATION = 1.4;
-  private static final double PULSE_OFF_DURATION = 0.3;
+  private static final double PULSE_OFF_DURATION = 0;
   private static final double PULSE_FORWARDS_DURATION = 0;
 
   private static final double HOPPER_WHEELS_DELAY = 0.75;
@@ -102,6 +102,7 @@ public class HoppertCommand extends Command {
 
     if (!shooter.isShooting()) {
       hoppert.stopHopper();
+      hoppert.stopWheels();
       if (pulseTimer.hasElapsed(PULSE_OFF_DURATION)) {
         pulseState = PulseState.FORWARDS;
         pulseTimer.restart();

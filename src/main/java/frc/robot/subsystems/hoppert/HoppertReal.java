@@ -6,6 +6,7 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -72,7 +73,7 @@ public class HoppertReal implements HoppertIO {
 
   @Override
   public void runHopperBackwards() {
-    hopperRollerMotor.setControl(new VelocityVoltage(-30));
+    hopperRollerMotor.setControl(new VelocityVoltage(-24));
     hopperRollersRunning = true;
     hopperRollersReversed = true;
   }
@@ -118,8 +119,12 @@ public class HoppertReal implements HoppertIO {
   @Override
   public void stopHopper() {
     hopperRollerMotor.setControl(new CoastOut());
-    hopperWheelsMotor.setControl(new CoastOut());
     hopperRollersRunning = false;
+  }
+
+  @Override
+  public void stopWheels() {
+    hopperWheelsMotor.setControl(new StaticBrake());
     hopperWheelsRunning = false;
   }
 

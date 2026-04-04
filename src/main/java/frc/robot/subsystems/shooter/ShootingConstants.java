@@ -14,13 +14,15 @@ public class ShootingConstants {
     distanceToRpsMap.put(1.96, 46.0);
     distanceToRpsMap.put(2.17, 50.0);
     distanceToRpsMap.put(2.33, 50.0);
-    distanceToRpsMap.put(2.51, 50.0);
-    distanceToRpsMap.put(2.82, 51.0);
-    distanceToRpsMap.put(3.05, 51.0);
-    distanceToRpsMap.put(3.3, 51.0);
-    distanceToRpsMap.put(3.5, 53.0);
-    distanceToRpsMap.put(3.72, 53.0);
-    distanceToRpsMap.put(4.27, 54.5);
+    // BEGIN GOOD
+    distanceToRpsMap.put(2.51, 47.2);
+    distanceToRpsMap.put(2.69, 47.2);
+    distanceToRpsMap.put(3.03, 48.8);
+    distanceToRpsMap.put(3.29, 50.0);
+    distanceToRpsMap.put(3.5, 51.3);
+    distanceToRpsMap.put(3.72, 52.6);
+    distanceToRpsMap.put(4.27, 53.0);
+    // END GOOD
     distanceToRpsMap.put(4.54, 57.0);
     distanceToRpsMap.put(4.71, 57.0);
     distanceToRpsMap.put(4.99, 58.5);
