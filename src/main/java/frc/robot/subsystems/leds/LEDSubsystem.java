@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import java.util.*;
+import org.littletonrobotics.junction.Logger;
 
 public class LEDSubsystem extends SubsystemBase {
 
@@ -41,7 +42,7 @@ public class LEDSubsystem extends SubsystemBase {
   }
 
   private void applyMode(LEDStream mode, Constants.LEDMode ledMode) {
-    //    Logger.recordOutput("LEDS/Active Mode", ledMode);
+    Logger.recordOutput("LEDS/Active Mode", ledMode);
 
     switch (ledMode) {
       case DISABLED:
@@ -91,6 +92,18 @@ public class LEDSubsystem extends SubsystemBase {
         break;
       case INACTIVE:
         candle.setControl(Constants.LED_ANIMATION_INACTIVE);
+        break;
+      case CLOSE_TO_NEXT_SHIFT:
+        candle.setControl(Constants.LED_ANIMATION_CLOSE_TO_NEXT_SHIFT);
+        break;
+      case CLOSE_TO_NEXT_SHIFT_R:
+        candle.setControl(Constants.LED_ANIMATION_CLOSE_TO_NEXT_SHIFT_R);
+        break;
+      case CLOSE_TO_NEXT_SHIFT_B:
+        candle.setControl(Constants.LED_ANIMATION_CLOSE_TO_NEXT_SHIFT_B);
+        break;
+      case ENDGAME:
+        candle.setControl(Constants.LED_ANIMATION_ENDGAME);
         break;
     }
   }

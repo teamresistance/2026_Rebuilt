@@ -20,7 +20,7 @@ public final class Constants {
 
   public static boolean TEST_MODE = false;
   public static final Mode CURRENT_MODE = RobotBase.isReal() ? Mode.REAL : Mode.SIM;
-  public static final boolean TUNING_MODE = false;
+  public static final boolean TUNING_MODE = true;
   public static final PathConstraints PATH_CONSTRAINTS =
       new PathConstraints(
           TunerConstants.kSpeedAt12Volts.in(MetersPerSecond),
@@ -72,7 +72,11 @@ public final class Constants {
     INACTIVE,
     BUMP,
     AUTO,
-    DISABLED
+    DISABLED,
+    CLOSE_TO_NEXT_SHIFT,
+    CLOSE_TO_NEXT_SHIFT_R,
+    CLOSE_TO_NEXT_SHIFT_B,
+    ENDGAME
   }
 
   public static final int LED_START_INDEX = 0;
@@ -121,6 +125,22 @@ public final class Constants {
   //      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
   //          .withColor(new RGBWColor(15, 0, 0))
   //          .withFrameRate(1);
+  public static final StrobeAnimation LED_ANIMATION_CLOSE_TO_NEXT_SHIFT =
+      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
+          .withColor(new RGBWColor(255, 165, 0))
+          .withFrameRate(4);
+  public static final StrobeAnimation LED_ANIMATION_CLOSE_TO_NEXT_SHIFT_R =
+      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
+          .withColor(new RGBWColor(255, 50, 50))
+          .withFrameRate(6);
+  public static final StrobeAnimation LED_ANIMATION_CLOSE_TO_NEXT_SHIFT_B =
+      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
+          .withColor(new RGBWColor(50, 50, 255))
+          .withFrameRate(6);
+  public static final StrobeAnimation LED_ANIMATION_ENDGAME =
+      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
+          .withColor(new RGBWColor(255, 255, 0))
+          .withFrameRate(4);
 
   // at what confidence is it considered "confident" instead of "doubtful" TODO: me
   public static final double CONFIDENCE_THRESHOLD = 0.5;
