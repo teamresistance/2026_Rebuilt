@@ -7,7 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Center Backup"
+            "pathName": "Outpost Backup"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 3.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Outpost OPR"
           }
         },
         {
@@ -19,13 +31,19 @@
         {
           "type": "named",
           "data": {
-            "name": "Shoot 7s"
+            "name": "Shoot 10s"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Toggle Intake"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Center Bottom Slow"
+            "pathName": "Outpost ALTC"
           }
         },
         {
@@ -39,17 +57,11 @@
           "data": {
             "name": "Climb Up"
           }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Toggle Intake"
-          }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": "Simple",
+  "folder": null,
   "choreoAuto": false
 }
