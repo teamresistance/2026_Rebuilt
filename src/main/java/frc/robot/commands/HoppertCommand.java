@@ -5,12 +5,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.hoppert.HoppertIO;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.shooter.ShooterIO;
-import org.littletonrobotics.junction.Logger;
+import java.util.function.BooleanSupplier;
 
 public class HoppertCommand extends Command {
-
-  // Set this to 1, 2, or 3
-  private static final int MODE = 3;
 
   // Mode 3 pulse timings (seconds)
   private static final double PULSE_BACKWARDS_DURATION = 1.4;
@@ -42,19 +39,21 @@ public class HoppertCommand extends Command {
   private boolean isOvercurrentTriggered = false;
   private boolean overcurrentTimerRunning = false;
 
-  public HoppertCommand(HoppertIO hoppert, ShooterIO shooter, IntakeIO intake) {
+  private BooleanSupplier triggerSup;
+
+  public HoppertCommand(
+      HoppertIO hoppert, ShooterIO shooter, IntakeIO intake, BooleanSupplier triggerHeld) {
     this.hoppert = hoppert;
     this.shooter = shooter;
     this.intake = intake;
+    triggerSup = triggerHeld;
     addRequirements(hoppert);
   }
 
   @Override
   public void initialize() {
-    if (MODE == 3) {
-      pulseState = PulseState.BACKWARDS;
-      pulseTimer.restart();
-    }
+    pulseState = PulseState.BACKWARDS;
+    pulseTimer.restart();
     startTimer.restart();
     isOvercurrentTriggered = false;
     overcurrentTimerRunning = false;
@@ -69,12 +68,12 @@ public class HoppertCommand extends Command {
 
     // Overcurrent detection
     if (hoppert.getMecanumCurrent() > OVERCURRENT_THRESHOLD) {
-      Logger.recordOutput("Hoppert/JamDetected", true);
+      //      Logger.recordOutput("Hoppert/JamDetected", true);
       if (!overcurrentTimerRunning) {
         overcurrentTimer.restart();
         overcurrentTimerRunning = true;
       } else if (overcurrentTimer.hasElapsed(OVERCURRENT_TRIGGER_DURATION)) {
-        Logger.recordOutput("Hoppert/DeJamming", true);
+        //        Logger.recordOutput("Hoppert/DeJamming", true);
         isOvercurrentTriggered = true;
         reverseTimer.restart();
         overcurrentTimerRunning = false;
@@ -82,8 +81,8 @@ public class HoppertCommand extends Command {
         overcurrentTimer.reset();
       }
     } else {
-      Logger.recordOutput("Hoppert/JamDetected", false);
-      Logger.recordOutput("Hoppert/DeJamming", false);
+      //      Logger.recordOutput("Hoppert/JamDetected", false);
+      //      Logger.recordOutput("Hoppert/DeJamming", false);
       overcurrentTimerRunning = false;
       overcurrentTimer.stop();
       overcurrentTimer.reset();
@@ -136,7 +135,7 @@ public class HoppertCommand extends Command {
       }
     }
 
-    if (startTimer.hasElapsed(HOPPER_WHEELS_DELAY)) {
+    if (startTimer.hasElapsed(HOPPER_WHEELS_DELAY) && triggerSup.getAsBoolean()) {
       hoppert.runHopperWheels();
     }
   }

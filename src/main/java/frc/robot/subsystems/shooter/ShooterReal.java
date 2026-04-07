@@ -60,7 +60,7 @@ public class ShooterReal implements ShooterIO {
 
     turretConfig =
         new TalonFXConfiguration()
-            .withSlot0(new Slot0Configs().withKP(2).withKI(0).withKD(0).withKS(0))
+            .withSlot0(new Slot0Configs().withKP(2).withKI(0).withKD(0).withKS(0.5))
             .withMotionMagic(
                 new MotionMagicConfigs()
                     .withMotionMagicAcceleration(600)
@@ -196,7 +196,7 @@ public class ShooterReal implements ShooterIO {
       turretMotor.setControl(
           new MotionMagicVoltage(ShootingUtil.toTurretRevs(turretTargetAngle))
               .withEnableFOC(true)
-              .withFeedForward(-omegaRadsPerSec * 2));
+              .withFeedForward(-omegaRadsPerSec * 5));
     }
   }
 
@@ -281,9 +281,9 @@ public class ShooterReal implements ShooterIO {
 
   @Override
   public void periodic() {
-    Logger.recordOutput("Shooter/Flywheel Target RPS", flywheelTargetRPS);
-    Logger.recordOutput(
-        "Shooter/Flywheel Real RPS", flywheelMotor.getVelocity().getValueAsDouble());
+    //    Logger.recordOutput("Shooter/Flywheel Target RPS", flywheelTargetRPS);
+    //    Logger.recordOutput(
+    //        "Shooter/Flywheel Real RPS", flywheelMotor.getVelocity().getValueAsDouble());
     //    Logger.recordOutput("Shooter/Turret Target Angle", turretTargetAngle);
     //    Logger.recordOutput(
     //        "Shooter/Turret Real Angle",

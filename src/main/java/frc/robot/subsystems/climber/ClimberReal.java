@@ -11,7 +11,6 @@ import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.wpilibj.Relay;
 import frc.robot.Constants;
-import org.littletonrobotics.junction.Logger;
 
 public class ClimberReal implements ClimberIO {
 
@@ -59,8 +58,8 @@ public class ClimberReal implements ClimberIO {
 
   @Override
   public void periodic() {
-    Logger.recordOutput("Climber/Setpoint", climberControl.getSetpoint());
-    Logger.recordOutput("Climber/Position", climber.getEncoder().getPosition());
-    Logger.recordOutput("Climber/Braking", brakeRelay.get() == Relay.Value.kOff);
+    //    Logger.recordOutput("Climber/Setpoint", climberControl.getSetpoint());
+    //    Logger.recordOutput("Climber/Position", climber.getEncoder().getPosition());
+    //    Logger.recordOutput("Climber/Braking", brakeRelay.get() == Relay.Value.kOff);
   }
 }

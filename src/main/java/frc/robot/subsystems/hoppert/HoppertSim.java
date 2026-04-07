@@ -1,7 +1,5 @@
 package frc.robot.subsystems.hoppert;
 
-import org.littletonrobotics.junction.Logger;
-
 public class HoppertSim implements HoppertIO {
 
   private boolean hopperRollersRunning = false;
@@ -17,11 +15,11 @@ public class HoppertSim implements HoppertIO {
 
   @Override
   public void periodic() {
-    Logger.recordOutput("Hoppert/Rollers Active", hopperRollersRunning);
-    Logger.recordOutput("Hoppert/Rollers Reversed", hopperRollersReversed);
-    Logger.recordOutput("Hoppert/Wheels Active", hopperWheelsRunning);
-    Logger.recordOutput("Hoppert/Tower Motor Active", towerMotorRunning);
-    Logger.recordOutput("Hoppert/Tower Motor Reversed", towerMotorReversed);
+    //    Logger.recordOutput("Hoppert/Rollers Active", hopperRollersRunning);
+    //    Logger.recordOutput("Hoppert/Rollers Reversed", hopperRollersReversed);
+    //    Logger.recordOutput("Hoppert/Wheels Active", hopperWheelsRunning);
+    //    Logger.recordOutput("Hoppert/Tower Motor Active", towerMotorRunning);
+    //    Logger.recordOutput("Hoppert/Tower Motor Reversed", towerMotorReversed);
   }
 
   @Override

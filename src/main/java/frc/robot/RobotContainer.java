@@ -130,7 +130,7 @@ public class RobotContainer {
                 () ->
                     drive
                         .getRotation()
-                        .plus(Rotation2d.fromDegrees(shooter.getDriveAssistanceAngle() + 180))
+                        .plus(Rotation2d.fromDegrees(shooter.getDriveAssistanceAngle() + 90))
                         .plus(Rotation2d.fromDegrees(-driver.getRightX() * 90))),
             DriveCommands.joystickDrive(
                 drive,
@@ -169,17 +169,17 @@ public class RobotContainer {
     NamedCommands.registerCommand(
         "Shoot 5s",
         (new ShootCommand(drive, shooter, () -> false)
-                .alongWith(new HoppertCommand(hoppert, shooter, intake)))
+                .alongWith(new HoppertCommand(hoppert, shooter, intake, () -> true)))
             .withTimeout(5));
     NamedCommands.registerCommand(
         "Shoot 10s",
         (new ShootCommand(drive, shooter, () -> false)
-                .alongWith(new HoppertCommand(hoppert, shooter, intake)))
+                .alongWith(new HoppertCommand(hoppert, shooter, intake, () -> true)))
             .withTimeout(10));
     NamedCommands.registerCommand(
         "Shoot 7s",
         (new ShootCommand(drive, shooter, () -> false)
-                .alongWith(new HoppertCommand(hoppert, shooter, intake)))
+                .alongWith(new HoppertCommand(hoppert, shooter, intake, () -> true)))
             .withTimeout(7));
     // TODO: outpost shoot for longer?
     NamedCommands.registerCommand("Toggle Intake", new ToggleIntakeCommand(intake));
@@ -332,6 +332,22 @@ public class RobotContainer {
     //            () -> true);
     //    leds.addStream(activeInactiveStream);
 
+    // DISABLED
+    LEDStream disabledStream =
+        new LEDStream("disabled", 999, () -> Constants.LEDMode.DISABLED, DriverStation::isDisabled);
+    leds.addStream(disabledStream);
+
+    // SHOOTING
+    LEDStream shootStream =
+        new LEDStream(
+            "shooting",
+            2,
+            () -> Constants.LEDMode.SHOOTING_CONFIDENT,
+            () ->
+                Math.abs(driver.getHID().getRightTriggerAxis()) > 0.25
+                    || driver.getHID().getRightBumperButton());
+    leds.addStream(shootStream);
+
     // ACTIVE vs INACTIVE
     LEDStream activeStream =
         new LEDStream(
@@ -413,7 +429,14 @@ public class RobotContainer {
                 Set.of(drive)));
 
     // have hopper automatically deciding when to run or not to run
-    hoppert.setDefaultCommand(new HoppertCommand(hoppert, shooter, intake));
+    hoppert.setDefaultCommand(
+        new HoppertCommand(
+            hoppert,
+            shooter,
+            intake,
+            () ->
+                Math.abs(driver.getHID().getRightTriggerAxis()) > 0.25
+                    || driver.getHID().getRightBumperButton()));
 
     // when y (paddle) is not pressed and in bump zone, auto rotate.
     driver

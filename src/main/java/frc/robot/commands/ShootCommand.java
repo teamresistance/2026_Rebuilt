@@ -8,7 +8,6 @@ import frc.robot.subsystems.shooter.ShootingConstants;
 import frc.robot.util.LoggedTunableNumber;
 import frc.robot.util.ShootingUtil;
 import java.util.function.BooleanSupplier;
-import org.littletonrobotics.junction.Logger;
 
 public class ShootCommand extends Command {
 
@@ -37,7 +36,7 @@ public class ShootCommand extends Command {
       shooter.runFlywheelAtRPS(tunableRPS.get());
     }
 
-    Logger.recordOutput("Shooter/Virtual Distance to Hub", distance);
+    // Logger.recordOutput("Shooter/Virtual Distance to Hub", distance);
   }
 
   @Override

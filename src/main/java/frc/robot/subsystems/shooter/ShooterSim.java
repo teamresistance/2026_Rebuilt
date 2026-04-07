@@ -64,7 +64,7 @@ public class ShooterSim implements ShooterIO {
     Logger.recordOutput("Shooter/Sim Hood Angle", hoodAngleDegs);
     Logger.recordOutput("Shooter/Sim Turret Target", turretTargetDegs);
     Logger.recordOutput("Shooter/Sim Hood Target", hoodTargetDegs);
-    Logger.recordOutput("Shooter/Drive Assist Angle", turretDriveAssistTargetAngle);
+    // Logger.recordOutput("Shooter/Drive Assist Angle", turretDriveAssistTargetAngle);
   }
 
   @Override

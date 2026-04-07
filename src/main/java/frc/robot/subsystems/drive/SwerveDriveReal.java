@@ -94,7 +94,7 @@ public class SwerveDriveReal implements SwerveDriveIO {
   public void periodic() {
     ODOMETRY_LOCK.lock(); // Prevents odometry updates while reading data
     gyroIO.updateInputs(gyroInputs);
-    Logger.processInputs("Drive/Gyro", gyroInputs);
+    // Logger.processInputs("Drive/Gyro", gyroInputs);
     for (var module : modules) {
       module.periodic();
     }
@@ -112,8 +112,8 @@ public class SwerveDriveReal implements SwerveDriveIO {
 
     // Log empty setpoint states when disabled
     if (DriverStation.isDisabled()) {
-      Logger.recordOutput("SwerveStates/Setpoints", new SwerveModuleState[] {});
-      Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleState[] {});
+      //      Logger.recordOutput("SwerveStates/Setpoints", new SwerveModuleState[] {});
+      //      Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleState[] {});
     }
 
     // Update odometry
@@ -164,8 +164,8 @@ public class SwerveDriveReal implements SwerveDriveIO {
     SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, TunerConstants.kSpeedAt12Volts);
 
     // Log unoptimized setpoints and setpoint speeds
-    Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
-    Logger.recordOutput("SwerveChassisSpeeds/Setpoints", discreteSpeeds);
+    //    Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
+    //    Logger.recordOutput("SwerveChassisSpeeds/Setpoints", discreteSpeeds);
 
     if (!Constants.TEST_MODE) {
       // Send setpoints to modules
@@ -175,7 +175,7 @@ public class SwerveDriveReal implements SwerveDriveIO {
     }
 
     // Log optimized setpoints (runSetpoint mutates each state)
-    Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
+    //    Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
   }
 
   /** Runs the drive in a straight line with the specified drive output. */
