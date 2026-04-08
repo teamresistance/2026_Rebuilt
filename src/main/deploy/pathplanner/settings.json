@@ -6,13 +6,10 @@
     "ISC Bottom",
     "ISC Top",
     "OUTPOST",
-    "SIS Bottom",
-    "SIS Top",
     "Simple (BACKUP)"
   ],
   "autoFolders": [
     "ISC",
-    "SIS",
     "Simple"
   ],
   "defaultMaxVel": 4.68,
@@ -27,7 +24,7 @@
   "driveGearing": 6.48,
   "maxDriveSpeed": 4.68,
   "driveMotorType": "krakenX60",
-  "driveCurrentLimit": 60.0,
+  "driveCurrentLimit": 80.0,
   "wheelCOF": 1.2,
   "flModuleX": 0.275,
   "flModuleY": 0.284,
