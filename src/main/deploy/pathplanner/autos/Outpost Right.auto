@@ -5,51 +5,79 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "deadline",
           "data": {
-            "pathName": "Outpost Backup"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 3.0
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Outpost OPR"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Toggle Intake"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot 10s"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Toggle Intake"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Outpost ALTC"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Closest Climb"
+            "commands": [
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 18.0
+                }
+              },
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "parallel",
+                      "data": {
+                        "commands": [
+                          {
+                            "type": "path",
+                            "data": {
+                              "pathName": "Outpost Backup"
+                            }
+                          },
+                          {
+                            "type": "named",
+                            "data": {
+                              "name": "Shoot 5s"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Shoot 5s"
+                      }
+                    },
+                    {
+                      "type": "parallel",
+                      "data": {
+                        "commands": [
+                          {
+                            "type": "named",
+                            "data": {
+                              "name": "Shoot 5s"
+                            }
+                          },
+                          {
+                            "type": "path",
+                            "data": {
+                              "pathName": "Outpost ALTC"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Closest Climb"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Shoot 5s"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
           }
         },
         {

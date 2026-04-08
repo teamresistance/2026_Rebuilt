@@ -9,7 +9,6 @@ import java.util.function.BooleanSupplier;
 
 public class HoppertCommand extends Command {
 
-  // Mode 3 pulse timings (seconds)
   private static final double PULSE_BACKWARDS_DURATION = 1.4;
   private static final double PULSE_OFF_DURATION = 0;
   private static final double PULSE_FORWARDS_DURATION = 0;
@@ -17,8 +16,10 @@ public class HoppertCommand extends Command {
   private static final double HOPPER_WHEELS_DELAY = 0.75;
 
   private static final double OVERCURRENT_THRESHOLD = 80.0;
-  private static final double OVERCURRENT_TRIGGER_DURATION = 0.5;
+  private static final double OVERCURRENT_TRIGGER_DURATION = 0.4;
   private static final double REVERSE_DURATION = 0.25;
+
+  private static final double OVERHOPPER_THRESHOLD = 70.0;
 
   private enum PulseState {
     BACKWARDS,
@@ -102,6 +103,9 @@ public class HoppertCommand extends Command {
     if (!shooter.isShooting()) {
       hoppert.stopHopper();
       hoppert.stopWheels();
+      if (intake.isIntaking()) {
+        hoppert.runHopperBackwards();
+      }
       if (pulseTimer.hasElapsed(PULSE_OFF_DURATION)) {
         pulseState = PulseState.FORWARDS;
         pulseTimer.restart();
@@ -120,14 +124,14 @@ public class HoppertCommand extends Command {
         }
       }
       case OFF -> {
-        hoppert.stopHopper();
+        // hoppert.stopHopper();
         if (pulseTimer.hasElapsed(PULSE_OFF_DURATION)) {
           pulseState = PulseState.FORWARDS;
           pulseTimer.restart();
         }
       }
       case FORWARDS -> {
-        hoppert.runHopperForwards();
+        // hoppert.runHopperForwards();
         if (pulseTimer.hasElapsed(PULSE_FORWARDS_DURATION)) {
           pulseState = PulseState.BACKWARDS;
           pulseTimer.restart();
@@ -135,8 +139,14 @@ public class HoppertCommand extends Command {
       }
     }
 
-    if (startTimer.hasElapsed(HOPPER_WHEELS_DELAY) && triggerSup.getAsBoolean()) {
+    if (startTimer.hasElapsed(HOPPER_WHEELS_DELAY)
+        && triggerSup.getAsBoolean()
+        && shooter.atShootingSetpoints()) {
       hoppert.runHopperWheels();
+    }
+
+    if (hoppert.getHopperCurrent() > OVERHOPPER_THRESHOLD) {
+      hoppert.runHopperForwards();
     }
   }
 }

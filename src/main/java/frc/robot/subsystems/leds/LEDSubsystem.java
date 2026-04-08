@@ -10,7 +10,6 @@ import java.util.*;
 public class LEDSubsystem extends SubsystemBase {
 
   private final List<LEDStream> streams = new ArrayList<>();
-  private LEDStream lastStream = null;
   private Constants.LEDMode lastLEDMode = null;
   private final CANdle candle = new CANdle(Constants.CANDLE_ID, new CANBus("drive"));
 
@@ -33,14 +32,16 @@ public class LEDSubsystem extends SubsystemBase {
 
     if (highest != null) {
       Constants.LEDMode currentMode = highest.getLEDMode();
-      applyMode(highest, currentMode);
-      //      Logger.recordOutput("LEDS/Active Stream", highest.name);
-      lastStream = highest;
+      // Only apply mode if it changed to avoid repeatedly calling setControl()
+      // if (lastLEDMode != currentMode) {
+      applyMode(currentMode);
       lastLEDMode = currentMode;
+      // }
+      //      Logger.recordOutput("LEDS/Active Stream", highest.name);
     }
   }
 
-  private void applyMode(LEDStream mode, Constants.LEDMode ledMode) {
+  private void applyMode(Constants.LEDMode ledMode) {
     // Logger.recordOutput("LEDS/Active Mode", ledMode);
 
     switch (ledMode) {
@@ -62,30 +63,30 @@ public class LEDSubsystem extends SubsystemBase {
         // .withFrameRate(
         //        mode.framerateSupplier.getAsDouble()));
         break;
-      case SHOOTING_DOUBTFUL:
-        candle.setControl(
-            Constants.LED_ANIMATION_SHOOTING_DOUBTFUL.withFrameRate(
-                mode.framerateSupplier.getAsDouble()));
-        break;
-      case PASSING_CONFIDENT:
-        candle.setControl(
-            Constants.LED_ANIMATION_PASSING_CONFIDENT.withFrameRate(
-                mode.framerateSupplier.getAsDouble()));
-        break;
-      case PASSING_DOUBTFUL:
-        candle.setControl(
-            Constants.LED_ANIMATION_PASSING_DOUBTFUL.withFrameRate(
-                mode.framerateSupplier.getAsDouble()));
-        break;
-      case INTAKING:
-        candle.setControl(Constants.LED_ANIMATION_INTAKING);
-        break;
+      //      case SHOOTING_DOUBTFUL:
+      //        candle.setControl(
+      //            Constants.LED_ANIMATION_SHOOTING_DOUBTFUL.withFrameRate(
+      //                mode.framerateSupplier.getAsDouble()));
+      //        break;
+      //      case PASSING_CONFIDENT:
+      //        candle.setControl(
+      //            Constants.LED_ANIMATION_PASSING_CONFIDENT.withFrameRate(
+      //                mode.framerateSupplier.getAsDouble()));
+      //        break;
+      //      case PASSING_DOUBTFUL:
+      //        candle.setControl(
+      //            Constants.LED_ANIMATION_PASSING_DOUBTFUL.withFrameRate(
+      //                mode.framerateSupplier.getAsDouble()));
+      //        break;
+      //      case INTAKING:
+      //        candle.setControl(Constants.LED_ANIMATION_INTAKING);
+      //        break;
       case BUMP:
         candle.setControl(Constants.LED_ANIMATION_BUMP);
         break;
-      case AUTO:
-        candle.setControl(Constants.LED_ANIMATION_AUTO);
-        break;
+      //      case AUTO:
+      //        candle.setControl(Constants.LED_ANIMATION_AUTO);
+      //        break;
       case ACTIVE:
         candle.setControl(Constants.LED_ANIMATION_ACTIVE);
         break;

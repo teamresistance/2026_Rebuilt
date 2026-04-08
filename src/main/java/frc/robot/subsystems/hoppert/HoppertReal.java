@@ -83,6 +83,11 @@ public class HoppertReal implements HoppertIO {
   }
 
   @Override
+  public double getHopperCurrent() {
+    return hopperRollerMotor.getStatorCurrent().getValueAsDouble();
+  }
+
+  @Override
   public void runHopperForwards() {
     hopperRollerMotor.setControl(new VelocityVoltage(4));
     hopperRollersRunning = true;

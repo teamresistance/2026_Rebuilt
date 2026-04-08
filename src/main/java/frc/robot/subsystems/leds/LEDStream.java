@@ -89,4 +89,8 @@ public class LEDStream {
     useFramerateSupplier = true;
     return this;
   }
+
+  public void forceOff() {
+    timedActive = false;
+  }
 }

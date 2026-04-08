@@ -29,6 +29,11 @@ public class HoppertSim implements HoppertIO {
   }
 
   @Override
+  public double getHopperCurrent() {
+    return 0;
+  }
+
+  @Override
   public double getMecanumCurrent() {
     return 0;
   }

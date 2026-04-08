@@ -46,8 +46,8 @@ public final class Constants {
 
   public static final double SHOOTER_HOOD_REVS_PER_DEG = (4.0 * (175.0 / 10.0)) / 360.0;
   public static final double SHOOTER_TURRET_REVS_PER_DEG = (5 * 5 * 3.2) / 360.0;
-  public static final double SHOOTER_HOOD_REVS_TOLERANCE = 0.25;
-  public static final double SHOOTER_TURRET_REVS_TOLERANCE = 0.5;
+  public static final double SHOOTER_HOOD_REVS_TOLERANCE = 3;
+  public static final double SHOOTER_TURRET_REVS_TOLERANCE = 3;
   public static final double SHOOTER_RPS_TOLERANCE = 0.5;
 
   public static final double SHOOTER_HOOD_MAX_PITCH = 43;
@@ -104,11 +104,11 @@ public final class Constants {
       new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
           .withFrameRate(10)
           .withColor(new RGBWColor(0, 255, 255));
-  public static final LarsonAnimation LED_ANIMATION_AUTO =
-      new LarsonAnimation(LED_START_INDEX, LED_END_INDEX)
-          .withFrameRate(20)
-          .withColor(new RGBWColor(255, 150, 0))
-          .withSize(20);
+  //  public static final LarsonAnimation LED_ANIMATION_AUTO =
+  //      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
+  //          .withFrameRate(20)
+  //          .withColor(new RGBWColor(255, 150, 0))
+  //          .withSize(20);
   public static final EmptyAnimation LED_ANIMATION_DISABLED_GOOD = new EmptyAnimation(0);
   public static final EmptyAnimation LED_ANIMATION_DISABLED_FINE = new EmptyAnimation(0);
   //  public static final StrobeAnimation LED_ANIMATION_DISABLED_GOOD =

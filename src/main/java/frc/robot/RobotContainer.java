@@ -172,6 +172,11 @@ public class RobotContainer {
                 .alongWith(new HoppertCommand(hoppert, shooter, intake, () -> true)))
             .withTimeout(5));
     NamedCommands.registerCommand(
+        "Shoot 4s",
+        (new ShootCommand(drive, shooter, () -> false)
+                .alongWith(new HoppertCommand(hoppert, shooter, intake, () -> true)))
+            .withTimeout(5));
+    NamedCommands.registerCommand(
         "Shoot 10s",
         (new ShootCommand(drive, shooter, () -> false)
                 .alongWith(new HoppertCommand(hoppert, shooter, intake, () -> true)))
@@ -338,15 +343,15 @@ public class RobotContainer {
     leds.addStream(disabledStream);
 
     // SHOOTING
-    LEDStream shootStream =
-        new LEDStream(
-            "shooting",
-            2,
-            () -> Constants.LEDMode.SHOOTING_CONFIDENT,
-            () ->
-                Math.abs(driver.getHID().getRightTriggerAxis()) > 0.25
-                    || driver.getHID().getRightBumperButton());
-    leds.addStream(shootStream);
+    //    LEDStream shootStream =
+    //        new LEDStream(
+    //            "shooting",
+    //            2,
+    //            () -> Constants.LEDMode.SHOOTING_CONFIDENT,
+    //            () ->
+    //                Math.abs(driver.getHID().getRightTriggerAxis()) > 0.25
+    //                    || driver.getHID().getRightBumperButton());
+    //    leds.addStream(shootStream);
 
     // ACTIVE vs INACTIVE
     LEDStream activeStream =
@@ -361,12 +366,10 @@ public class RobotContainer {
     leds.addStream(activeStream);
 
     LEDStream shiftCountdown =
-        new LEDStream(
-            "shift countdown 7s",
-            3,
-            () -> Constants.LEDMode.CLOSE_TO_NEXT_SHIFT,
-            ShiftUtil::withinSevenSecondsOfNextShift);
+        new LEDStream("shift countdown 7s", 3, () -> Constants.LEDMode.CLOSE_TO_NEXT_SHIFT);
     leds.addStream(shiftCountdown);
+    new Trigger(ShiftUtil::withinSevenSecondsOfNextShift)
+        .onTrue(Commands.runOnce(() -> shiftCountdown.runForSeconds(5)));
 
     LEDStream shiftCountdown2 =
         new LEDStream(
@@ -375,9 +378,10 @@ public class RobotContainer {
             () ->
                 ShiftUtil.getNextShift() == Constants.ShiftOwner.RED
                     ? Constants.LEDMode.CLOSE_TO_NEXT_SHIFT_R
-                    : Constants.LEDMode.CLOSE_TO_NEXT_SHIFT_B,
-            ShiftUtil::withinTwoSecondsOfNextShift);
+                    : Constants.LEDMode.CLOSE_TO_NEXT_SHIFT_B);
     leds.addStream(shiftCountdown2);
+    new Trigger(ShiftUtil::withinTwoSecondsOfNextShift)
+        .onTrue(Commands.runOnce(() -> shiftCountdown2.runForSeconds(2)));
 
     LEDStream endgame =
         new LEDStream(
@@ -553,7 +557,7 @@ public class RobotContainer {
    * Creates an LEDStream that runs the auto animation 20 seconds and then is never accessed again.
    */
   public void runAutoLEDs() {
-    LEDStream autoStream = new LEDStream("auto", 100, () -> Constants.LEDMode.AUTO);
+    LEDStream autoStream = new LEDStream("auto", 100, () -> Constants.LEDMode.RAINBOW);
     leds.addStream(autoStream);
     autoStream.runForSeconds(20);
   }
