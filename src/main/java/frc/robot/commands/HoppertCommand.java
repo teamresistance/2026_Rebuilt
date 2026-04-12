@@ -13,7 +13,8 @@ public class HoppertCommand extends Command {
   private static final double PULSE_OFF_DURATION = 0;
   private static final double PULSE_FORWARDS_DURATION = 0;
 
-  private static final double HOPPER_WHEELS_DELAY = 0.75;
+  private static final double HOPPER_WHEELS_DELAY = 0.5;
+  private static final double HOPPER_FLOOR_DELAY = 1;
 
   private static final double OVERCURRENT_THRESHOLD = 80.0;
   private static final double OVERCURRENT_TRIGGER_DURATION = 0.4;
@@ -53,6 +54,10 @@ public class HoppertCommand extends Command {
 
   @Override
   public void initialize() {
+    reset();
+  }
+
+  private void reset() {
     pulseState = PulseState.BACKWARDS;
     pulseTimer.restart();
     startTimer.restart();
@@ -104,45 +109,51 @@ public class HoppertCommand extends Command {
       hoppert.stopHopper();
       hoppert.stopWheels();
       if (intake.isIntaking()) {
-        hoppert.runHopperBackwards();
+        hoppert.runHopperBackwardsSlow();
       }
       if (pulseTimer.hasElapsed(PULSE_OFF_DURATION)) {
         pulseState = PulseState.FORWARDS;
         pulseTimer.restart();
       }
+      reset();
       return;
     }
 
     hoppert.runTowerForwards();
 
-    switch (pulseState) {
-      case BACKWARDS -> {
-        hoppert.runHopperBackwards();
-        if (pulseTimer.hasElapsed(PULSE_BACKWARDS_DURATION)) {
-          pulseState = PulseState.OFF;
-          pulseTimer.restart();
-        }
-      }
-      case OFF -> {
-        // hoppert.stopHopper();
-        if (pulseTimer.hasElapsed(PULSE_OFF_DURATION)) {
-          pulseState = PulseState.FORWARDS;
-          pulseTimer.restart();
-        }
-      }
-      case FORWARDS -> {
-        // hoppert.runHopperForwards();
-        if (pulseTimer.hasElapsed(PULSE_FORWARDS_DURATION)) {
-          pulseState = PulseState.BACKWARDS;
-          pulseTimer.restart();
-        }
-      }
-    }
+    //    switch (pulseState) {
+    //      case BACKWARDS -> {
+    //        hoppert.runHopperBackwards();
+    //        if (pulseTimer.hasElapsed(PULSE_BACKWARDS_DURATION)) {
+    //          pulseState = PulseState.OFF;
+    //          pulseTimer.restart();
+    //        }
+    //      }
+    //      case OFF -> {
+    //        // hoppert.stopHopper();
+    //        if (pulseTimer.hasElapsed(PULSE_OFF_DURATION)) {
+    //          pulseState = PulseState.FORWARDS;
+    //          pulseTimer.restart();
+    //        }
+    //      }
+    //      case FORWARDS -> {
+    //        // hoppert.runHopperForwards();
+    //        if (pulseTimer.hasElapsed(PULSE_FORWARDS_DURATION)) {
+    //          pulseState = PulseState.BACKWARDS;
+    //          pulseTimer.restart();
+    //        }
+    //      }
+    //    }
 
-    if (startTimer.hasElapsed(HOPPER_WHEELS_DELAY)
-        && triggerSup.getAsBoolean()
-        && shooter.atShootingSetpoints()) {
-      hoppert.runHopperWheels();
+    if (triggerSup.getAsBoolean() && shooter.atShootingSetpoints()) {
+      if (startTimer.hasElapsed(HOPPER_WHEELS_DELAY)) {
+        hoppert.runHopperWheels();
+      }
+      if (startTimer.hasElapsed(HOPPER_FLOOR_DELAY)) {
+        hoppert.runHopperBackwardsSlow();
+      } else {
+        hoppert.runHopperBackwards();
+      }
     }
 
     if (hoppert.getHopperCurrent() > OVERHOPPER_THRESHOLD) {

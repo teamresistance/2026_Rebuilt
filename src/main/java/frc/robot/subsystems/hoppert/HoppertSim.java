@@ -29,6 +29,9 @@ public class HoppertSim implements HoppertIO {
   }
 
   @Override
+  public void runHopperBackwardsSlow() {}
+
+  @Override
   public double getHopperCurrent() {
     return 0;
   }

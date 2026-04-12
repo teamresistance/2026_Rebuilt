@@ -70,9 +70,9 @@ public class ShootingConstants {
     distanceToHoodMap.put(5.52, 30.0);
     distanceToHoodMap.put(5.89, 32.0);
 
-    distanceToRpsMap.put(1.46, 41.0 - 2);
-    distanceToRpsMap.put(1.84, 45.0 - 2);
-    distanceToRpsMap.put(2.23, 48.0 - 2);
+    distanceToRpsMap.put(1.46, 41.0 - 2.5);
+    distanceToRpsMap.put(1.84, 45.0 - 2.5);
+    distanceToRpsMap.put(2.23, 48.0 - 2.5);
     distanceToRpsMap.put(2.52, 49.7 - 2.75);
     distanceToRpsMap.put(2.86, 49.7 - 2.75);
     distanceToRpsMap.put(3.23, 50.4 - 1.5);

@@ -66,7 +66,9 @@ public class RobotContainer {
 
   // Controller
   private final CommandXboxController driver = new CommandXboxController(0);
+  private final XboxController driverHID = driver.getHID();
   private final CommandXboxController coDriver = new CommandXboxController(1);
+  private final XboxController operatorHID = coDriver.getHID();
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -114,8 +116,8 @@ public class RobotContainer {
     driveAtAngleForBump =
         DriveCommands.joystickDriveAtAngle(
                 drive,
-                () -> -driver.getLeftY(),
-                () -> -driver.getLeftX(),
+                () -> -driverHID.getLeftY(),
+                () -> -driverHID.getLeftX(),
                 () -> BumpUtil.rotationToSnap(drive::getRotation))
             .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming);
     driveAtAngleForBump.addRequirements(drive);
@@ -125,21 +127,19 @@ public class RobotContainer {
         new ConditionalCommand(
             DriveCommands.joystickDriveAtAngle(
                 drive,
-                () -> MathUtil.clamp(-driver.getLeftY(), -0.5, 0.5),
-                () -> MathUtil.clamp(-driver.getLeftX(), -0.5, 0.5),
+                () -> MathUtil.clamp(-driverHID.getLeftY(), -0.5, 0.5),
+                () -> MathUtil.clamp(-driverHID.getLeftX(), -0.5, 0.5),
                 () ->
                     drive
                         .getRotation()
-                        .plus(Rotation2d.fromDegrees(shooter.getDriveAssistanceAngle() + 90))
-                        .plus(Rotation2d.fromDegrees(-driver.getRightX() * 90))),
+                        .plus(Rotation2d.fromDegrees(shooter.getDriveAssistanceAngle()))
+                        .plus(Rotation2d.fromDegrees(-driverHID.getRightX() * 90))),
             DriveCommands.joystickDrive(
                 drive,
-                () -> MathUtil.clamp(-driver.getLeftY(), -0.5, 0.5),
-                () -> MathUtil.clamp(-driver.getLeftX(), -0.5, 0.5),
-                () -> MathUtil.clamp(-driver.getRightX(), -0.4, 0.4)),
-            () ->
-                Math.abs(shooter.getDriveAssistanceAngle()) > 2
-                    && driver.y().negate().getAsBoolean());
+                () -> MathUtil.clamp(-driverHID.getLeftY(), -0.50, 0.5),
+                () -> MathUtil.clamp(-driverHID.getLeftX(), -0.5, 0.5),
+                () -> MathUtil.clamp(-driverHID.getRightX(), -0.4, 0.4)),
+            () -> Math.abs(shooter.getDriveAssistanceAngle()) > 2 && !driverHID.getYButton());
     driveShooting.addRequirements(drive);
 
     manualShiftAssigner.addOption("Red", "R");
@@ -297,7 +297,7 @@ public class RobotContainer {
     //                  }
     //                },
     //                () ->
-    //                    driver
+    //                    driverHID
     //                        .rightTrigger()
     //                        .or((coDriver.rightTrigger().or(coDriver.rightBumper())))
     //                        .getAsBoolean())
@@ -349,8 +349,8 @@ public class RobotContainer {
     //            2,
     //            () -> Constants.LEDMode.SHOOTING_CONFIDENT,
     //            () ->
-    //                Math.abs(driver.getHID().getRightTriggerAxis()) > 0.25
-    //                    || driver.getHID().getRightBumperButton());
+    //                Math.abs(driverHID.getHID().getRightTriggerAxis()) > 0.25
+    //                    || driverHID.getHID().getRightBumperButton());
     //    leds.addStream(shootStream);
 
     // ACTIVE vs INACTIVE
@@ -394,21 +394,16 @@ public class RobotContainer {
     leds.addStream(bumpStream);
 
     // BUMP trigger (timed 1s when entering bump zone)
-    driver
-        .y()
-        .negate()
-        .and(inBumpZone)
-        .and(() -> !DriverStation.isAutonomous())
-        .onTrue(Commands.runOnce(() -> bumpStream.runForSeconds(1)));
+    driver.y().onTrue(Commands.runOnce(() -> bumpStream.runForSeconds(1)));
 
     // RUMBLE when 5s from next shift
     new Trigger(ShiftUtil::nearNextShift)
         .onTrue(
-            Commands.runOnce(() -> driver.setRumble(GenericHID.RumbleType.kBothRumble, 1))
+            Commands.runOnce(() -> driverHID.setRumble(GenericHID.RumbleType.kBothRumble, 1))
                 .andThen(new WaitCommand(1))
                 .andThen(
                     Commands.runOnce(
-                        () -> driver.setRumble(GenericHID.RumbleType.kBothRumble, 0))));
+                        () -> driverHID.setRumble(GenericHID.RumbleType.kBothRumble, 0))));
   }
 
   /** Defines button bindings and control triggers */
@@ -417,7 +412,10 @@ public class RobotContainer {
     // Default: normal drive
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
-            drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
+            drive,
+            () -> -driverHID.getLeftY(),
+            () -> -driverHID.getLeftX(),
+            () -> -driverHID.getRightX()));
 
     // While right stick held: lock rotation to heading at moment of press
     driver
@@ -427,8 +425,8 @@ public class RobotContainer {
                 () ->
                     DriveCommands.joystickDriveAtAngle(
                         drive,
-                        () -> -driver.getLeftY(),
-                        () -> -driver.getLeftX(),
+                        () -> -driverHID.getLeftY(),
+                        () -> -driverHID.getLeftX(),
                         drive::getRotation), // captured when stick is pressed
                 Set.of(drive)));
 
@@ -439,16 +437,13 @@ public class RobotContainer {
             shooter,
             intake,
             () ->
-                Math.abs(driver.getHID().getRightTriggerAxis()) > 0.25
-                    || driver.getHID().getRightBumperButton()));
+                (Math.abs(driverHID.getRightTriggerAxis()) > 0.25
+                        || driverHID.getRightBumperButton())
+                    || (Math.abs(operatorHID.getRightTriggerAxis()) > 0.25
+                        || operatorHID.getRightBumperButton())));
 
     // when y (paddle) is not pressed and in bump zone, auto rotate.
-    driver
-        .y()
-        .negate()
-        .and(inBumpZone)
-        .and(() -> !DriverStation.isAutonomous())
-        .whileTrue(driveAtAngleForBump);
+    driver.y().whileTrue(driveAtAngleForBump);
 
     // climb raise robot
     driver
@@ -470,6 +465,10 @@ public class RobotContainer {
                 .andThen(new WaitUntilCommand(climber::atTarget))
                 .andThen(climber::brake));
 
+    Command zeroCmd = Commands.run(() -> shooter.setTurretTarget(0, 0));
+    zeroCmd.addRequirements(shooter);
+    driver.leftStick().whileTrue(zeroCmd);
+
     // reverse intake
     driver.leftBumper().whileTrue(Commands.runOnce(intake::reverseIntake));
     driver.leftBumper().onFalse(Commands.runOnce(intake::stopIntake));
@@ -486,28 +485,28 @@ public class RobotContainer {
 
     // auto-aim hood and turret always
     shooter.setDefaultCommand(
-        new IdleShooterCommand(drive, shooter, () -> driver.rightBumper().getAsBoolean()));
+        new IdleShooterCommand(drive, shooter, driverHID::getRightBumperButton));
 
     // Switch to X pattern when X button is pressed
-    //    driver.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    //    driverHID.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
     // reverse mecanums
     driver.b().whileTrue(Commands.run(hoppert::reverseHopperWheels));
-    driver.b().onFalse(Commands.runOnce(hoppert::stopHopper));
+    driver.b().onFalse(Commands.runOnce(hoppert::stopWheels));
 
     // shoot
     (driver.rightTrigger().or(driver.rightBumper()))
         .or(coDriver.rightTrigger().or(coDriver.rightBumper()))
-        .whileTrue(new ShootCommand(drive, shooter, () -> driver.rightBumper().getAsBoolean()));
+        .whileTrue(new ShootCommand(drive, shooter, driverHID::getRightBumperButton));
     (driver.rightTrigger().or(driver.rightBumper()))
         .or((coDriver.rightTrigger().or(coDriver.rightBumper())))
-        .and(driver.y().negate())
+        .and(() -> !driverHID.getYButton())
         .whileTrue(driveShooting);
     (driver.rightTrigger().or(driver.rightBumper()))
         .or((coDriver.rightTrigger().or(coDriver.rightBumper())))
         .onFalse(
             new ParallelDeadlineGroup(
-                    new ShootCommand(drive, shooter, () -> driver.rightBumper().getAsBoolean())
+                    new ShootCommand(drive, shooter, driverHID::getRightBumperButton)
                         .withTimeout(1.25),
                     Commands.run(hoppert::runTowerForwards),
                     Commands.run(hoppert::stopHopper))
@@ -517,20 +516,10 @@ public class RobotContainer {
     driver.leftTrigger().onTrue(new ToggleIntakeCommand(intake));
     driver.leftTrigger().onFalse(new ToggleIntakeCommand(intake));
 
-    // hold to zero
-    Command zeroCmd =
-        Commands.run(
-            () -> {
-              shooter.setHoodTarget(Constants.SHOOTER_HOOD_MIN_PITCH);
-              shooter.setTurretTarget(0, 0);
-            });
-    zeroCmd.addRequirements(shooter);
-    driver.leftStick().whileTrue(zeroCmd);
-
     // POV for adjusting shooter trim, with up/down adjusting vertical and left/right adjusting
     // horizontal.
-    //    driver.povUp().onTrue(Commands.runOnce(() -> shooter.adjustVerticalTrim(true)));
-    //    driver.povDown().onTrue(Commands.runOnce(() -> shooter.adjustVerticalTrim(false)));
+    //    driverHID.povUp().onTrue(Commands.runOnce(() -> shooter.adjustVerticalTrim(true)));
+    //    driverHID.povDown().onTrue(Commands.runOnce(() -> shooter.adjustVerticalTrim(false)));
     driver
         .povRight()
         .or(coDriver.povRight())

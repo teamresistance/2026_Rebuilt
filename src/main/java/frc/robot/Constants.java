@@ -52,8 +52,8 @@ public final class Constants {
 
   public static final double SHOOTER_HOOD_MAX_PITCH = 43;
   public static final double SHOOTER_HOOD_MIN_PITCH = 17.5;
-  public static final double SHOOTER_TURRET_MAX_YAW = 130;
-  public static final double SHOOTER_TURRET_MIN_YAW = -130;
+  public static final double SHOOTER_TURRET_MAX_YAW = 129;
+  public static final double SHOOTER_TURRET_MIN_YAW = -129;
   public static final double SHOOTER_TRIM_ADJUSTMENT_INCREMENT = 3;
 
   public static final Transform2d ROBOT_TO_TURRET =
@@ -125,7 +125,7 @@ public final class Constants {
           .withFrameRate(1);
   public static final StrobeAnimation LED_ANIMATION_CLOSE_TO_NEXT_SHIFT =
       new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
-          .withColor(new RGBWColor(255, 100, 0))
+          .withColor(new RGBWColor(255, 50, 0))
           .withFrameRate(4);
   public static final StrobeAnimation LED_ANIMATION_CLOSE_TO_NEXT_SHIFT_R =
       new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)

@@ -23,7 +23,7 @@ public class HoppertReal implements HoppertIO {
   private final TalonFX towerMotor = new TalonFX(Constants.TOWER_MOTOR_ID, CANBus.roboRIO());
 
   private final LoggedTunableNumber hopperFloorRPS =
-      new LoggedTunableNumber("Hoppert/TunableHopperFloorSpeed", -24);
+      new LoggedTunableNumber("Hoppert/TunableHopperFloorSpeed", -34);
 
   private boolean hopperRollersRunning = false;
   private boolean hopperWheelsRunning = false;
@@ -78,6 +78,13 @@ public class HoppertReal implements HoppertIO {
   @Override
   public void runHopperBackwards() {
     hopperRollerMotor.setControl(new VelocityVoltage(hopperFloorRPS.get()));
+    hopperRollersRunning = true;
+    hopperRollersReversed = true;
+  }
+
+  @Override
+  public void runHopperBackwardsSlow() {
+    hopperRollerMotor.setControl(new VelocityVoltage(-16));
     hopperRollersRunning = true;
     hopperRollersReversed = true;
   }

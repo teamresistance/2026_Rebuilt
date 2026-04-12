@@ -10,6 +10,8 @@ public interface HoppertIO extends Subsystem {
 
   void runHopperBackwards();
 
+  void runHopperBackwardsSlow();
+
   double getHopperCurrent();
 
   double getMecanumCurrent();
