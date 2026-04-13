@@ -17,7 +17,7 @@ public class HoppertCommand extends Command {
   private static final double HOPPER_FLOOR_DELAY = 1;
 
   private static final double OVERCURRENT_THRESHOLD = 80.0;
-  private static final double OVERCURRENT_TRIGGER_DURATION = 0.4;
+  private static final double OVERCURRENT_TRIGGER_DURATION = 0.3;
   private static final double REVERSE_DURATION = 0.25;
 
   private static final double OVERHOPPER_THRESHOLD = 70.0;
@@ -72,6 +72,20 @@ public class HoppertCommand extends Command {
   @Override
   public void execute() {
 
+    if (!shooter.isShooting()) {
+      hoppert.stopHopper();
+      hoppert.stopWheels();
+      if (intake.isIntaking()) {
+        hoppert.runHopperBackwardsSlow();
+      }
+      if (pulseTimer.hasElapsed(PULSE_OFF_DURATION)) {
+        pulseState = PulseState.FORWARDS;
+        pulseTimer.restart();
+      }
+      reset();
+      return;
+    }
+
     // Overcurrent detection
     if (hoppert.getMecanumCurrent() > OVERCURRENT_THRESHOLD) {
       //      Logger.recordOutput("Hoppert/JamDetected", true);
@@ -102,20 +116,6 @@ public class HoppertCommand extends Command {
         reverseTimer.stop();
         reverseTimer.reset();
       }
-      return;
-    }
-
-    if (!shooter.isShooting()) {
-      hoppert.stopHopper();
-      hoppert.stopWheels();
-      if (intake.isIntaking()) {
-        hoppert.runHopperBackwardsSlow();
-      }
-      if (pulseTimer.hasElapsed(PULSE_OFF_DURATION)) {
-        pulseState = PulseState.FORWARDS;
-        pulseTimer.restart();
-      }
-      reset();
       return;
     }
 

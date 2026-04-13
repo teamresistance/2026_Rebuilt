@@ -96,11 +96,11 @@ public class LEDSubsystem extends SubsystemBase {
       case CLOSE_TO_NEXT_SHIFT:
         candle.setControl(Constants.LED_ANIMATION_CLOSE_TO_NEXT_SHIFT);
         break;
-      case CLOSE_TO_NEXT_SHIFT_R:
-        candle.setControl(Constants.LED_ANIMATION_CLOSE_TO_NEXT_SHIFT_R);
+      case CLOSE_TO_NEXT_SHIFT_US:
+        candle.setControl(Constants.LED_ANIMATION_CLOSE_TO_NEXT_SHIFT_US);
         break;
-      case CLOSE_TO_NEXT_SHIFT_B:
-        candle.setControl(Constants.LED_ANIMATION_CLOSE_TO_NEXT_SHIFT_B);
+      case CLOSE_TO_NEXT_SHIFT_NOTUS:
+        candle.setControl(Constants.LED_ANIMATION_CLOSE_TO_NEXT_SHIFT_NOTUS);
         break;
       case ENDGAME:
         candle.setControl(Constants.LED_ANIMATION_ENDGAME);

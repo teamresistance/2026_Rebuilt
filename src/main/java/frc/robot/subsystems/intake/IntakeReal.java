@@ -22,7 +22,7 @@ public class IntakeReal implements IntakeIO {
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
                     .withSupplyCurrentLimitEnable(true)
-                    .withSupplyCurrentLimit(30));
+                    .withSupplyCurrentLimit(20));
 
     intakeMotor.getConfigurator().apply(config);
   }

@@ -77,7 +77,6 @@ public class RobotContainer {
 
   // bump zone and prebuilt commands
   private final Trigger inBumpZone;
-  private final Command driveAtAngleForBump;
   private final Command driveShooting;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -111,16 +110,6 @@ public class RobotContainer {
 
     // bump stuff
     inBumpZone = new Trigger(() -> BumpUtil.inBumpZone(drive::getPose, drive::getChassisSpeeds));
-
-    // pid angle control to the rotationToSnap() return
-    driveAtAngleForBump =
-        DriveCommands.joystickDriveAtAngle(
-                drive,
-                () -> -driverHID.getLeftY(),
-                () -> -driverHID.getLeftX(),
-                () -> BumpUtil.rotationToSnap(drive::getRotation))
-            .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming);
-    driveAtAngleForBump.addRequirements(drive);
 
     // angle assist vs. slow driving
     driveShooting =
@@ -376,9 +365,9 @@ public class RobotContainer {
             "shift countdown 2s",
             4,
             () ->
-                ShiftUtil.getNextShift() == Constants.ShiftOwner.RED
-                    ? Constants.LEDMode.CLOSE_TO_NEXT_SHIFT_R
-                    : Constants.LEDMode.CLOSE_TO_NEXT_SHIFT_B);
+                ShiftUtil.isOurs(ShiftUtil.getShift())
+                    ? Constants.LEDMode.CLOSE_TO_NEXT_SHIFT_NOTUS
+                    : Constants.LEDMode.CLOSE_TO_NEXT_SHIFT_US);
     leds.addStream(shiftCountdown2);
     new Trigger(ShiftUtil::withinTwoSecondsOfNextShift)
         .onTrue(Commands.runOnce(() -> shiftCountdown2.runForSeconds(2)));
@@ -388,13 +377,14 @@ public class RobotContainer {
             "endgame countdown", 6, () -> Constants.LEDMode.ENDGAME, ShiftUtil::isDeepEndgame);
     leds.addStream(endgame);
 
-    // BUMP (priority 5, timed 1s, cancels if leaving zone)
-    LEDStream bumpStream =
-        new LEDStream("bump", 5, () -> Constants.LEDMode.BUMP, inBumpZone::getAsBoolean);
-    leds.addStream(bumpStream);
-
-    // BUMP trigger (timed 1s when entering bump zone)
-    driver.y().onTrue(Commands.runOnce(() -> bumpStream.runForSeconds(1)));
+    //    // BUMP (priority 5, timed 1s, cancels if leaving zone)
+    //    LEDStream bumpStream =
+    //        new LEDStream("bump", 5, () -> Constants.LEDMode.BUMP, driverHID::getYButton);
+    //    leds.addStream(bumpStream);
+    //
+    //    // BUMP trigger (timed 1s when entering bump zone)
+    //    driver.povUp().or(driver.povDown()).onTrue(Commands.runOnce(() ->
+    // bumpStream.runForSeconds(1)));
 
     // RUMBLE when 5s from next shift
     new Trigger(ShiftUtil::nearNextShift)
@@ -442,8 +432,30 @@ public class RobotContainer {
                     || (Math.abs(operatorHID.getRightTriggerAxis()) > 0.25
                         || operatorHID.getRightBumperButton())));
 
-    // when y (paddle) is not pressed and in bump zone, auto rotate.
-    driver.y().whileTrue(driveAtAngleForBump);
+    // when POV up/down pressed and in bump zone, auto rotate to left/right side
+    driver
+        .povUp()
+        .whileTrue(
+            DriveCommands.joystickDriveAtAngle(
+                drive,
+                () -> -driverHID.getLeftY(),
+                () -> -driverHID.getLeftX(),
+                () ->
+                    DriverStation.getAlliance().get().equals(DriverStation.Alliance.Red)
+                        ? Rotation2d.fromDegrees(-135) // Left side for Red
+                        : Rotation2d.fromDegrees(135))); // Left side for Blue
+
+    driver
+        .povDown()
+        .whileTrue(
+            DriveCommands.joystickDriveAtAngle(
+                drive,
+                () -> -driverHID.getLeftY(),
+                () -> -driverHID.getLeftX(),
+                () ->
+                    DriverStation.getAlliance().get().equals(DriverStation.Alliance.Red)
+                        ? Rotation2d.fromDegrees(-45) // Right side for Red
+                        : Rotation2d.fromDegrees(45))); // Right side for Blue
 
     // climb raise robot
     driver
@@ -494,23 +506,19 @@ public class RobotContainer {
     driver.b().whileTrue(Commands.run(hoppert::reverseHopperWheels));
     driver.b().onFalse(Commands.runOnce(hoppert::stopWheels));
 
+    Trigger shtTrg =
+        new Trigger(driver.rightTrigger().or(driver.rightBumper()))
+            .or(coDriver.rightTrigger().or(coDriver.rightBumper()));
+
     // shoot
-    (driver.rightTrigger().or(driver.rightBumper()))
-        .or(coDriver.rightTrigger().or(coDriver.rightBumper()))
-        .whileTrue(new ShootCommand(drive, shooter, driverHID::getRightBumperButton));
-    (driver.rightTrigger().or(driver.rightBumper()))
-        .or((coDriver.rightTrigger().or(coDriver.rightBumper())))
-        .and(() -> !driverHID.getYButton())
-        .whileTrue(driveShooting);
-    (driver.rightTrigger().or(driver.rightBumper()))
-        .or((coDriver.rightTrigger().or(coDriver.rightBumper())))
-        .onFalse(
-            new ParallelDeadlineGroup(
-                    new ShootCommand(drive, shooter, driverHID::getRightBumperButton)
-                        .withTimeout(1.25),
-                    Commands.run(hoppert::runTowerForwards),
-                    Commands.run(hoppert::stopHopper))
-                .andThen(Commands.runOnce(hoppert::stopTower)));
+    shtTrg.whileTrue(new ShootCommand(drive, shooter, driverHID::getRightBumperButton));
+    shtTrg.whileTrue(driveShooting);
+    shtTrg.onFalse(
+        new ParallelDeadlineGroup(
+                new ShootCommand(drive, shooter, driverHID::getRightBumperButton).withTimeout(0.9),
+                Commands.run(hoppert::runTowerForwards),
+                Commands.run(hoppert::stopHopper))
+            .andThen(Commands.runOnce(hoppert::stopTower)));
 
     // left trigger toggles intake
     driver.leftTrigger().onTrue(new ToggleIntakeCommand(intake));

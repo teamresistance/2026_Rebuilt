@@ -74,8 +74,8 @@ public final class Constants {
     AUTO,
     DISABLED,
     CLOSE_TO_NEXT_SHIFT,
-    CLOSE_TO_NEXT_SHIFT_R,
-    CLOSE_TO_NEXT_SHIFT_B,
+    CLOSE_TO_NEXT_SHIFT_US,
+    CLOSE_TO_NEXT_SHIFT_NOTUS,
     ENDGAME
   }
 
@@ -125,15 +125,15 @@ public final class Constants {
           .withFrameRate(1);
   public static final StrobeAnimation LED_ANIMATION_CLOSE_TO_NEXT_SHIFT =
       new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
-          .withColor(new RGBWColor(255, 50, 0))
+          .withColor(new RGBWColor(255, 40, 0))
           .withFrameRate(4);
-  public static final StrobeAnimation LED_ANIMATION_CLOSE_TO_NEXT_SHIFT_R =
+  public static final StrobeAnimation LED_ANIMATION_CLOSE_TO_NEXT_SHIFT_US =
       new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
-          .withColor(new RGBWColor(255, 50, 50))
+          .withColor(new RGBWColor(0, 255, 0))
           .withFrameRate(6);
-  public static final StrobeAnimation LED_ANIMATION_CLOSE_TO_NEXT_SHIFT_B =
+  public static final StrobeAnimation LED_ANIMATION_CLOSE_TO_NEXT_SHIFT_NOTUS =
       new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
-          .withColor(new RGBWColor(50, 50, 255))
+          .withColor(new RGBWColor(255, 0, 0))
           .withFrameRate(6);
   public static final StrobeAnimation LED_ANIMATION_ENDGAME =
       new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)

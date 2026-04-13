@@ -166,8 +166,12 @@ public class ShiftUtil {
         .map(
             value ->
                 switch (value) {
-                  case Red -> shiftOwner == Constants.ShiftOwner.RED;
-                  case Blue -> shiftOwner == Constants.ShiftOwner.BLUE;
+                  case Red ->
+                      shiftOwner == Constants.ShiftOwner.RED
+                          || shiftOwner == Constants.ShiftOwner.BOTH;
+                  case Blue ->
+                      shiftOwner == Constants.ShiftOwner.BLUE
+                          || shiftOwner == Constants.ShiftOwner.BOTH;
                 })
         .orElse(true);
   }

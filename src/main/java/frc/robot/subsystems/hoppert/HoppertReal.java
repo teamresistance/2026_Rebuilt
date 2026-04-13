@@ -122,7 +122,7 @@ public class HoppertReal implements HoppertIO {
 
   @Override
   public void runHopperWheels() {
-    hopperWheelsMotor.setControl(new VelocityVoltage(150));
+    hopperWheelsMotor.setControl(new VelocityVoltage(250));
     hopperWheelsRunning = true;
   }
 

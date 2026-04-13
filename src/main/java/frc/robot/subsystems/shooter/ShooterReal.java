@@ -63,7 +63,7 @@ public class ShooterReal implements ShooterIO {
             .withSlot0(new Slot0Configs().withKP(2).withKI(0).withKD(0).withKS(0.5))
             .withMotionMagic(
                 new MotionMagicConfigs()
-                    .withMotionMagicAcceleration(600)
+                    .withMotionMagicAcceleration(800)
                     .withMotionMagicCruiseVelocity(130)
                     .withMotionMagicJerk(3000))
             .withMotorOutput(
