@@ -5,11 +5,13 @@
   "pathFolders": [
     "ISC Bottom",
     "ISC Top",
+    "Bump",
     "OUTPOST",
     "Simple (BACKUP)"
   ],
   "autoFolders": [
     "ISC",
+    "Bump",
     "Simple"
   ],
   "defaultMaxVel": 4.68,

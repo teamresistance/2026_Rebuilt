@@ -164,7 +164,12 @@ public class RobotContainer {
         "Shoot 4s",
         (new ShootCommand(drive, shooter, () -> false)
                 .alongWith(new HoppertCommand(hoppert, shooter, intake, () -> true)))
-            .withTimeout(5));
+            .withTimeout(4));
+    NamedCommands.registerCommand(
+      "Shoot 3s",
+      (new ShootCommand(drive, shooter, () -> false)
+        .alongWith(new HoppertCommand(hoppert, shooter, intake, () -> true)))
+        .withTimeout(3));
     NamedCommands.registerCommand(
         "Shoot 10s",
         (new ShootCommand(drive, shooter, () -> false)
