@@ -1,0 +1,67 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot 3s"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BT_Cross"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Toggle Intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BT_Int"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Toggle Intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BT_Return"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot 5s"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Closest Climb"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Climb Up"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "Bump",
+  "choreoAuto": false
+}
