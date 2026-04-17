@@ -75,6 +75,7 @@ public class RobotContainer {
   private final LoggedDashboardChooser<Command> autoChooser;
   private final SendableChooser<Boolean> swivelStop = new SendableChooser<>();
   private final SendableChooser<String> manualShiftAssigner = new SendableChooser<>();
+  private final SendableChooser<Boolean> startTrimChooser = new SendableChooser<>();
 
   // bump zone and prebuilt commands
   private final Trigger inBumpZone;
@@ -141,6 +142,10 @@ public class RobotContainer {
     swivelStop.addOption("GOOD", false);
     swivelStop.setDefaultOption("GOOD", false);
     SmartDashboard.putData("Turret Swivel Stop", swivelStop);
+
+    startTrimChooser.setDefaultOption("No", false);
+    startTrimChooser.addOption("Yes", true);
+    SmartDashboard.putData("Start Trimmed", startTrimChooser);
 
     configureDriverFeedback();
     autoChooser = configureAutos();
@@ -573,7 +578,7 @@ public class RobotContainer {
         .onTrue(Commands.runOnce(() -> shooter.adjustHorizontalTrim(false)));
     driver
         .povLeft()
-        .or(coDriver.povRight())
+        .or(coDriver.povLeft())
         .onTrue(Commands.runOnce(() -> shooter.adjustHorizontalTrim(true)));
   }
 
@@ -618,7 +623,22 @@ public class RobotContainer {
 
   /** Returns the autonomous command to schedule for the auto period. */
   public Command getAutonomousCommand() {
-    Command autoCommand = autoChooser.get();
+    Command autoCommand;
+    if (startTrimChooser.getSelected()) {
+      shooter.adjustHorizontalTrim(true);
+      shooter.adjustHorizontalTrim(true);
+      autoCommand =
+          autoChooser
+              .get()
+              .andThen(
+                  Commands.runOnce(
+                      () -> {
+                        shooter.adjustHorizontalTrim(false);
+                        shooter.adjustHorizontalTrim(false);
+                      }));
+    } else {
+      autoCommand = autoChooser.get();
+    }
     if (autoCommand == null) {
       Logger.recordOutput("Auto/NoCommandSelected", true);
       return Commands.none(); // Return empty command if no auto selected

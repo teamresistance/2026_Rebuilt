@@ -38,19 +38,19 @@
                       }
                     },
                     {
-                      "type": "deadline",
+                      "type": "parallel",
                       "data": {
                         "commands": [
-                          {
-                            "type": "named",
-                            "data": {
-                              "name": "Shoot 5s"
-                            }
-                          },
                           {
                             "type": "path",
                             "data": {
                               "pathName": "Outpost ALTC"
+                            }
+                          },
+                          {
+                            "type": "named",
+                            "data": {
+                              "name": "Shoot 5s"
                             }
                           }
                         ]
