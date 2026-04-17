@@ -529,6 +529,11 @@ public class RobotContainer {
     driver.leftTrigger().onTrue(new ToggleIntakeCommand(intake));
     driver.leftTrigger().onFalse(new ToggleIntakeCommand(intake));
 
+    coDriver
+        .back()
+        .or(operatorHID::getStartButton)
+        .whileTrue(Commands.run(climber::trimDown).withTimeout(0.1));
+
     // POV for adjusting shooter trim, with up/down adjusting vertical and left/right adjusting
     // horizontal.
     //    driverHID.povUp().onTrue(Commands.runOnce(() -> shooter.adjustVerticalTrim(true)));

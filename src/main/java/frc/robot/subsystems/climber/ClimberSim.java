@@ -39,6 +39,9 @@ public class ClimberSim implements ClimberIO {
   }
 
   @Override
+  public void trimDown() {}
+
+  @Override
   public void periodic() {
     Logger.recordOutput("Climber/Setpoint", isUp);
     Logger.recordOutput("Climber/Position", isUp);
