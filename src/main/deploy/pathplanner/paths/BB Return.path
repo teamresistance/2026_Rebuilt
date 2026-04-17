@@ -76,7 +76,7 @@
       "minWaypointRelativePos": 1.1748818365968938,
       "maxWaypointRelativePos": 2.0256583389601617,
       "constraints": {
-        "maxVelocity": 3.0,
+        "maxVelocity": 3.5,
         "maxAcceleration": 5.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 400.0,
@@ -96,7 +96,7 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 2.0,
+    "velocity": 0.0,
     "rotation": 0.0
   },
   "reversed": false,

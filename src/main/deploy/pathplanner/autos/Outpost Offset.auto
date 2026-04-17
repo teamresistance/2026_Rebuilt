@@ -27,12 +27,6 @@
                             "data": {
                               "pathName": "Outpost Backup LO"
                             }
-                          },
-                          {
-                            "type": "named",
-                            "data": {
-                              "name": "Shoot 5s"
-                            }
                           }
                         ]
                       }
