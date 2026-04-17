@@ -49,6 +49,12 @@
         {
           "type": "named",
           "data": {
+            "name": "Toggle Intake"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "Closest Climb"
           }
         },
@@ -56,6 +62,12 @@
           "type": "named",
           "data": {
             "name": "Climb Up"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Toggle Intake"
           }
         }
       ]

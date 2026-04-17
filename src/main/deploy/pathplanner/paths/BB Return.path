@@ -8,24 +8,24 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 8.088858773181169,
-        "y": 2.7346647646219684
+        "x": 6.549158345221112,
+        "y": 2.30768901569187
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.708145506419401,
-        "y": 2.4370756062767476
+        "x": 6.057489300998572,
+        "y": 2.5
       },
       "prevControl": {
-        "x": 7.233645783154911,
-        "y": 2.4370756062767476
+        "x": 6.329201141226819,
+        "y": 2.5646932952924395
       },
       "nextControl": {
-        "x": 3.8708559201141224,
-        "y": 2.437075606276748
+        "x": 5.814287747327229,
+        "y": 2.44209486817349
       },
       "isLocked": false,
       "linkedName": null
@@ -33,15 +33,15 @@
     {
       "anchor": {
         "x": 3.560328102710413,
-        "y": 2.4370756062767476
+        "y": 2.437
       },
       "prevControl": {
         "x": 5.41055634807418,
-        "y": 2.450014265335236
+        "y": 2.449938659058488
       },
       "nextControl": {
         "x": 1.7100998573466457,
-        "y": 2.4241369472182592
+        "y": 2.4240613409415115
       },
       "isLocked": false,
       "linkedName": null
@@ -72,24 +72,11 @@
   ],
   "constraintZones": [
     {
-      "name": "bump slow strt",
-      "minWaypointRelativePos": 0.9777177582714378,
-      "maxWaypointRelativePos": 1.2261985145172116,
-      "constraints": {
-        "maxVelocity": 1.5,
-        "maxAcceleration": 5.0,
-        "maxAngularVelocity": 540.0,
-        "maxAngularAcceleration": 400.0,
-        "nominalVoltage": 12.0,
-        "unlimited": false
-      }
-    },
-    {
       "name": "bump slow mnd",
-      "minWaypointRelativePos": 1.7906819716407825,
+      "minWaypointRelativePos": 1.1748818365968938,
       "maxWaypointRelativePos": 2.0256583389601617,
       "constraints": {
-        "maxVelocity": 1.5,
+        "maxVelocity": 3.0,
         "maxAcceleration": 5.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 400.0,

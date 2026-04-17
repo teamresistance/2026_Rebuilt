@@ -116,8 +116,8 @@ public class RobotContainer {
         new ConditionalCommand(
             DriveCommands.joystickDriveAtAngle(
                 drive,
-                () -> MathUtil.clamp(-driverHID.getLeftY(), -0.5, 0.5),
-                () -> MathUtil.clamp(-driverHID.getLeftX(), -0.5, 0.5),
+                () -> MathUtil.clamp(-driverHID.getLeftY(), -0.7, 0.7),
+                () -> MathUtil.clamp(-driverHID.getLeftX(), -0.7, 0.7),
                 () ->
                     drive
                         .getRotation()
@@ -125,9 +125,9 @@ public class RobotContainer {
                         .plus(Rotation2d.fromDegrees(-driverHID.getRightX() * 90))),
             DriveCommands.joystickDrive(
                 drive,
-                () -> MathUtil.clamp(-driverHID.getLeftY(), -0.50, 0.5),
-                () -> MathUtil.clamp(-driverHID.getLeftX(), -0.5, 0.5),
-                () -> MathUtil.clamp(-driverHID.getRightX(), -0.4, 0.4)),
+                () -> MathUtil.clamp(-driverHID.getLeftY(), -0.7, 0.7),
+                () -> MathUtil.clamp(-driverHID.getLeftX(), -0.7, 0.7),
+                () -> MathUtil.clamp(-driverHID.getRightX(), -0.5, 0.5)),
             () -> Math.abs(shooter.getDriveAssistanceAngle()) > 2 && !driverHID.getYButton());
     driveShooting.addRequirements(drive);
 
@@ -158,28 +158,28 @@ public class RobotContainer {
     NamedCommands.registerCommand(
         "Shoot 5s",
         (new ShootCommand(drive, shooter, () -> false)
-                .alongWith(new HoppertCommand(hoppert, shooter, intake, () -> true)))
-            .withTimeout(5));
+            // .alongWith(new HoppertCommand(hoppert, shooter, intake, () -> true)))
+            .withTimeout(5)));
     NamedCommands.registerCommand(
         "Shoot 4s",
         (new ShootCommand(drive, shooter, () -> false)
-                .alongWith(new HoppertCommand(hoppert, shooter, intake, () -> true)))
-            .withTimeout(4));
+            // .alongWith(new HoppertCommand(hoppert, shooter, intake, () -> true)))
+            .withTimeout(4)));
     NamedCommands.registerCommand(
-      "Shoot 3s",
-      (new ShootCommand(drive, shooter, () -> false)
-        .alongWith(new HoppertCommand(hoppert, shooter, intake, () -> true)))
-        .withTimeout(3));
+        "Shoot 3s",
+        (new ShootCommand(drive, shooter, () -> false)
+            // .alongWith(new HoppertCommand(hoppert, shooter, intake, () -> true)))
+            .withTimeout(3)));
     NamedCommands.registerCommand(
         "Shoot 10s",
         (new ShootCommand(drive, shooter, () -> false)
-                .alongWith(new HoppertCommand(hoppert, shooter, intake, () -> true)))
-            .withTimeout(10));
+            // .alongWith(new HoppertCommand(hoppert, shooter, intake, () -> true)))
+            .withTimeout(10)));
     NamedCommands.registerCommand(
         "Shoot 7s",
         (new ShootCommand(drive, shooter, () -> false)
-                .alongWith(new HoppertCommand(hoppert, shooter, intake, () -> true)))
-            .withTimeout(7));
+            // .alongWith(new HoppertCommand(hoppert, shooter, intake, () -> true)))
+            .withTimeout(7)));
     // TODO: outpost shoot for longer?
     NamedCommands.registerCommand("Toggle Intake", new ToggleIntakeCommand(intake));
     NamedCommands.registerCommand(

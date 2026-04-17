@@ -224,7 +224,7 @@ public class ShooterReal implements ShooterIO {
 
   @Override
   public boolean isShooting() {
-    return flywheelTargetRPS >= 1.0;
+    return flywheelTargetRPS >= 10.0;
   }
 
   @Override

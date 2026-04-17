@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.hoppert.HoppertIO;
@@ -72,6 +73,27 @@ public class HoppertCommand extends Command {
   @Override
   public void execute() {
 
+    if ((triggerSup.getAsBoolean() || DriverStation.isAutonomous())
+        && shooter.atShootingSetpoints()) {
+      if (shooter.isShooting()) {
+        hoppert.runTowerForwards();
+      } else {
+        hoppert.stopTower();
+      }
+      if (startTimer.hasElapsed(HOPPER_WHEELS_DELAY)) {
+        hoppert.runHopperWheels();
+      }
+      if (startTimer.hasElapsed(HOPPER_FLOOR_DELAY)) {
+        hoppert.runHopperBackwardsSlow();
+      } else {
+        hoppert.runHopperBackwards();
+      }
+    }
+
+    if (hoppert.getHopperCurrent() > OVERHOPPER_THRESHOLD) {
+      hoppert.runHopperForwards();
+    }
+
     if (!shooter.isShooting()) {
       hoppert.stopHopper();
       hoppert.stopWheels();
@@ -119,8 +141,6 @@ public class HoppertCommand extends Command {
       return;
     }
 
-    hoppert.runTowerForwards();
-
     //    switch (pulseState) {
     //      case BACKWARDS -> {
     //        hoppert.runHopperBackwards();
@@ -144,20 +164,5 @@ public class HoppertCommand extends Command {
     //        }
     //      }
     //    }
-
-    if (triggerSup.getAsBoolean() && shooter.atShootingSetpoints()) {
-      if (startTimer.hasElapsed(HOPPER_WHEELS_DELAY)) {
-        hoppert.runHopperWheels();
-      }
-      if (startTimer.hasElapsed(HOPPER_FLOOR_DELAY)) {
-        hoppert.runHopperBackwardsSlow();
-      } else {
-        hoppert.runHopperBackwards();
-      }
-    }
-
-    if (hoppert.getHopperCurrent() > OVERHOPPER_THRESHOLD) {
-      hoppert.runHopperForwards();
-    }
   }
 }
