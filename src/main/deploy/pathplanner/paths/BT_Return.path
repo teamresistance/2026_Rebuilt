@@ -3,12 +3,12 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 8.153552068473608,
+        "x": 8.154,
         "y": 4.373751783166903
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.80793152639087,
+        "x": 6.808379457917262,
         "y": 5.2059486447931524
       },
       "isLocked": false,
@@ -48,12 +48,12 @@
     },
     {
       "anchor": {
-        "x": 1.0372895863052778,
-        "y": 4.895420827389444
+        "x": 1.03,
+        "y": 5.0
       },
       "prevControl": {
-        "x": 2.344094151212553,
-        "y": 5.128316690442225
+        "x": 2.3368045649072755,
+        "y": 5.232895863052781
       },
       "nextControl": null,
       "isLocked": false,
@@ -70,10 +70,10 @@
     {
       "name": "bump slow mnd",
       "minWaypointRelativePos": 1.3369345037137068,
-      "maxWaypointRelativePos": 2.0256583389601617,
+      "maxWaypointRelativePos": 3.0,
       "constraints": {
         "maxVelocity": 3.5,
-        "maxAcceleration": 5.0,
+        "maxAcceleration": 2.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 400.0,
         "nominalVoltage": 12.0,

@@ -36,24 +36,24 @@
         "y": 2.437
       },
       "prevControl": {
-        "x": 5.41055634807418,
-        "y": 2.449938659058488
+        "x": 5.397786883110853,
+        "y": 2.6543872102250594
       },
       "nextControl": {
-        "x": 1.7100998573466457,
-        "y": 2.4240613409415115
+        "x": 1.3736947218259625,
+        "y": 2.1783024251069905
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 1.0372895863052778,
-        "y": 2.4370756062767476
+        "x": 1.01,
+        "y": 2.17830242510699
       },
       "prevControl": {
-        "x": 2.7840085592011414,
-        "y": 2.4111982881597713
+        "x": 3.3518972895863053,
+        "y": 2.4370756062767476
       },
       "nextControl": null,
       "isLocked": false,
@@ -66,7 +66,7 @@
       "rotationDegrees": 90.0
     },
     {
-      "waypointRelativePos": 2.1556503198294434,
+      "waypointRelativePos": 2.0453172205438017,
       "rotationDegrees": 90.0
     }
   ],
@@ -74,7 +74,7 @@
     {
       "name": "bump slow mnd",
       "minWaypointRelativePos": 1.1748818365968938,
-      "maxWaypointRelativePos": 2.0256583389601617,
+      "maxWaypointRelativePos": 3.0,
       "constraints": {
         "maxVelocity": 3.5,
         "maxAcceleration": 5.0,
