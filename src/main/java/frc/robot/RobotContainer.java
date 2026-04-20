@@ -195,19 +195,11 @@ public class RobotContainer {
             () -> {
               var currentPose = drive.getPose();
               var targetPose = OtherUtil.getClimberAlignPos(currentPose);
-              double xDiff = Math.abs(currentPose.getX() - targetPose.getX());
-              if (xDiff < 0.2) {
-                // If already close in x, just align directly
-                return DriveCommands.goToTransform(drive, GeomUtil.poseToTransform(targetPose));
-              } else {
-                // Otherwise, go to intermediate pose first
-                var intermediatePose =
-                    new Pose2d(targetPose.getX(), currentPose.getY(), targetPose.getRotation());
-                return DriveCommands.goToTransform(
-                        drive, GeomUtil.poseToTransform(intermediatePose))
-                    .andThen(
-                        DriveCommands.goToTransform(drive, GeomUtil.poseToTransform(targetPose)));
-              }
+              var intermediatePose =
+                  new Pose2d(targetPose.getX(), currentPose.getY(), targetPose.getRotation());
+              return DriveCommands.goToTransform(drive, GeomUtil.poseToTransform(intermediatePose))
+                  .andThen(
+                      DriveCommands.goToTransform(drive, GeomUtil.poseToTransform(targetPose)));
             }));
   }
 
@@ -518,20 +510,12 @@ public class RobotContainer {
                 () -> {
                   var currentPose = drive.getPose();
                   var targetPose = OtherUtil.getClimberAlignPos(currentPose);
-                  double xDiff = Math.abs(currentPose.getX() - targetPose.getX());
-                  if (xDiff < 0.2) {
-                    // If already close in x, just align directly
-                    return DriveCommands.goToTransform(drive, GeomUtil.poseToTransform(targetPose));
-                  } else {
-                    // Otherwise, go to intermediate pose first
-                    var intermediatePose =
-                        new Pose2d(targetPose.getX(), currentPose.getY(), targetPose.getRotation());
-                    return DriveCommands.goToTransform(
-                            drive, GeomUtil.poseToTransform(intermediatePose))
-                        .andThen(
-                            DriveCommands.goToTransform(
-                                drive, GeomUtil.poseToTransform(targetPose)));
-                  }
+                  var intermediatePose =
+                      new Pose2d(targetPose.getX(), currentPose.getY(), targetPose.getRotation());
+                  return DriveCommands.goToTransform(
+                          drive, GeomUtil.poseToTransform(intermediatePose))
+                      .andThen(
+                          DriveCommands.goToTransform(drive, GeomUtil.poseToTransform(targetPose)));
                 }));
 
     // auto-aim hood and turret always
