@@ -8,7 +8,6 @@ import frc.robot.subsystems.shooter.ShootingConstants;
 import frc.robot.util.LoggedTunableNumber;
 import frc.robot.util.ShootingUtil;
 import java.util.function.BooleanSupplier;
-import org.littletonrobotics.junction.Logger;
 
 public class IdleShooterCommand extends Command {
 
@@ -37,7 +36,7 @@ public class IdleShooterCommand extends Command {
         ShootingUtil.getAngleToAim(
             drive.getPose(),
             drive.getChassisSpeeds(),
-            ShootingConstants.getTimeOfFlight(distance) - 0.4,
+            ShootingConstants.getTimeOfFlight(distance),
             passing);
     double hoodAngle = ShootingConstants.getHoodAngle(distance);
 
@@ -48,6 +47,6 @@ public class IdleShooterCommand extends Command {
       shooter.setHoodTarget(tunableHood.get());
     }
 
-    Logger.recordOutput("Shooter/Virtual Distance to Hub", distance);
+    // Logger.recordOutput("Shooter/Virtual Distance to Hub", distance);
   }
 }

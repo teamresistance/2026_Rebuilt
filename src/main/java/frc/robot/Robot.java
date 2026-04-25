@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.generated.TunerConstants;
 import frc.robot.util.ShiftUtil;
-import frc.robot.util.TurretConfidenceUtil;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -177,8 +176,9 @@ public class Robot extends LoggedRobot {
 
     // Calculate and update the shot confidence value from the utility class and publish it to the
     // dashboard for operator awareness
-    Logger.recordOutput(
-        "Shooter/Confidence", TurretConfidenceUtil.calculateConfidence(robotContainer.getDrive()));
+    //    Logger.recordOutput(
+    //        "Shooter/Confidence",
+    // TurretConfidenceUtil.calculateConfidence(robotContainer.getDrive()));
   }
 
   /** This function is called once when test mode is enabled. */

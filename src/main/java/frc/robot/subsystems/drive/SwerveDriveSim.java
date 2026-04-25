@@ -117,7 +117,9 @@ public class SwerveDriveSim implements SwerveDriveIO {
   }
 
   @Override
-  public void setPose(Pose2d pose) {}
+  public void setPose(Pose2d pose) {
+    driveSimulation.setSimulationWorldPose(pose);
+  }
 
   @Override
   public Rotation2d getRotation() {

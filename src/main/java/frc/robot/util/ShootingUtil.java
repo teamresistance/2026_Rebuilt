@@ -137,7 +137,7 @@ public class ShootingUtil {
       Pose2d robotPose, ChassisSpeeds robotSpeeds, double estimatedAirtime, boolean passing) {
 
     Pose2d goalPose = ShootingUtil.getShootingTarget(robotPose, passing);
-    Logger.recordOutput("Shooter/GoalPose", goalPose);
+    //    Logger.recordOutput("Shooter/GoalPose", goalPose);
 
     Translation2d fieldVelocity =
         new Translation2d(robotSpeeds.vxMetersPerSecond, robotSpeeds.vyMetersPerSecond)
@@ -174,7 +174,7 @@ public class ShootingUtil {
       Pose2d robotPose, ChassisSpeeds robotSpeeds, boolean passing) {
 
     Pose2d goalPose = ShootingUtil.getShootingTarget(robotPose, passing);
-    Logger.recordOutput("Shooter/GoalPose", goalPose);
+    //    Logger.recordOutput("Shooter/GoalPose", goalPose);
 
     Translation2d fieldVelocity =
         new Translation2d(robotSpeeds.vxMetersPerSecond, robotSpeeds.vyMetersPerSecond)

@@ -3,41 +3,41 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.7653922967189715,
-        "y": 3.420413694721826
+        "x": 3.5862054208273886,
+        "y": 2.4758915834522113
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.932625587394738,
-        "y": 2.9566289022236014
+        "x": 4.5862054208273895,
+        "y": 2.4758915834522113
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.953980028530669,
-        "y": 2.4888302425106996
+        "x": 5.552881597717547,
+        "y": 2.4758915834522113
       },
       "prevControl": {
-        "x": 6.279265015816224,
-        "y": 2.6032158715483784
+        "x": 5.302914109584516,
+        "y": 2.4718598497726463
       },
       "nextControl": {
-        "x": 5.3682165581672034,
-        "y": 2.282848024936056
+        "x": 6.352777559743246,
+        "y": 2.4887931312268194
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 2.4993580599144076,
-        "y": 2.2947503566333807
+        "x": 8.659777777777778,
+        "y": 1.0434555555555551
       },
       "prevControl": {
-        "x": 3.611121930378924,
-        "y": 2.417003783231487
+        "x": 7.558655555555555,
+        "y": -0.2915333333333341
       },
       "nextControl": null,
       "isLocked": false,
@@ -46,15 +46,15 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.6929861402771939,
-      "rotationDegrees": 45.0
+      "waypointRelativePos": 1.1641791044776169,
+      "rotationDegrees": 90.0
     }
   ],
   "constraintZones": [
     {
-      "name": "Bump Slow",
-      "minWaypointRelativePos": 0.826787512588117,
-      "maxWaypointRelativePos": 1.8096676737160122,
+      "name": "bump slow mnd",
+      "minWaypointRelativePos": 0.7022282241728504,
+      "maxWaypointRelativePos": 1.0641458474004075,
       "constraints": {
         "maxVelocity": 1.5,
         "maxAcceleration": 5.0,
@@ -76,14 +76,14 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0.0,
-    "rotation": 45.0
+    "velocity": 1.0,
+    "rotation": 20.0
   },
   "reversed": false,
-  "folder": "SIS Bottom",
+  "folder": "Bump",
   "idealStartingState": {
-    "velocity": 1.5,
-    "rotation": 0.0
+    "velocity": 0,
+    "rotation": 90.0
   },
   "useDefaultConstraints": true
 }

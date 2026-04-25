@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.7653922967189715,
-        "y": 6.780342368045649
+        "x": 0.4421112696148356,
+        "y": 0.7032952924393738
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.816657941645832,
-        "y": 7.026862747785977
+        "x": 0.8596625939216735,
+        "y": 1.7110486620364087
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 7.7653922967189715,
-        "y": 4.619586305278174
+        "x": 1.0502282453637657,
+        "y": 2.3465049928673327
       },
       "prevControl": {
-        "x": 7.722931247070227,
-        "y": 5.469506199810385
+        "x": 0.5468248437708693,
+        "y": 1.0350263315276051
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,7 +33,7 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 1.25,
+    "maxVelocity": 0.5,
     "maxAcceleration": 5.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 400.0,
@@ -41,13 +41,13 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 1.0,
+    "velocity": 0,
     "rotation": 0.0
   },
   "reversed": false,
-  "folder": "SIS Top",
+  "folder": "OUTPOST",
   "idealStartingState": {
-    "velocity": 1.25,
+    "velocity": 0,
     "rotation": 0.0
   },
   "useDefaultConstraints": false

@@ -34,7 +34,7 @@ public final class Constants {
 
   public static final int CLIMBER_MOTOR_ID = 11;
   public static final int CLIMBER_FULL_OUT = 0; // FULLY UP
-  public static final int CLIMBER_FULL_IN = -160; // FULLY DOWN
+  public static final int CLIMBER_FULL_IN = -138; // FULLY DOWN
   public static final int CLIMBER_BRAKE_RELAY_ID = 1;
 
   public static final int SHOOTER_HOOD_ID = 12;
@@ -46,15 +46,15 @@ public final class Constants {
 
   public static final double SHOOTER_HOOD_REVS_PER_DEG = (4.0 * (175.0 / 10.0)) / 360.0;
   public static final double SHOOTER_TURRET_REVS_PER_DEG = (5 * 5 * 3.2) / 360.0;
-  public static final double SHOOTER_HOOD_REVS_TOLERANCE = 0.25;
-  public static final double SHOOTER_TURRET_REVS_TOLERANCE = 0.5;
+  public static final double SHOOTER_HOOD_REVS_TOLERANCE = 3;
+  public static final double SHOOTER_TURRET_REVS_TOLERANCE = 3;
   public static final double SHOOTER_RPS_TOLERANCE = 0.5;
 
   public static final double SHOOTER_HOOD_MAX_PITCH = 43;
   public static final double SHOOTER_HOOD_MIN_PITCH = 17.5;
-  public static final double SHOOTER_TURRET_MAX_YAW = 130;
-  public static final double SHOOTER_TURRET_MIN_YAW = -130;
-  public static final double SHOOTER_TRIM_ADJUSTMENT_INCREMENT = 3; // TODO: number w/ driver
+  public static final double SHOOTER_TURRET_MAX_YAW = 129;
+  public static final double SHOOTER_TURRET_MIN_YAW = -129;
+  public static final double SHOOTER_TRIM_ADJUSTMENT_INCREMENT = 3;
 
   public static final Transform2d ROBOT_TO_TURRET =
       new Transform2d(Units.inchesToMeters(1.38), Units.inchesToMeters(3.8), Rotation2d.kZero);
@@ -72,7 +72,11 @@ public final class Constants {
     INACTIVE,
     BUMP,
     AUTO,
-    DISABLED
+    DISABLED,
+    CLOSE_TO_NEXT_SHIFT,
+    CLOSE_TO_NEXT_SHIFT_US,
+    CLOSE_TO_NEXT_SHIFT_NOTUS,
+    ENDGAME
   }
 
   public static final int LED_START_INDEX = 0;
@@ -93,22 +97,20 @@ public final class Constants {
           .withColor(new RGBWColor(255, 200, 0))
           .withFrameRate(5);
   public static final SolidColor LED_ANIMATION_ACTIVE =
-      new SolidColor(LED_START_INDEX, LED_END_INDEX).withColor(new RGBWColor(255, 0, 255));
-  public static final EmptyAnimation LED_ANIMATION_INACTIVE = new EmptyAnimation(0);
-  //  public static final SolidColor LED_ANIMATION_INACTIVE =
-  //      new SolidColor(LED_START_INDEX, LED_END_INDEX).withColor(new RGBWColor(255, 255, 255));
+      new SolidColor(LED_START_INDEX, LED_END_INDEX).withColor(new RGBWColor(0, 255, 0));
+  public static final SolidColor LED_ANIMATION_INACTIVE =
+      new SolidColor(LED_START_INDEX, LED_END_INDEX).withColor(new RGBWColor(255, 0, 0));
   public static final StrobeAnimation LED_ANIMATION_BUMP =
       new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
           .withFrameRate(10)
           .withColor(new RGBWColor(0, 255, 255));
-  public static final LarsonAnimation LED_ANIMATION_AUTO =
-      new LarsonAnimation(LED_START_INDEX, LED_END_INDEX)
-          .withFrameRate(20)
-          .withColor(new RGBWColor(255, 150, 0))
-          .withSize(20);
+  //  public static final LarsonAnimation LED_ANIMATION_AUTO =
+  //      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
+  //          .withFrameRate(20)
+  //          .withColor(new RGBWColor(255, 150, 0))
+  //          .withSize(20);
   public static final EmptyAnimation LED_ANIMATION_DISABLED_GOOD = new EmptyAnimation(0);
   public static final EmptyAnimation LED_ANIMATION_DISABLED_FINE = new EmptyAnimation(0);
-  public static final EmptyAnimation LED_ANIMATION_DISABLED_BAD = new EmptyAnimation(0);
   //  public static final StrobeAnimation LED_ANIMATION_DISABLED_GOOD =
   //      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
   //          .withColor(new RGBWColor(0, 15, 0))
@@ -117,10 +119,26 @@ public final class Constants {
   //      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
   //          .withColor(new RGBWColor(15, 3, 0))
   //          .withFrameRate(1);
-  //  public static final StrobeAnimation LED_ANIMATION_DISABLED_BAD =
-  //      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
-  //          .withColor(new RGBWColor(15, 0, 0))
-  //          .withFrameRate(1);
+  public static final StrobeAnimation LED_ANIMATION_DISABLED_BAD =
+      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
+          .withColor(new RGBWColor(15, 0, 0))
+          .withFrameRate(1);
+  public static final StrobeAnimation LED_ANIMATION_CLOSE_TO_NEXT_SHIFT =
+      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
+          .withColor(new RGBWColor(255, 40, 0))
+          .withFrameRate(4);
+  public static final StrobeAnimation LED_ANIMATION_CLOSE_TO_NEXT_SHIFT_US =
+      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
+          .withColor(new RGBWColor(0, 255, 0))
+          .withFrameRate(6);
+  public static final StrobeAnimation LED_ANIMATION_CLOSE_TO_NEXT_SHIFT_NOTUS =
+      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
+          .withColor(new RGBWColor(255, 0, 0))
+          .withFrameRate(6);
+  public static final StrobeAnimation LED_ANIMATION_ENDGAME =
+      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
+          .withColor(new RGBWColor(255, 255, 0))
+          .withFrameRate(4);
 
   // at what confidence is it considered "confident" instead of "doubtful" TODO: me
   public static final double CONFIDENCE_THRESHOLD = 0.5;

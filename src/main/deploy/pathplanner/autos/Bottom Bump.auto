@@ -5,34 +5,15 @@
     "data": {
       "commands": [
         {
-          "type": "parallel",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "SIS Top Start"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Shoot 5s"
-                }
-              }
-            ]
+            "name": "Shoot 3s"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "SIS Top Cross"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "SIS Top Intake Prepare"
+            "pathName": "BB Cross"
           }
         },
         {
@@ -44,13 +25,25 @@
         {
           "type": "path",
           "data": {
-            "pathName": "SIS Top Intake"
+            "pathName": "BB Int"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Toggle Intake"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "SIS Top Return"
+            "pathName": "BB Return"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot 4s"
           }
         },
         {
@@ -62,13 +55,25 @@
         {
           "type": "named",
           "data": {
-            "name": "Shoot 10s"
+            "name": "Closest Climb"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Climb Up"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Toggle Intake"
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": "SIS",
+  "folder": "Bump",
   "choreoAuto": false
 }

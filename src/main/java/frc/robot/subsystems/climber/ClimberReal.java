@@ -11,12 +11,13 @@ import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.wpilibj.Relay;
 import frc.robot.Constants;
-import org.littletonrobotics.junction.Logger;
 
 public class ClimberReal implements ClimberIO {
 
   private final SparkMax climber = new SparkMax(Constants.CLIMBER_MOTOR_ID, MotorType.kBrushless);
   private final SparkClosedLoopController climberControl = climber.getClosedLoopController();
+
+  private double trim = 0;
 
   private final Relay brakeRelay = new Relay(Constants.CLIMBER_BRAKE_RELAY_ID);
 
@@ -49,7 +50,7 @@ public class ClimberReal implements ClimberIO {
   @Override
   public void down() {
     climberControl.setSetpoint(
-        Constants.CLIMBER_FULL_IN, SparkBase.ControlType.kPosition, ClosedLoopSlot.kSlot0);
+        Constants.CLIMBER_FULL_IN + trim, SparkBase.ControlType.kPosition, ClosedLoopSlot.kSlot0);
   }
 
   @Override
@@ -58,9 +59,16 @@ public class ClimberReal implements ClimberIO {
   }
 
   @Override
+  public void trimDown() {
+    climberControl.setSetpoint(
+        Constants.CLIMBER_FULL_IN + trim, SparkBase.ControlType.kPosition, ClosedLoopSlot.kSlot0);
+    trim--;
+  }
+
+  @Override
   public void periodic() {
-    Logger.recordOutput("Climber/Setpoint", climberControl.getSetpoint());
-    Logger.recordOutput("Climber/Position", climber.getEncoder().getPosition());
-    Logger.recordOutput("Climber/Braking", brakeRelay.get() == Relay.Value.kOff);
+    //    Logger.recordOutput("Climber/Setpoint", climberControl.getSetpoint());
+    //    Logger.recordOutput("Climber/Position", climber.getEncoder().getPosition());
+    //    Logger.recordOutput("Climber/Braking", brakeRelay.get() == Relay.Value.kOff);
   }
 }

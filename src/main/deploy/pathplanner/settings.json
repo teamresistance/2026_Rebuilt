@@ -3,16 +3,16 @@
   "robotLength": 0.85,
   "holonomicMode": true,
   "pathFolders": [
-    "ISC Top",
     "ISC Bottom",
-    "SIS Bottom",
-    "SIS Top",
+    "ISC Top",
+    "Bump",
+    "OUTPOST",
     "Simple (BACKUP)"
   ],
   "autoFolders": [
     "ISC",
-    "SIS",
-    "Simple (BACKUP)"
+    "Bump",
+    "Simple"
   ],
   "defaultMaxVel": 4.68,
   "defaultMaxAccel": 5.0,
@@ -26,7 +26,7 @@
   "driveGearing": 6.48,
   "maxDriveSpeed": 4.68,
   "driveMotorType": "krakenX60",
-  "driveCurrentLimit": 60.0,
+  "driveCurrentLimit": 80.0,
   "wheelCOF": 1.2,
   "flModuleX": 0.275,
   "flModuleY": 0.284,

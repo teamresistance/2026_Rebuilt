@@ -5,12 +5,13 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.CoastOut;
-import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import frc.robot.Constants;
+import frc.robot.util.LoggedTunableNumber;
 import org.littletonrobotics.junction.Logger;
 
 public class HoppertReal implements HoppertIO {
@@ -20,6 +21,9 @@ public class HoppertReal implements HoppertIO {
   private final TalonFX hopperWheelsMotor =
       new TalonFX(Constants.HOPPER_WHEELS_ID, CANBus.roboRIO());
   private final TalonFX towerMotor = new TalonFX(Constants.TOWER_MOTOR_ID, CANBus.roboRIO());
+
+  private final LoggedTunableNumber hopperFloorRPS =
+      new LoggedTunableNumber("Hoppert/TunableHopperFloorSpeed", -34);
 
   private boolean hopperRollersRunning = false;
   private boolean hopperWheelsRunning = false;
@@ -46,7 +50,8 @@ public class HoppertReal implements HoppertIO {
 
     TalonFXConfiguration config3 =
         new TalonFXConfiguration()
-            .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Coast));
+            .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Coast))
+            .withSlot0(new Slot0Configs().withKP(6));
     hopperWheelsMotor.getConfigurator().apply(config3);
 
     register();
@@ -66,10 +71,27 @@ public class HoppertReal implements HoppertIO {
   }
 
   @Override
+  public double getMecanumCurrent() {
+    return hopperWheelsMotor.getStatorCurrent().getValueAsDouble();
+  }
+
+  @Override
   public void runHopperBackwards() {
-    hopperRollerMotor.setControl(new VelocityVoltage(-32));
+    hopperRollerMotor.setControl(new VelocityVoltage(hopperFloorRPS.get()));
     hopperRollersRunning = true;
     hopperRollersReversed = true;
+  }
+
+  @Override
+  public void runHopperBackwardsSlow() {
+    hopperRollerMotor.setControl(new VelocityVoltage(-16));
+    hopperRollersRunning = true;
+    hopperRollersReversed = true;
+  }
+
+  @Override
+  public double getHopperCurrent() {
+    return hopperRollerMotor.getStatorCurrent().getValueAsDouble();
   }
 
   @Override
@@ -100,27 +122,31 @@ public class HoppertReal implements HoppertIO {
 
   @Override
   public void runHopperWheels() {
-    hopperWheelsMotor.setControl(new DutyCycleOut(0.9));
+    hopperWheelsMotor.setControl(new VelocityVoltage(250));
     hopperWheelsRunning = true;
   }
 
   @Override
   public void reverseHopperWheels() {
-    hopperWheelsMotor.setControl(new DutyCycleOut(-0.9));
+    hopperWheelsMotor.setControl(new VelocityVoltage(-60));
     hopperWheelsRunning = true;
   }
 
   @Override
   public void stopHopper() {
     hopperRollerMotor.setControl(new CoastOut());
-    hopperWheelsMotor.setControl(new CoastOut());
     hopperRollersRunning = false;
+  }
+
+  @Override
+  public void stopWheels() {
+    hopperWheelsMotor.setControl(new StaticBrake());
     hopperWheelsRunning = false;
   }
 
   @Override
   public void stopTower() {
     towerMotor.setControl(new CoastOut());
-    hopperRollersRunning = false;
+    towerMotorRunning = false;
   }
 }

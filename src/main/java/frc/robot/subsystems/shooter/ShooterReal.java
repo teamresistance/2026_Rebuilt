@@ -44,7 +44,7 @@ public class ShooterReal implements ShooterIO {
 
     hoodConfig =
         new TalonFXConfiguration()
-            .withSlot0(new Slot0Configs().withKP(10).withKI(0).withKD(0).withKS(0))
+            .withSlot0(new Slot0Configs().withKP(10).withKI(0).withKD(0))
             .withMotionMagic(
                 new MotionMagicConfigs()
                     .withMotionMagicAcceleration(300)
@@ -60,10 +60,10 @@ public class ShooterReal implements ShooterIO {
 
     turretConfig =
         new TalonFXConfiguration()
-            .withSlot0(new Slot0Configs().withKP(2).withKI(0).withKD(0).withKS(0))
+            .withSlot0(new Slot0Configs().withKP(2).withKI(0).withKD(0).withKS(0.5))
             .withMotionMagic(
                 new MotionMagicConfigs()
-                    .withMotionMagicAcceleration(600)
+                    .withMotionMagicAcceleration(800)
                     .withMotionMagicCruiseVelocity(130)
                     .withMotionMagicJerk(3000))
             .withMotorOutput(
@@ -86,9 +86,16 @@ public class ShooterReal implements ShooterIO {
                     .withForwardSoftLimitEnable(true));
     turretMotor.getConfigurator().apply(turretConfig);
 
-    TalonFXConfiguration flywheelConfig =
+    TalonFXConfiguration flywheelConfig = // ks 0.05 kv 0.128 OR kP 12
         new TalonFXConfiguration()
-            .withSlot0(new Slot0Configs().withKP(12).withKI(0).withKD(0).withKS(0))
+            .withSlot0(
+                new Slot0Configs()
+                    .withKP(0)
+                    .withKI(0)
+                    .withKD(0)
+                    .withKS(0)
+                    .withKV(0.128)
+                    .withKS(0.05))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
                     .withStatorCurrentLimit(50)
@@ -189,7 +196,7 @@ public class ShooterReal implements ShooterIO {
       turretMotor.setControl(
           new MotionMagicVoltage(ShootingUtil.toTurretRevs(turretTargetAngle))
               .withEnableFOC(true)
-              .withFeedForward(-omegaRadsPerSec * 2));
+              .withFeedForward(-omegaRadsPerSec * 5));
     }
   }
 
@@ -217,7 +224,7 @@ public class ShooterReal implements ShooterIO {
 
   @Override
   public boolean isShooting() {
-    return flywheelTargetRPS >= 1.0;
+    return flywheelTargetRPS >= 10.0;
   }
 
   @Override
@@ -274,9 +281,9 @@ public class ShooterReal implements ShooterIO {
 
   @Override
   public void periodic() {
-    Logger.recordOutput("Shooter/Flywheel Target RPS", flywheelTargetRPS);
-    Logger.recordOutput(
-        "Shooter/Flywheel Real RPS", flywheelMotor.getVelocity().getValueAsDouble());
+    //    Logger.recordOutput("Shooter/Flywheel Target RPS", flywheelTargetRPS);
+    //    Logger.recordOutput(
+    //        "Shooter/Flywheel Real RPS", flywheelMotor.getVelocity().getValueAsDouble());
     //    Logger.recordOutput("Shooter/Turret Target Angle", turretTargetAngle);
     //    Logger.recordOutput(
     //        "Shooter/Turret Real Angle",

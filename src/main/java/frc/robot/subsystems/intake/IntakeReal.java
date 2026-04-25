@@ -7,7 +7,6 @@ import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import frc.robot.Constants;
-import org.littletonrobotics.junction.Logger;
 
 public class IntakeReal implements IntakeIO {
 
@@ -23,7 +22,7 @@ public class IntakeReal implements IntakeIO {
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
                     .withSupplyCurrentLimitEnable(true)
-                    .withSupplyCurrentLimit(30));
+                    .withSupplyCurrentLimit(20));
 
     intakeMotor.getConfigurator().apply(config);
   }
@@ -51,8 +50,8 @@ public class IntakeReal implements IntakeIO {
 
   @Override
   public void periodic() {
-    Logger.recordOutput("Intake/Intaking", intaking);
-    Logger.recordOutput("Intake/Rejecting", rejecting);
+    // Logger.recordOutput("Intake/Intaking", intaking);
+    // Logger.recordOutput("Intake/Rejecting", rejecting);
   }
 
   @Override

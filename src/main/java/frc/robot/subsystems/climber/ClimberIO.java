@@ -16,4 +16,6 @@ public interface ClimberIO extends Subsystem {
   void down();
 
   boolean atTarget();
+
+  void trimDown();
 }

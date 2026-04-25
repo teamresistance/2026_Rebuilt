@@ -1,20 +1,27 @@
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.hoppert.HoppertIO;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.shooter.ShooterIO;
+import java.util.function.BooleanSupplier;
 
 public class HoppertCommand extends Command {
 
-  // Set this to 1, 2, or 3
-  private static final int MODE = 3;
-
-  // Mode 3 pulse timings (seconds)
   private static final double PULSE_BACKWARDS_DURATION = 1.4;
-  private static final double PULSE_OFF_DURATION = 0.3;
+  private static final double PULSE_OFF_DURATION = 0;
   private static final double PULSE_FORWARDS_DURATION = 0;
+
+  private static final double HOPPER_WHEELS_DELAY = 0.5;
+  private static final double HOPPER_FLOOR_DELAY = 1;
+
+  private static final double OVERCURRENT_THRESHOLD = 80.0;
+  private static final double OVERCURRENT_TRIGGER_DURATION = 0.3;
+  private static final double REVERSE_DURATION = 0.25;
+
+  private static final double OVERHOPPER_THRESHOLD = 70.0;
 
   private enum PulseState {
     BACKWARDS,
@@ -27,56 +34,135 @@ public class HoppertCommand extends Command {
   private final IntakeIO intake;
 
   private final Timer pulseTimer = new Timer();
-  private PulseState pulseState = PulseState.BACKWARDS;
+  private final Timer startTimer = new Timer();
+  private final Timer overcurrentTimer = new Timer();
+  private final Timer reverseTimer = new Timer();
 
-  public HoppertCommand(HoppertIO hoppert, ShooterIO shooter, IntakeIO intake) {
+  private PulseState pulseState = PulseState.BACKWARDS;
+  private boolean isOvercurrentTriggered = false;
+  private boolean overcurrentTimerRunning = false;
+
+  private BooleanSupplier triggerSup;
+
+  public HoppertCommand(
+      HoppertIO hoppert, ShooterIO shooter, IntakeIO intake, BooleanSupplier triggerHeld) {
     this.hoppert = hoppert;
     this.shooter = shooter;
     this.intake = intake;
+    triggerSup = triggerHeld;
     addRequirements(hoppert);
   }
 
   @Override
   public void initialize() {
-    if (MODE == 3) {
-      pulseState = PulseState.BACKWARDS;
-      pulseTimer.restart();
-    }
+    reset();
+  }
+
+  private void reset() {
+    pulseState = PulseState.BACKWARDS;
+    pulseTimer.restart();
+    startTimer.restart();
+    isOvercurrentTriggered = false;
+    overcurrentTimerRunning = false;
+    overcurrentTimer.stop();
+    overcurrentTimer.reset();
+    reverseTimer.stop();
+    reverseTimer.reset();
   }
 
   @Override
   public void execute() {
 
-    if (hoppert.towerAtSpeed() && shooter.atTargetRPS()) {
-      hoppert.runHopperWheels();
-    }
-    hoppert.runTowerForwards();
-
-    switch (pulseState) {
-      case BACKWARDS -> {
+    if ((triggerSup.getAsBoolean() || DriverStation.isAutonomous())
+        && shooter.atShootingSetpoints()) {
+      if (shooter.isShooting()) {
+        hoppert.runTowerForwards();
+      } else {
+        hoppert.stopTower();
+      }
+      if (startTimer.hasElapsed(HOPPER_WHEELS_DELAY)) {
+        hoppert.runHopperWheels();
+      }
+      if (startTimer.hasElapsed(HOPPER_FLOOR_DELAY)) {
+        hoppert.runHopperBackwardsSlow();
+      } else {
         hoppert.runHopperBackwards();
-        if (pulseTimer.hasElapsed(PULSE_BACKWARDS_DURATION)) {
-          pulseState = PulseState.OFF;
-          pulseTimer.restart();
-        }
-      }
-      case OFF -> {
-        hoppert.stopHopper();
-        if (pulseTimer.hasElapsed(PULSE_OFF_DURATION)) {
-          pulseState = PulseState.FORWARDS;
-          pulseTimer.restart();
-        }
-      }
-      case FORWARDS -> {
-        hoppert.runHopperForwards();
-        if (pulseTimer.hasElapsed(PULSE_FORWARDS_DURATION)) {
-          pulseState = PulseState.BACKWARDS;
-          pulseTimer.restart();
-        }
       }
     }
-    if (hoppert.towerAtSpeed() && shooter.atTargetRPS()) {
-      hoppert.runHopperWheels();
+
+    if (hoppert.getHopperCurrent() > OVERHOPPER_THRESHOLD) {
+      hoppert.runHopperForwards();
     }
+
+    if (!shooter.isShooting()) {
+      hoppert.stopHopper();
+      hoppert.stopWheels();
+      if (intake.isIntaking()) {
+        hoppert.runHopperBackwardsSlow();
+      }
+      if (pulseTimer.hasElapsed(PULSE_OFF_DURATION)) {
+        pulseState = PulseState.FORWARDS;
+        pulseTimer.restart();
+      }
+      reset();
+      return;
+    }
+
+    // Overcurrent detection
+    if (hoppert.getMecanumCurrent() > OVERCURRENT_THRESHOLD) {
+      //      Logger.recordOutput("Hoppert/JamDetected", true);
+      if (!overcurrentTimerRunning) {
+        overcurrentTimer.restart();
+        overcurrentTimerRunning = true;
+      } else if (overcurrentTimer.hasElapsed(OVERCURRENT_TRIGGER_DURATION)) {
+        //        Logger.recordOutput("Hoppert/DeJamming", true);
+        isOvercurrentTriggered = true;
+        reverseTimer.restart();
+        overcurrentTimerRunning = false;
+        overcurrentTimer.stop();
+        overcurrentTimer.reset();
+      }
+    } else {
+      //      Logger.recordOutput("Hoppert/JamDetected", false);
+      //      Logger.recordOutput("Hoppert/DeJamming", false);
+      overcurrentTimerRunning = false;
+      overcurrentTimer.stop();
+      overcurrentTimer.reset();
+    }
+
+    // Reverse wheels if overcurrent was triggered, until reverse duration elapses
+    if (isOvercurrentTriggered) {
+      hoppert.reverseHopperWheels();
+      if (reverseTimer.hasElapsed(REVERSE_DURATION)) {
+        isOvercurrentTriggered = false;
+        reverseTimer.stop();
+        reverseTimer.reset();
+      }
+      return;
+    }
+
+    //    switch (pulseState) {
+    //      case BACKWARDS -> {
+    //        hoppert.runHopperBackwards();
+    //        if (pulseTimer.hasElapsed(PULSE_BACKWARDS_DURATION)) {
+    //          pulseState = PulseState.OFF;
+    //          pulseTimer.restart();
+    //        }
+    //      }
+    //      case OFF -> {
+    //        // hoppert.stopHopper();
+    //        if (pulseTimer.hasElapsed(PULSE_OFF_DURATION)) {
+    //          pulseState = PulseState.FORWARDS;
+    //          pulseTimer.restart();
+    //        }
+    //      }
+    //      case FORWARDS -> {
+    //        // hoppert.runHopperForwards();
+    //        if (pulseTimer.hasElapsed(PULSE_FORWARDS_DURATION)) {
+    //          pulseState = PulseState.BACKWARDS;
+    //          pulseTimer.restart();
+    //        }
+    //      }
+    //    }
   }
 }

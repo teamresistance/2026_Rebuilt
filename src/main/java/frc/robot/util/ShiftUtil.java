@@ -166,8 +166,12 @@ public class ShiftUtil {
         .map(
             value ->
                 switch (value) {
-                  case Red -> shiftOwner == Constants.ShiftOwner.RED;
-                  case Blue -> shiftOwner == Constants.ShiftOwner.BLUE;
+                  case Red ->
+                      shiftOwner == Constants.ShiftOwner.RED
+                          || shiftOwner == Constants.ShiftOwner.BOTH;
+                  case Blue ->
+                      shiftOwner == Constants.ShiftOwner.BLUE
+                          || shiftOwner == Constants.ShiftOwner.BOTH;
                 })
         .orElse(true);
   }
@@ -182,6 +186,35 @@ public class ShiftUtil {
     } else if (elapsed < 60.0 && elapsed > 55.0) {
       return true;
     } else return elapsed < 85.0 && elapsed > 80.0;
+  }
+
+  /** Returns true if within 7 seconds of the next shift */
+  public static boolean withinSevenSecondsOfNextShift() {
+    double elapsed = shiftTimer.get();
+    if (elapsed < 10.0 && elapsed > 3.0) {
+      return true;
+    } else if (elapsed < 35.0 && elapsed > 28.0) {
+      return true;
+    } else if (elapsed < 60.0 && elapsed > 53.0) {
+      return true;
+    } else return elapsed < 85.0 && elapsed > 78.0;
+  }
+
+  /** Returns true if within 2 seconds of the next shift */
+  public static boolean withinTwoSecondsOfNextShift() {
+    double elapsed = shiftTimer.get();
+    if (elapsed < 10.0 && elapsed > 8.0) {
+      return true;
+    } else if (elapsed < 35.0 && elapsed > 33.0) {
+      return true;
+    } else if (elapsed < 60.0 && elapsed > 58.0) {
+      return true;
+    } else return elapsed < 85.0 && elapsed > 83.0;
+  }
+
+  /** Returns true if we are currently in the endgame phase (after 85 seconds + 20s) */
+  public static boolean isDeepEndgame() {
+    return shiftTimer.get() >= 85.0 + 20;
   }
 
   public static String getAutoWinnerColor() {
