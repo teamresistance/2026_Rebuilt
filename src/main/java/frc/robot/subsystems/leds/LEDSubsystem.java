@@ -6,6 +6,8 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import java.util.*;
+import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 public class LEDSubsystem extends SubsystemBase {
 
@@ -13,7 +15,64 @@ public class LEDSubsystem extends SubsystemBase {
   private Constants.LEDMode lastLEDMode = null;
   private final CANdle candle = new CANdle(Constants.CANDLE_ID, new CANBus("drive"));
 
-  /** Adds an LEDStream to the list of periodically checked streams. */
+  /**
+   * Initally defines the modeToAnimation HashMap. This makes it easier to modify the code as it
+   * condenses one absolutely massive switch statement to a slightly less massive HashMap. The two
+   * data types are 1. the LEDModes defined in the Constants file and 2. the light animations
+   * possible
+   */
+  private final Map<Constants.LEDMode, Supplier<com.ctre.phoenix6.controls.ControlRequest>>
+      modeToAnimation = new HashMap<>();
+
+  /**
+   * Constructor intializes modeToAnimation. Commented out modes reflect the commented out modes in
+   * the switch.
+   */
+  public LEDSubsystem() {
+
+    /**
+     * For the disabled mode, we need to check battery voltage to determine which animation to use,
+     * so a method reference is used
+     */
+    modeToAnimation.put(Constants.LEDMode.DISABLED, this::getDisabledAnimation);
+    modeToAnimation.put(Constants.LEDMode.RAINBOW, () -> Constants.LED_ANIMATION_RAINBOW);
+    modeToAnimation.put(
+        Constants.LEDMode.SHOOTING_CONFIDENT, () -> Constants.LED_ANIMATION_SHOOTING_CONFIDENT);
+    // modeToAnimation.put(Constants.LEDMode.SHOOTING_DOUBTFUL, () ->
+    // Constants.LED_ANIMATION_SHOOTING_DOUBTFUL);
+    // modeToAnimation.put(Constants.LEDMode.PASSING_CONFIDENT, () ->
+    // Constants.LED_ANIMATION_PASSING_CONFIDENT);
+    // modeToAnimation.put(Constants.LEDMode.PASSING_DOUBTFUL, () ->
+    // Constants.LED_ANIMATION_PASSING_DOUBTFUL);
+    // modeToAnimation.put(Constants.LEDMode.INTAKING, () -> Constants.LED_ANIMATION_INTAKING);
+    modeToAnimation.put(Constants.LEDMode.BUMP, () -> Constants.LED_ANIMATION_BUMP);
+    // modeToAnimation.put(Constants.LEDMode.AUTO, () -> Constants.LED_ANIMATION_AUTO);
+    modeToAnimation.put(Constants.LEDMode.ACTIVE, () -> Constants.LED_ANIMATION_ACTIVE);
+    modeToAnimation.put(Constants.LEDMode.INACTIVE, () -> Constants.LED_ANIMATION_INACTIVE);
+    modeToAnimation.put(
+        Constants.LEDMode.CLOSE_TO_NEXT_SHIFT, () -> Constants.LED_ANIMATION_CLOSE_TO_NEXT_SHIFT);
+    modeToAnimation.put(
+        Constants.LEDMode.CLOSE_TO_NEXT_SHIFT_US,
+        () -> Constants.LED_ANIMATION_CLOSE_TO_NEXT_SHIFT_US);
+    modeToAnimation.put(
+        Constants.LEDMode.CLOSE_TO_NEXT_SHIFT_NOTUS,
+        () -> Constants.LED_ANIMATION_CLOSE_TO_NEXT_SHIFT_NOTUS);
+    modeToAnimation.put(Constants.LEDMode.ENDGAME, () -> Constants.LED_ANIMATION_ENDGAME);
+  }
+
+  // Returns the appropriate disables animation based on battery voltage
+  private com.ctre.phoenix6.controls.ControlRequest getDisabledAnimation() {
+    double voltage = RobotController.getBatteryVoltage();
+    if (voltage >= 12.6) {
+      return Constants.LED_ANIMATION_DISABLED_GOOD;
+    } else if (voltage > 12.2) {
+      return Constants.LED_ANIMATION_DISABLED_FINE;
+    } else {
+      return Constants.LED_ANIMATION_DISABLED_BAD;
+    }
+  }
+
+  // Adds an LEDStream to the list of periodically checked streams.
   public void addStream(LEDStream stream) {
     streams.add(stream);
   }
@@ -21,90 +80,39 @@ public class LEDSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
 
-    LEDStream highest = null;
-
-    for (LEDStream stream : streams) {
-      if (!stream.isActive()) continue;
-      if (highest == null || stream.priority >= highest.priority) {
-        highest = stream;
-      }
-    }
+    // Find the stream with the highest priority that is currently active
+    LEDStream highest =
+        streams.stream()
+            .filter(LEDStream::isActive)
+            .max(Comparator.comparingInt(s -> s.priority))
+            .orElse(null);
 
     if (highest != null) {
       Constants.LEDMode currentMode = highest.getLEDMode();
       // Only apply mode if it changed to avoid repeatedly calling setControl()
-      // if (lastLEDMode != currentMode) {
-      applyMode(currentMode);
-      lastLEDMode = currentMode;
-      // }
-      //      Logger.recordOutput("LEDS/Active Stream", highest.name);
+      if (lastLEDMode != currentMode) {
+        applyMode(currentMode);
+        lastLEDMode = currentMode;
+      }
     }
   }
 
+  /**
+   * Checks if mode is valid and applies the corresponding animation to the CANdle. The status of
+   * the method is retured through smart dashboard.
+   */
   private void applyMode(Constants.LEDMode ledMode) {
-    // Logger.recordOutput("LEDS/Active Mode", ledMode);
-
-    switch (ledMode) {
-      case DISABLED:
-        double voltage = RobotController.getBatteryVoltage();
-        if (voltage >= 12.6) {
-          candle.setControl(Constants.LED_ANIMATION_DISABLED_GOOD);
-        } else if (voltage > 12.2) {
-          candle.setControl(Constants.LED_ANIMATION_DISABLED_FINE);
-        } else {
-          candle.setControl(Constants.LED_ANIMATION_DISABLED_BAD);
-        }
-        break;
-      case RAINBOW:
-        candle.setControl(Constants.LED_ANIMATION_RAINBOW);
-        break;
-      case SHOOTING_CONFIDENT:
-        candle.setControl(Constants.LED_ANIMATION_SHOOTING_CONFIDENT);
-        // .withFrameRate(
-        //        mode.framerateSupplier.getAsDouble()));
-        break;
-      //      case SHOOTING_DOUBTFUL:
-      //        candle.setControl(
-      //            Constants.LED_ANIMATION_SHOOTING_DOUBTFUL.withFrameRate(
-      //                mode.framerateSupplier.getAsDouble()));
-      //        break;
-      //      case PASSING_CONFIDENT:
-      //        candle.setControl(
-      //            Constants.LED_ANIMATION_PASSING_CONFIDENT.withFrameRate(
-      //                mode.framerateSupplier.getAsDouble()));
-      //        break;
-      //      case PASSING_DOUBTFUL:
-      //        candle.setControl(
-      //            Constants.LED_ANIMATION_PASSING_DOUBTFUL.withFrameRate(
-      //                mode.framerateSupplier.getAsDouble()));
-      //        break;
-      //      case INTAKING:
-      //        candle.setControl(Constants.LED_ANIMATION_INTAKING);
-      //        break;
-      case BUMP:
-        candle.setControl(Constants.LED_ANIMATION_BUMP);
-        break;
-      //      case AUTO:
-      //        candle.setControl(Constants.LED_ANIMATION_AUTO);
-      //        break;
-      case ACTIVE:
-        candle.setControl(Constants.LED_ANIMATION_ACTIVE);
-        break;
-      case INACTIVE:
-        candle.setControl(Constants.LED_ANIMATION_INACTIVE);
-        break;
-      case CLOSE_TO_NEXT_SHIFT:
-        candle.setControl(Constants.LED_ANIMATION_CLOSE_TO_NEXT_SHIFT);
-        break;
-      case CLOSE_TO_NEXT_SHIFT_US:
-        candle.setControl(Constants.LED_ANIMATION_CLOSE_TO_NEXT_SHIFT_US);
-        break;
-      case CLOSE_TO_NEXT_SHIFT_NOTUS:
-        candle.setControl(Constants.LED_ANIMATION_CLOSE_TO_NEXT_SHIFT_NOTUS);
-        break;
-      case ENDGAME:
-        candle.setControl(Constants.LED_ANIMATION_ENDGAME);
-        break;
+    String ledModeString = ledMode.toString();
+    if (modeToAnimation.containsKey(ledMode)) {
+      try {
+        candle.setControl(modeToAnimation.get(ledMode).get());
+        Logger.recordOutput("LEDs/CurrentMode", ledModeString);
+      } catch (Exception e) {
+        Logger.recordOutput("LEDs/Error", "Failed to apply mode: " + ledModeString);
+      }
+    } else {
+      Logger.recordOutput(
+          "LED/Error", "LED mode not configured in modeToAnimation map: " + ledModeString);
     }
   }
 }
