@@ -448,8 +448,7 @@ public class RobotContainer {
                 .andThen(Commands.runOnce(hoppert::stopTower)));
 
     // left trigger toggles intake
-    driver.leftTrigger().onTrue(new ToggleIntakeCommand(intake));
-    driver.leftTrigger().onFalse(new ToggleIntakeCommand(intake));
+    driver.leftTrigger().whileTrue(Commands.run(intake::activateIntake, intake));
 
     // hold to zero
     Command zeroCmd =
