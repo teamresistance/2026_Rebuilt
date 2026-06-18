@@ -19,6 +19,7 @@ import frc.robot.commands.IdleShooterCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.commands.ToggleIntakeCommand;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.climber.ClimberReal;
 import frc.robot.subsystems.climber.ClimberSim;
@@ -29,8 +30,6 @@ import frc.robot.subsystems.hoppert.HoppertSim;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeReal;
 import frc.robot.subsystems.intake.IntakeSim;
-import frc.robot.subsystems.leds.LEDStream;
-import frc.robot.subsystems.leds.LEDSubsystem;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterReal;
 import frc.robot.subsystems.shooter.ShooterSim;
@@ -279,129 +278,7 @@ public class RobotContainer {
   /** Sets up LEDs and controller rumbles */
   private void configureDriverFeedback() {
 
-    //    // SHOOTING/PASSING (priority 4, determines confidence and passing/shooting, framerate
-    // based on
-    //    // confidence)
-    //    LEDStream shootingStream =
-    //        new LEDStream(
-    //                "shooting/passing",
-    //                4,
-    //                () -> {
-    //                  boolean isShooting = ShootingUtil.getShootingType(drive::getPose) == 0;
-    //                  boolean isConfident =
-    //                      TurretConfidenceUtil.calculateConfidence(drive)
-    //                          > Constants.CONFIDENCE_THRESHOLD;
-    //
-    //                  if (isShooting) {
-    //                    return isConfident
-    //                        ? Constants.LEDMode.SHOOTING_CONFIDENT
-    //                        : Constants.LEDMode.SHOOTING_DOUBTFUL;
-    //                  } else {
-    //                    return isConfident
-    //                        ? Constants.LEDMode.PASSING_CONFIDENT
-    //                        : Constants.LEDMode.PASSING_DOUBTFUL;
-    //                  }
-    //                },
-    //                () ->
-    //                    driverHID
-    //                        .rightTrigger()
-    //                        .or((coDriver.rightTrigger().or(coDriver.rightBumper())))
-    //                        .getAsBoolean())
-    //            .withFramerateSupplier(
-    //                () -> {
-    //                  double confidence = TurretConfidenceUtil.calculateConfidence(drive);
-    //                  return (confidence > 90.0)
-    //                      ? 10 // very high framerate for very high confidence
-    //                      : (confidence > 80.0)
-    //                          ? 9
-    //                          : (confidence > 70.0) ? 8 : (confidence > 60.0) ? 7 : 6;
-    //                });
-    //
-    //    leds.addStream(shootingStream);
-    //
-    //    // INTAKING (priority 2, flashing yellow)
-    //    //    LEDStream intakeStream =
-    //    //        new LEDStream("intake", 2, () -> Constants.LEDMode.INTAKING,
-    // intake::isIntaking);
-    //    //    leds.addStream(intakeStream);
-    //
-    //    // DISABLED
-    //    LEDStream disabledStream =
-    //        new LEDStream("disabled", 999, () -> Constants.LEDMode.DISABLED,
-    // DriverStation::isDisabled);
-    //    leds.addStream(disabledStream);
-    //
-    //    // ACTIVE/INACTIVE
-    //    LEDStream activeInactiveStream =
-    //        new LEDStream(
-    //            "active/inactive",
-    //            1,
-    //            () ->
-    //                ShiftUtil.isOurs(ShiftUtil.getShift())
-    //                    ? Constants.LEDMode.ACTIVE
-    //                    : Constants.LEDMode.INACTIVE,
-    //            () -> true);
-    //    leds.addStream(activeInactiveStream);
-
-    // DISABLED
-    LEDStream disabledStream =
-        new LEDStream("disabled", 999, () -> Constants.LEDMode.DISABLED, DriverStation::isDisabled);
-    leds.addStream(disabledStream);
-
-    // SHOOTING
-    //    LEDStream shootStream =
-    //        new LEDStream(
-    //            "shooting",
-    //            2,
-    //            () -> Constants.LEDMode.SHOOTING_CONFIDENT,
-    //            () ->
-    //                Math.abs(driverHID.getHID().getRightTriggerAxis()) > 0.25
-    //                    || driverHID.getHID().getRightBumperButton());
-    //    leds.addStream(shootStream);
-
-    // ACTIVE vs INACTIVE
-    LEDStream activeStream =
-        new LEDStream(
-            "active/inactive",
-            1,
-            () ->
-                ShiftUtil.isOurs(ShiftUtil.getShift())
-                    ? Constants.LEDMode.ACTIVE
-                    : Constants.LEDMode.INACTIVE,
-            () -> true);
-    leds.addStream(activeStream);
-
-    LEDStream shiftCountdown =
-        new LEDStream("shift countdown 7s", 3, () -> Constants.LEDMode.CLOSE_TO_NEXT_SHIFT);
-    leds.addStream(shiftCountdown);
-    new Trigger(ShiftUtil::withinSevenSecondsOfNextShift)
-        .onTrue(Commands.runOnce(() -> shiftCountdown.runForSeconds(5)));
-
-    LEDStream shiftCountdown2 =
-        new LEDStream(
-            "shift countdown 2s",
-            4,
-            () ->
-                ShiftUtil.isOurs(ShiftUtil.getShift())
-                    ? Constants.LEDMode.CLOSE_TO_NEXT_SHIFT_NOTUS
-                    : Constants.LEDMode.CLOSE_TO_NEXT_SHIFT_US);
-    leds.addStream(shiftCountdown2);
-    new Trigger(ShiftUtil::withinTwoSecondsOfNextShift)
-        .onTrue(Commands.runOnce(() -> shiftCountdown2.runForSeconds(2)));
-
-    LEDStream endgame =
-        new LEDStream(
-            "endgame countdown", 6, () -> Constants.LEDMode.ENDGAME, ShiftUtil::isDeepEndgame);
-    leds.addStream(endgame);
-
-    //    // BUMP (priority 5, timed 1s, cancels if leaving zone)
-    //    LEDStream bumpStream =
-    //        new LEDStream("bump", 5, () -> Constants.LEDMode.BUMP, driverHID::getYButton);
-    //    leds.addStream(bumpStream);
-    //
-    //    // BUMP trigger (timed 1s when entering bump zone)
-    //    driver.povUp().or(driver.povDown()).onTrue(Commands.runOnce(() ->
-    // bumpStream.runForSeconds(1)));
+    // TODO: Transfer LEDs to new system
 
     // RUMBLE when 5s from next shift
     new Trigger(ShiftUtil::nearNextShift)
@@ -576,15 +453,6 @@ public class RobotContainer {
             Commands.runOnce(ShiftUtil::startShiftTimer)
                 .andThen(new WaitCommand(1))
                 .andThen(Commands.runOnce(ShiftUtil::assignShifts)));
-  }
-
-  /**
-   * Creates an LEDStream that runs the auto animation 20 seconds and then is never accessed again.
-   */
-  public void runAutoLEDs() {
-    LEDStream autoStream = new LEDStream("auto", 100, () -> Constants.LEDMode.RAINBOW);
-    leds.addStream(autoStream);
-    autoStream.runForSeconds(20);
   }
 
   public String getShiftChosen() {

@@ -2,11 +2,13 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.signals.RGBWColor;
 import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.generated.TunerConstants;
@@ -59,7 +61,16 @@ public final class Constants {
   public static final Transform2d ROBOT_TO_TURRET =
       new Transform2d(Units.inchesToMeters(1.38), Units.inchesToMeters(3.8), Rotation2d.kZero);
 
-  public static final int CANDLE_ID = 40;
+  public static final Translation2d CENTER_OF_ROTATION =
+      new Translation2d(Units.inchesToMeters(0), Units.inchesToMeters(0));
+
+  public static final int LED_CANDLE_ID = 40;
+  public static final CANBus LED_CANDLE_BUS = new CANBus("drive");
+
+  public enum LED_MODE {
+    DISABLED,
+    ENABLED,
+  }
 
   public enum LEDMode {
     RAINBOW,
