@@ -212,9 +212,14 @@ public class ShiftUtil {
     } else return elapsed < 85.0 && elapsed > 83.0;
   }
 
-  /** Returns true if we are currently in the endgame phase (after 85 seconds + 20s) */
+  /** Returns true if last 10s of match */
   public static boolean isDeepEndgame() {
-    return shiftTimer.get() >= 85.0 + 20;
+    return shiftTimer.get() >= 110 + 20;
+  }
+
+  /** Returns true if last 4s of match */
+  public static boolean isVeryDeepEndgame() {
+    return shiftTimer.get() >= 110 + 26;
   }
 
   public static String getAutoWinnerColor() {
