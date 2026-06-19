@@ -197,7 +197,9 @@ public class ShiftUtil {
       return true;
     } else if (elapsed < 60.0 && elapsed > 53.0) {
       return true;
-    } else return elapsed < 85.0 && elapsed > 78.0;
+    } else if (elapsed < 85.0 && elapsed > 78.0) {
+      return true;
+    } else return elapsed < 110.0 && elapsed > 103.0;
   }
 
   /** Returns true if within 2 seconds of the next shift */
@@ -209,7 +211,9 @@ public class ShiftUtil {
       return true;
     } else if (elapsed < 60.0 && elapsed > 58.0) {
       return true;
-    } else return elapsed < 85.0 && elapsed > 83.0;
+    } else if (elapsed < 85.0 && elapsed > 83.0) {
+      return true;
+    } else return elapsed < 110.0 && elapsed > 108.0;
   }
 
   /** Returns true if last 10s of match */

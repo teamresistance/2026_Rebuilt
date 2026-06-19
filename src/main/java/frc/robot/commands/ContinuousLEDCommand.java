@@ -33,33 +33,37 @@ public class ContinuousLEDCommand extends Command {
       return;
     }
     if (ShiftUtil.isVeryDeepEndgame()) {
-      leds.setModeEndgameWarning();
-      return;
-    }
-    if (ShiftUtil.isVeryDeepEndgame()) {
       leds.setModeClimbWarning();
       return;
     }
+    if (ShiftUtil.isDeepEndgame()) {
+      leds.setModeEndgameWarning();
+      return;
+    }
     if (ShiftUtil.isOurs(ShiftUtil.getShift())) { // we are active
-      if (ShiftUtil.withinTwoSecondsOfNextShift()) { // active, 2s of next, next must be them
-        leds.setModeShiftSwitchingRed();
+      if (ShiftUtil.withinTwoSecondsOfNextShift()) {
+        if (ShiftUtil.isOurs(ShiftUtil.getNextShift())) { // next shift is also ours
+          leds.setModeShiftSwitchingGreen();
+        } else { // next shift is theirs
+          leds.setModeShiftSwitchingRed();
+        }
         return;
       }
-      if (ShiftUtil.withinSevenSecondsOfNextShift()) { // 7s warning does not vary color
+      if (ShiftUtil.withinSevenSecondsOfNextShift()) {
         leds.setModeShiftWarning();
         return;
       }
-      leds.setModeActive();  // no time warning to give, active
+      leds.setModeActive();
     } else { // not active
       if (ShiftUtil.withinTwoSecondsOfNextShift()) { // not active, 2s of next, next must be us
         leds.setModeShiftSwitchingGreen();
         return;
       }
-      if (ShiftUtil.withinSevenSecondsOfNextShift()) { // 7s warning does not vary color
+      if (ShiftUtil.withinSevenSecondsOfNextShift()) {
         leds.setModeShiftWarning();
         return;
       }
-      leds.setModeInactive(); // no time warning to give, not active
+      leds.setModeInactive();
     }
   }
 
