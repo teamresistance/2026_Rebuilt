@@ -7,6 +7,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
 import frc.robot.util.ShootingUtil;
 import org.littletonrobotics.junction.Logger;
@@ -193,10 +194,10 @@ public class ShooterReal implements ShooterIO {
       }
       turretTargetAngle =
           turretAngle + horizontalTrim; // add horizontal trim to turret target angle
+      turretTargetAngle -= Units.radiansToDegrees(omegaRadsPerSec) * 0.2;
       turretMotor.setControl(
-          new MotionMagicVoltage(ShootingUtil.toTurretRevs(turretTargetAngle))
-              .withEnableFOC(true)
-              .withFeedForward(-omegaRadsPerSec * 5));
+          new MotionMagicVoltage(ShootingUtil.toTurretRevs(turretTargetAngle)).withEnableFOC(true));
+      //              .withFeedForward(-(Units.radiansToRotations(-omegaRadsPerSec) * 80.0) * 0.5));
     }
   }
 
@@ -239,10 +240,15 @@ public class ShooterReal implements ShooterIO {
   @Override
   public void adjustHorizontalTrim(boolean right) {
     if (right) {
-      horizontalTrim += Constants.SHOOTER_TRIM_ADJUSTMENT_INCREMENT;
-    } else {
       horizontalTrim -= Constants.SHOOTER_TRIM_ADJUSTMENT_INCREMENT;
+    } else {
+      horizontalTrim += Constants.SHOOTER_TRIM_ADJUSTMENT_INCREMENT;
     }
+  }
+
+  @Override
+  public double getTurretAngle() {
+    return ShootingUtil.toTurretDegrees(turretMotor.getPosition().getValueAsDouble());
   }
 
   @Override

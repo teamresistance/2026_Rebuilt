@@ -29,6 +29,8 @@ public interface ShooterIO extends Subsystem {
 
   void adjustHorizontalTrim(boolean right);
 
+  double getTurretAngle();
+
   void brake();
 
   void coast();

@@ -14,4 +14,6 @@ public interface IntakeIO extends Subsystem {
   void reverseIntake();
 
   boolean isIntaking();
+
+  double getIntakeCurrent();
 }

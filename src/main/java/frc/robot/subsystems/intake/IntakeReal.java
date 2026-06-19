@@ -58,4 +58,9 @@ public class IntakeReal implements IntakeIO {
   public boolean isIntaking() {
     return intaking;
   }
+
+  @Override
+  public double getIntakeCurrent() {
+    return intakeMotor.getStatorCurrent().getValueAsDouble();
+  }
 }

@@ -35,4 +35,9 @@ public class IntakeSim implements IntakeIO {
   public boolean isIntaking() {
     return intaking;
   }
+
+  @Override
+  public double getIntakeCurrent() {
+    return 0;
+  }
 }

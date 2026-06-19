@@ -12,12 +12,8 @@ import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.commands.*;
 import frc.robot.commands.DeferredCommand;
-import frc.robot.commands.DriveCommands;
-import frc.robot.commands.HoppertCommand;
-import frc.robot.commands.IdleShooterCommand;
-import frc.robot.commands.ShootCommand;
-import frc.robot.commands.ToggleIntakeCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.climber.ClimberIO;
@@ -57,7 +53,8 @@ public class RobotContainer {
 
   // Subsystems
   private final SwerveDriveIO drive;
-  private VisionSubsystem vision;
+  private VisionIOPhoton visionPhoton;
+  private VisionIOLimelight visionLimelight;
   private final ShooterIO shooter;
   private final ClimberIO climber;
   private final HoppertIO hoppert;
@@ -84,7 +81,8 @@ public class RobotContainer {
   public RobotContainer() {
 
     drive = configureDrive();
-    vision = configureAprilTagVision();
+    visionPhoton = configureAprilTagVision();
+    visionLimelight = new VisionRealLimelight("limelight");
     ShootingConstants.configureShootingConstants();
 
     switch (Constants.CURRENT_MODE) {
@@ -146,7 +144,7 @@ public class RobotContainer {
     startTrimChooser.addOption("Yes", true);
     SmartDashboard.putData("Start Trimmed", startTrimChooser);
 
-    configureDriverFeedback();
+    configureFeedback();
     autoChooser = configureAutos();
     configureButtonBindings();
     cameraFailureAlert = new Alert("Camera system failure", Alert.AlertType.kError);
@@ -227,15 +225,15 @@ public class RobotContainer {
   }
 
   /**
-   * Configures the AprilTag vision system with PhotonVision cameras.
+   * Configures the AprilTag visionPhoton system with PhotonVision cameras.
    *
    * @return The configured VisionSubsystem, or null if initialization fails
    */
-  private VisionSubsystem configureAprilTagVision() {
+  private VisionIOPhoton configureAprilTagVision() {
     try {
-      vision =
-          new VisionSubsystem(frontLeftCamera, frontRightCamera, backRightCamera, backLeftCamera);
-      vision.setDataInterfaces(drive::getPose, drive::addAutoVisionMeasurement);
+      visionPhoton =
+          new VisionRealPhoton(frontLeftCamera, frontRightCamera, backRightCamera, backLeftCamera);
+      visionPhoton.setDataInterfaces(drive::getPose, drive::addAutoVisionMeasurement);
 
     } catch (IOException e) {
       if (cameraFailureAlert != null) {
@@ -245,7 +243,7 @@ public class RobotContainer {
       Logger.recordOutput("Vision/FieldLayoutLoadError", e.getMessage());
       return null; // Return null on failure for proper error handling
     }
-    return vision;
+    return visionPhoton;
   }
 
   private SwerveDriveIO configureDrive() {
@@ -276,9 +274,17 @@ public class RobotContainer {
   }
 
   /** Sets up LEDs and controller rumbles */
-  private void configureDriverFeedback() {
+  private void configureFeedback() {
 
-    // TODO: Transfer LEDs to new system
+    leds.setDefaultCommand(new ContinuousLEDCommand(leds, drive));
+
+    // this can be either photon or limelight, it just needs to be something's default
+    visionPhoton.setDefaultCommand(
+        new ContinuousVisionStdDevCommand(drive, visionPhoton, visionLimelight));
+
+    // updates limelight to robot pose constantly based on turret rotation
+    visionLimelight.setDefaultCommand(
+        new ContinuousLimelightPoseCommand(visionLimelight, shooter::getTurretAngle));
 
     // RUMBLE when 5s from next shift
     new Trigger(ShiftUtil::nearNextShift)
@@ -375,10 +381,6 @@ public class RobotContainer {
     zeroCmd.addRequirements(shooter);
     driver.leftStick().whileTrue(zeroCmd);
 
-    // reverse intake
-    driver.leftBumper().whileTrue(Commands.runOnce(intake::reverseIntake));
-    driver.leftBumper().onFalse(Commands.runOnce(intake::stopIntake));
-
     // closest climb align
     driver
         .x()
@@ -421,8 +423,13 @@ public class RobotContainer {
             .andThen(Commands.runOnce(hoppert::stopTower)));
 
     // left trigger toggles intake
-    driver.leftTrigger().onTrue(new ToggleIntakeCommand(intake));
-    driver.leftTrigger().onFalse(new ToggleIntakeCommand(intake));
+    //    driver.leftTrigger().onTrue(new ToggleIntakeCommand(intake));
+    //    driver.leftTrigger().onFalse(new ToggleIntakeCommand(intake));
+    intake.setDefaultCommand(
+        new IntakeCommand(
+            intake,
+            () -> (Math.abs(driverHID.getLeftTriggerAxis()) > 0.5),
+            driverHID::getLeftBumperButton));
 
     coDriver
         .back()
@@ -436,11 +443,11 @@ public class RobotContainer {
     driver
         .povRight()
         .or(coDriver.povRight())
-        .onTrue(Commands.runOnce(() -> shooter.adjustHorizontalTrim(false)));
+        .onTrue(Commands.runOnce(() -> shooter.adjustHorizontalTrim(true)));
     driver
         .povLeft()
         .or(coDriver.povLeft())
-        .onTrue(Commands.runOnce(() -> shooter.adjustHorizontalTrim(true)));
+        .onTrue(Commands.runOnce(() -> shooter.adjustHorizontalTrim(false)));
   }
 
   /**
