@@ -58,7 +58,7 @@ public final class Constants {
       new Transform2d(Units.inchesToMeters(3.5), Units.inchesToMeters(0.75), Rotation2d.kZero);
 
   // z = 0 because it gets overridden by limelight height
-  public static final double LIMELIGHT_HEIGHT = Units.inchesToMeters(0); // TODO
+  public static final double LIMELIGHT_HEIGHT = Units.inchesToMeters(22); // TODO
   public static final Transform3d TURRET_TO_LIMELIGHT =
       new Transform3d(
           new Translation3d(Units.inchesToMeters(-1.215), Units.inchesToMeters(-6.248), 0.0),
