@@ -166,4 +166,6 @@ public interface SwerveDriveIO extends Subsystem {
       Matrix<N3, N1> visionMeasurementStdDevs);
 
   void addAutoVisionMeasurement(List<TimestampedVisionUpdate> timestampedVisionUpdates);
+
+  ChassisSpeeds getAcceleration();
 }

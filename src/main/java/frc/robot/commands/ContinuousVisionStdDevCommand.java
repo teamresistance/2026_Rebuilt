@@ -20,10 +20,7 @@ public class ContinuousVisionStdDevCommand extends Command {
     this.drive = drive;
     this.vision = vision;
 
-    // means nothing for other "visions", only needed for the one it defaults on
-    for (VisionIO vsn : vision) {
-      addRequirements(vsn);
-    }
+    addRequirements(vision[0]);
   }
 
   @Override

@@ -16,6 +16,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -29,6 +30,11 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class SwerveDriveReal implements SwerveDriveIO {
+
+  // accel calculation things
+  private ChassisSpeeds lastFieldRelativeSpeeds = new ChassisSpeeds();
+  private double lastAccelerationTimestamp = Timer.getFPGATimestamp();
+  private ChassisSpeeds acceleration = new ChassisSpeeds();
 
   private final SysIdRoutine sysId;
   private final GyroIO gyroIO;
@@ -99,6 +105,26 @@ public class SwerveDriveReal implements SwerveDriveIO {
       module.periodic();
     }
     ODOMETRY_LOCK.unlock();
+
+    double now = Timer.getFPGATimestamp();
+    double dt = now - lastAccelerationTimestamp;
+    if (dt > 0.0) { // just in case because divide by zero will kill code
+      ChassisSpeeds currentFieldRelative = getChassisSpeedsFieldRelative();
+
+      double ax =
+          (currentFieldRelative.vxMetersPerSecond - lastFieldRelativeSpeeds.vxMetersPerSecond) / dt;
+      double ay =
+          (currentFieldRelative.vyMetersPerSecond - lastFieldRelativeSpeeds.vyMetersPerSecond) / dt;
+      double omegaRPS =
+          (currentFieldRelative.omegaRadiansPerSecond
+                  - lastFieldRelativeSpeeds.omegaRadiansPerSecond)
+              / dt;
+
+      acceleration = new ChassisSpeeds(ax, ay, omegaRPS);
+
+      lastFieldRelativeSpeeds = currentFieldRelative;
+      lastAccelerationTimestamp = now;
+    }
 
     // Stop moving when disabled
     if (DriverStation.isDisabled()) {
@@ -299,5 +325,11 @@ public class SwerveDriveReal implements SwerveDriveIO {
     for (TimestampedVisionUpdate autoUpdate : timestampedVisionUpdates) {
       this.addVisionMeasurement(autoUpdate.pose(), autoUpdate.timestamp(), autoUpdate.stdDevs());
     }
+  }
+
+  // TODO: 2027 will add a ChassisAccelerations object... use it
+  @Override
+  public ChassisSpeeds getAcceleration() {
+    return acceleration;
   }
 }

@@ -6,8 +6,10 @@ import frc.robot.subsystems.drive.SwerveDriveIO;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShootingConstants;
 import frc.robot.util.LoggedTunableNumber;
+import frc.robot.util.ShiftUtil;
 import frc.robot.util.ShootingUtil;
 import java.util.function.BooleanSupplier;
+import org.littletonrobotics.junction.Logger;
 
 public class IdleShooterCommand extends Command {
 
@@ -31,7 +33,12 @@ public class IdleShooterCommand extends Command {
     boolean passing = passingSup.getAsBoolean();
 
     double distance =
-        ShootingUtil.getVirtualDistanceToTarget(drive.getPose(), drive.getChassisSpeeds(), passing);
+        ShootingUtil.getVirtualDistanceToTarget(
+            drive.getPose(),
+            drive
+                .getChassisSpeeds()
+                .plus(drive.getAcceleration().times(Constants.ACCELERATION_SOTM_SCALAR)),
+            passing);
     double turretAngle =
         ShootingUtil.getAngleToAim(
             drive.getPose(),
@@ -40,13 +47,24 @@ public class IdleShooterCommand extends Command {
             passing);
     double hoodAngle = ShootingConstants.getHoodAngle(distance);
 
-    shooter.setTurretTarget(turretAngle, drive.getChassisSpeeds().omegaRadiansPerSecond);
-    if (!Constants.TUNING_MODE) {
-      shooter.setHoodTarget(hoodAngle);
+    if (distance < Constants.MIN_DISTANCE_METERS) {
+      Constants.tooClose = true;
     } else {
-      shooter.setHoodTarget(tunableHood.get());
+      Constants.tooClose = false;
     }
 
-    // Logger.recordOutput("Shooter/Virtual Distance to Hub", distance);
+    //     will only aim turret when needed, so when (almost) active or when commanding to shoot
+    if (ShiftUtil.withinTwoSecondsOfNextShift()
+        || ShiftUtil.isOurs(ShiftUtil.getShift())
+        || shooter.isShooting()) {
+      shooter.setTurretTarget(turretAngle, drive.getChassisSpeeds().omegaRadiansPerSecond);
+      if (!Constants.TUNING_MODE) {
+        shooter.setHoodTarget(hoodAngle);
+      } else {
+        shooter.setHoodTarget(tunableHood.get());
+      }
+    }
+
+    Logger.recordOutput("Shooter/Virtual Distance to Hub", distance);
   }
 }

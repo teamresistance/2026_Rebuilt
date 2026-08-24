@@ -50,8 +50,12 @@ public class LEDSubsystem extends SubsystemBase {
           .withFrameRate(4);
   private final StrobeAnimation ANIM_DISABLED_DIM =
       new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
-          .withColor(new RGBWColor(10, 0, 0))
+          .withColor(new RGBWColor(0, 0, 0)) // off for now, change later?
           .withFrameRate(1);
+  private final StrobeAnimation ANIM_TOO_CLOSE =
+      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
+          .withColor(new RGBWColor(0, 0, 255))
+          .withFrameRate(10);
 
   public void setModeActive() {
     if (ledMode == Constants.LED_MODE.ACTIVE) return;
@@ -68,6 +72,15 @@ public class LEDSubsystem extends SubsystemBase {
     candle.setControl(new EmptyAnimation(0));
     candle.setControl(ANIM_INACTIVE);
     ledMode = Constants.LED_MODE.INACTIVE;
+    Logger.recordOutput("LEDS/Mode", ledMode);
+  }
+
+  public void setModeTooClose() {
+    if (ledMode == Constants.LED_MODE.TOO_CLOSE) return;
+
+    candle.setControl(new EmptyAnimation(0));
+    candle.setControl(ANIM_TOO_CLOSE);
+    ledMode = Constants.LED_MODE.TOO_CLOSE;
     Logger.recordOutput("LEDS/Mode", ledMode);
   }
 

@@ -49,10 +49,15 @@ public final class Constants {
   public static final double SHOOTER_RPS_TOLERANCE = 0.5;
 
   public static final double SHOOTER_HOOD_MAX_PITCH = 43;
-  public static final double SHOOTER_HOOD_MIN_PITCH = 17.5;
+  public static final double SHOOTER_HOOD_MIN_PITCH = 20;
   public static final double SHOOTER_TURRET_MAX_YAW = 129;
   public static final double SHOOTER_TURRET_MIN_YAW = -129;
   public static final double SHOOTER_TRIM_ADJUSTMENT_INCREMENT = 3;
+
+  // evil workaround... tbd
+  public static boolean tooClose = false;
+  public static final double MIN_DISTANCE_METERS = 1.2; // TODO: refine
+  public static final double ACCELERATION_SOTM_SCALAR = 0; // TODO
 
   public static final Transform2d ROBOT_TO_TURRET =
       new Transform2d(Units.inchesToMeters(3.5), Units.inchesToMeters(0.75), Rotation2d.kZero);
@@ -79,7 +84,8 @@ public final class Constants {
     ENDGAME_WARNING,
     CLIMB_WARNING,
     AUTO,
-    DISABLED_DIM
+    DISABLED_DIM,
+    TOO_CLOSE
   }
 
   public static final int LED_START_INDEX = 0;

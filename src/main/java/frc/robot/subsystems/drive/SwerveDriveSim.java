@@ -156,4 +156,9 @@ public class SwerveDriveSim implements SwerveDriveIO {
       addVisionMeasurement(autoUpdate.pose(), autoUpdate.timestamp(), autoUpdate.stdDevs());
     }
   }
+
+  @Override
+  public ChassisSpeeds getAcceleration() {
+    return new ChassisSpeeds(); // figure this out, later, not really needed unless maplesim
+  }
 }

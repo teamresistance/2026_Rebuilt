@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import java.util.function.DoubleSupplier;
+import org.littletonrobotics.junction.Logger;
 
 public class ContinuousLimelightPoseCommand extends Command {
 
@@ -21,6 +22,11 @@ public class ContinuousLimelightPoseCommand extends Command {
     this.limelight = ll;
     this.turretAngleSupplier = turretAngleSupplier;
     addRequirements(ll);
+  }
+
+  @Override
+  public void initialize() {
+    Logger.recordOutput("Shooter/LLCmdActive", true);
   }
 
   @Override
@@ -48,7 +54,13 @@ public class ContinuousLimelightPoseCommand extends Command {
     Pose3d rotatedTurretFrame = centerOfTurret.transformBy(turretYaw);
 
     // offset from turret center, the limelight transform is applied at an angle
-    limelight.updateCameraTransform(
-        "limelight", rotatedTurretFrame.transformBy(Constants.TURRET_TO_LIMELIGHT));
+    Pose3d camPose = rotatedTurretFrame.transformBy(Constants.TURRET_TO_LIMELIGHT);
+    limelight.updateCameraTransform("limelight", camPose);
+    Logger.recordOutput("Shooter/Limelight", camPose);
+  }
+
+  @Override
+  public boolean runsWhenDisabled() {
+    return true;
   }
 }

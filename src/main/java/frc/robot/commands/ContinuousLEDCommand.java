@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.drive.SwerveDriveIO;
 import frc.robot.util.ShiftUtil;
@@ -34,6 +35,10 @@ public class ContinuousLEDCommand extends Command {
     }
     if (ShiftUtil.isVeryDeepEndgame()) {
       leds.setModeClimbWarning();
+      return;
+    }
+    if (Constants.tooClose) {
+      leds.setModeTooClose();
       return;
     }
     if (ShiftUtil.isDeepEndgame()) {

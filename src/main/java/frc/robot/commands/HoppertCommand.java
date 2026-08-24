@@ -81,7 +81,9 @@ public class HoppertCommand extends Command {
         hoppert.stopTower();
       }
       if (startTimer.hasElapsed(HOPPER_WHEELS_DELAY)) {
-        hoppert.runHopperWheels();
+        if (shooter.atShootingSetpoints()) { // TODO: hope this works
+          hoppert.runHopperWheels();
+        }
       }
       if (startTimer.hasElapsed(HOPPER_FLOOR_DELAY)) {
         hoppert.runHopperBackwardsSlow();
