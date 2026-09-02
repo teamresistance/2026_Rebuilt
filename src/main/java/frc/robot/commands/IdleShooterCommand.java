@@ -18,19 +18,17 @@ public class IdleShooterCommand extends Command {
 
   private final SwerveDriveIO drive;
   private final ShooterIO shooter;
-  private final BooleanSupplier passingSup;
+  private final BooleanSupplier fwdSup;
 
-  public IdleShooterCommand(SwerveDriveIO _drive, ShooterIO _shooter, BooleanSupplier _passingSup) {
+  public IdleShooterCommand(SwerveDriveIO _drive, ShooterIO _shooter, BooleanSupplier _fwd) {
     drive = _drive;
     shooter = _shooter;
-    passingSup = _passingSup;
+    fwdSup = _fwd;
     addRequirements(shooter);
   }
 
   @Override
   public void execute() {
-
-    boolean passing = passingSup.getAsBoolean();
 
     double distance =
         ShootingUtil.getVirtualDistanceToTarget(
@@ -38,13 +36,13 @@ public class IdleShooterCommand extends Command {
             drive
                 .getChassisSpeeds()
                 .plus(drive.getAcceleration().times(Constants.ACCELERATION_SOTM_SCALAR)),
-            passing);
+          false);
     double turretAngle =
         ShootingUtil.getAngleToAim(
             drive.getPose(),
             drive.getChassisSpeeds(),
             ShootingConstants.getTimeOfFlight(distance),
-            passing);
+          false);
     double hoodAngle = ShootingConstants.getHoodAngle(distance);
 
     if (distance < Constants.MIN_DISTANCE_METERS) {

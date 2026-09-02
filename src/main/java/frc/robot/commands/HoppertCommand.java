@@ -43,13 +43,15 @@ public class HoppertCommand extends Command {
   private boolean overcurrentTimerRunning = false;
 
   private BooleanSupplier triggerSup;
+  private BooleanSupplier fwdSup;
 
   public HoppertCommand(
-      HoppertIO hoppert, ShooterIO shooter, IntakeIO intake, BooleanSupplier triggerHeld) {
+      HoppertIO hoppert, ShooterIO shooter, IntakeIO intake, BooleanSupplier triggerHeld, BooleanSupplier _fwdSup) {
     this.hoppert = hoppert;
     this.shooter = shooter;
     this.intake = intake;
     triggerSup = triggerHeld;
+    fwdSup = _fwdSup;
     addRequirements(hoppert);
   }
 
@@ -85,8 +87,8 @@ public class HoppertCommand extends Command {
           hoppert.runHopperWheels();
         }
       }
-      if (startTimer.hasElapsed(HOPPER_FLOOR_DELAY)) {
-        hoppert.runHopperBackwardsSlow();
+      if (fwdSup.getAsBoolean()) {
+        hoppert.runHopperForwards();
       } else {
         hoppert.runHopperBackwards();
       }

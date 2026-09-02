@@ -330,7 +330,8 @@ public class RobotContainer {
                 (Math.abs(driverHID.getRightTriggerAxis()) > 0.25
                         || driverHID.getRightBumperButton())
                     || (Math.abs(operatorHID.getRightTriggerAxis()) > 0.25
-                        || operatorHID.getRightBumperButton())));
+                        || operatorHID.getRightBumperButton()),
+          driverHID::getRightBumperButton));
 
     // when POV up/down pressed and in bump zone, auto rotate to left/right side
     driver

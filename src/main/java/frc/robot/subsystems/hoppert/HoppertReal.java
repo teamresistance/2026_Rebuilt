@@ -1,6 +1,7 @@
 package frc.robot.subsystems.hoppert;
 
 import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -45,7 +46,8 @@ public class HoppertReal implements HoppertIO {
                 new MotorOutputConfigs()
                     .withNeutralMode(NeutralModeValue.Brake)
                     .withInverted(InvertedValue.Clockwise_Positive))
-            .withSlot0(new Slot0Configs().withKP(1));
+            .withSlot0(new Slot0Configs().withKP(1))
+          .withCurrentLimits(new CurrentLimitsConfigs().withSupplyCurrentLimit(10).withSupplyCurrentLimitEnable(true));
     hopperRollerMotor.getConfigurator().apply(config2);
 
     TalonFXConfiguration config3 =
@@ -96,7 +98,7 @@ public class HoppertReal implements HoppertIO {
 
   @Override
   public void runHopperForwards() {
-    hopperRollerMotor.setControl(new VelocityVoltage(4));
+    hopperRollerMotor.setControl(new VelocityVoltage(20)); // TODO: me
     hopperRollersRunning = true;
     hopperRollersReversed = false;
   }
