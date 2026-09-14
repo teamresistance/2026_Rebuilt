@@ -47,7 +47,10 @@ public class HoppertReal implements HoppertIO {
                     .withNeutralMode(NeutralModeValue.Brake)
                     .withInverted(InvertedValue.Clockwise_Positive))
             .withSlot0(new Slot0Configs().withKP(1))
-          .withCurrentLimits(new CurrentLimitsConfigs().withSupplyCurrentLimit(10).withSupplyCurrentLimitEnable(true));
+            .withCurrentLimits(
+                new CurrentLimitsConfigs()
+                    .withSupplyCurrentLimit(10)
+                    .withSupplyCurrentLimitEnable(true));
     hopperRollerMotor.getConfigurator().apply(config2);
 
     TalonFXConfiguration config3 =
@@ -98,7 +101,7 @@ public class HoppertReal implements HoppertIO {
 
   @Override
   public void runHopperForwards() {
-    hopperRollerMotor.setControl(new VelocityVoltage(20)); // TODO: me
+    hopperRollerMotor.setControl(new VelocityVoltage(8)); // TODO: me
     hopperRollersRunning = true;
     hopperRollersReversed = false;
   }

@@ -42,8 +42,8 @@ public class LEDSubsystem extends SubsystemBase {
           .withFrameRate(4);
   private final StrobeAnimation ANIM_CLIMB_WARNING =
       new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
-          .withColor(new RGBWColor(200, 0, 200))
-          .withFrameRate(10);
+          .withColor(new RGBWColor(250, 0, 150))
+          .withFrameRate(12);
   private final StrobeAnimation ANIM_AUTO =
       new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
           .withColor(new RGBWColor(0, 255, 0))

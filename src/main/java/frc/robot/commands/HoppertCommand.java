@@ -14,12 +14,12 @@ public class HoppertCommand extends Command {
   private static final double PULSE_OFF_DURATION = 0;
   private static final double PULSE_FORWARDS_DURATION = 0;
 
-  private static final double HOPPER_WHEELS_DELAY = 0.5;
+  private static final double HOPPER_WHEELS_DELAY = 0.2;
   private static final double HOPPER_FLOOR_DELAY = 1;
 
   private static final double OVERCURRENT_THRESHOLD = 80.0;
   private static final double OVERCURRENT_TRIGGER_DURATION = 0.3;
-  private static final double REVERSE_DURATION = 0.25;
+  private static final double REVERSE_DURATION = 0.4;
 
   private static final double OVERHOPPER_THRESHOLD = 70.0;
 
@@ -46,7 +46,11 @@ public class HoppertCommand extends Command {
   private BooleanSupplier fwdSup;
 
   public HoppertCommand(
-      HoppertIO hoppert, ShooterIO shooter, IntakeIO intake, BooleanSupplier triggerHeld, BooleanSupplier _fwdSup) {
+      HoppertIO hoppert,
+      ShooterIO shooter,
+      IntakeIO intake,
+      BooleanSupplier triggerHeld,
+      BooleanSupplier _fwdSup) {
     this.hoppert = hoppert;
     this.shooter = shooter;
     this.intake = intake;

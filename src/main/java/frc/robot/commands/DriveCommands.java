@@ -31,8 +31,8 @@ import org.littletonrobotics.junction.Logger;
 
 public class DriveCommands {
   private static final double DEADBAND = 0.1;
-  private static final double ANGLE_KP = 10.0;
-  private static final double ANGLE_KD = 0;
+  private static final double ANGLE_KP = 4.0;
+  private static final double ANGLE_KD = 0.4;
   private static final double ANGLE_MAX_VELOCITY = 8.0;
   private static final double ANGLE_MAX_ACCELERATION = 20.0;
   private static final double FF_START_DELAY = 2.0; // Secs
@@ -216,7 +216,7 @@ public class DriveCommands {
     // PID controllers for X and Y positions
     ProfiledPIDController pidX =
         new ProfiledPIDController(
-            3.0, // KP for X (tune as needed)
+            1.0, // KP for X (tune as needed)
             0.0, // KI for X (no integral term)
             0.0, // KD for X (no derivative term)
             new TrapezoidProfile.Constraints(
@@ -226,7 +226,7 @@ public class DriveCommands {
 
     ProfiledPIDController pidY =
         new ProfiledPIDController(
-            3.0, // KP for Y (tune as needed)
+            1.0, // KP for Y (tune as needed)
             0.0, // KI for Y (no integral term)
             0.0, // KD for Y (no derivative term)
             new TrapezoidProfile.Constraints(
