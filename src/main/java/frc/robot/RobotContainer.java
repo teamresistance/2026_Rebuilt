@@ -287,7 +287,7 @@ public class RobotContainer {
         new ContinuousLimelightPoseCommand(visionLimelight, shooter::getTurretAngle));
 
     // RUMBLE when 5s from next shift
-    new Trigger(ShiftUtil::nearNextShift)
+    new Trigger(ShiftUtil::withinFiveSecondsOfNextShift)
         .onTrue(
             Commands.runOnce(() -> driverHID.setRumble(GenericHID.RumbleType.kBothRumble, 1))
                 .andThen(new WaitCommand(1))

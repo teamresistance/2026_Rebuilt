@@ -54,8 +54,16 @@ public class ContinuousLEDCommand extends Command {
         }
         return;
       }
-      if (ShiftUtil.withinSevenSecondsOfNextShift()) {
+      if (ShiftUtil.withinFiveSecondsOfNextShift()) {
         leds.setModeShiftWarning();
+        return;
+      }
+      if (ShiftUtil.withinSevenSecondsOfNextShift()) { // first 2s of warning tell whats coming
+        if (ShiftUtil.isOurs(ShiftUtil.getNextShift())) { // next shift is also ours
+          leds.setModeShiftSwitchingGreen();
+        } else { // next shift is theirs
+          leds.setModeShiftSwitchingRed();
+        }
         return;
       }
       leds.setModeActive();

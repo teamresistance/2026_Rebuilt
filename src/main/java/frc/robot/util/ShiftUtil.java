@@ -177,7 +177,7 @@ public class ShiftUtil {
   }
 
   /** Returns true if within 5 seconds of the next shift */
-  public static boolean nearNextShift() {
+  public static boolean withinFiveSecondsOfNextShift() {
     double elapsed = shiftTimer.get();
     if (elapsed < 10.0 && elapsed > 5.0) {
       return true;
