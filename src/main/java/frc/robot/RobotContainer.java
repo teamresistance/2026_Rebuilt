@@ -299,6 +299,8 @@ public class RobotContainer {
   /** Defines button bindings and control triggers */
   private void configureButtonBindings() {
 
+    driver.a().onTrue(Commands.run(drive::stopWithX));
+
     // Default: normal drive
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
