@@ -23,14 +23,14 @@ jobs:
 
     steps:
       - name: Check out repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
       - name: Configure JDK
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6
         with:
           distribution: "temurin"
           java-version: ${{ env.JAVA_VERSION }}
@@ -43,7 +43,7 @@ jobs:
 
       - name: Run MegaLinter
         id: ml
-        uses: oxsecurity/megalinter/flavors/java@v9
+        uses: oxsecurity/megalinter/flavors/java@v10
         env:
           VALIDATE_ALL_CODEBASE: false
           DISABLE_ERRORS: true
