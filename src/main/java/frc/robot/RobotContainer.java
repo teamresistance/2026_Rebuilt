@@ -12,13 +12,10 @@ import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.commands.*;
 import frc.robot.commands.DeferredCommand;
-import frc.robot.commands.DriveCommands;
-import frc.robot.commands.HoppertCommand;
-import frc.robot.commands.IdleShooterCommand;
-import frc.robot.commands.ShootCommand;
-import frc.robot.commands.ToggleIntakeCommand;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.climber.ClimberReal;
 import frc.robot.subsystems.climber.ClimberSim;
@@ -29,8 +26,6 @@ import frc.robot.subsystems.hoppert.HoppertSim;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeReal;
 import frc.robot.subsystems.intake.IntakeSim;
-import frc.robot.subsystems.leds.LEDStream;
-import frc.robot.subsystems.leds.LEDSubsystem;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterReal;
 import frc.robot.subsystems.shooter.ShooterSim;
@@ -58,7 +53,8 @@ public class RobotContainer {
 
   // Subsystems
   private final SwerveDriveIO drive;
-  private VisionSubsystem vision;
+  private VisionIOPhoton visionPhoton;
+  private VisionIOLimelight visionLimelight;
   private final ShooterIO shooter;
   private final ClimberIO climber;
   private final HoppertIO hoppert;
@@ -85,7 +81,8 @@ public class RobotContainer {
   public RobotContainer() {
 
     drive = configureDrive();
-    vision = configureAprilTagVision();
+    visionPhoton = configureAprilTagVision();
+    visionLimelight = new VisionRealLimelight("limelight");
     ShootingConstants.configureShootingConstants();
 
     switch (Constants.CURRENT_MODE) {
@@ -147,7 +144,7 @@ public class RobotContainer {
     startTrimChooser.addOption("Yes", true);
     SmartDashboard.putData("Start Trimmed", startTrimChooser);
 
-    configureDriverFeedback();
+    configureFeedback();
     autoChooser = configureAutos();
     configureButtonBindings();
     cameraFailureAlert = new Alert("Camera system failure", Alert.AlertType.kError);
@@ -228,15 +225,15 @@ public class RobotContainer {
   }
 
   /**
-   * Configures the AprilTag vision system with PhotonVision cameras.
+   * Configures the AprilTag visionPhoton system with PhotonVision cameras.
    *
    * @return The configured VisionSubsystem, or null if initialization fails
    */
-  private VisionSubsystem configureAprilTagVision() {
+  private VisionIOPhoton configureAprilTagVision() {
     try {
-      vision =
-          new VisionSubsystem(frontLeftCamera, frontRightCamera, backRightCamera, backLeftCamera);
-      vision.setDataInterfaces(drive::getPose, drive::addAutoVisionMeasurement);
+      visionPhoton =
+          new VisionRealPhoton(frontLeftCamera, frontRightCamera, backRightCamera, backLeftCamera);
+      visionPhoton.setDataInterfaces(drive::getPose, drive::addAutoVisionMeasurement);
 
     } catch (IOException e) {
       if (cameraFailureAlert != null) {
@@ -246,7 +243,7 @@ public class RobotContainer {
       Logger.recordOutput("Vision/FieldLayoutLoadError", e.getMessage());
       return null; // Return null on failure for proper error handling
     }
-    return vision;
+    return visionPhoton;
   }
 
   private SwerveDriveIO configureDrive() {
@@ -277,134 +274,20 @@ public class RobotContainer {
   }
 
   /** Sets up LEDs and controller rumbles */
-  private void configureDriverFeedback() {
+  private void configureFeedback() {
 
-    //    // SHOOTING/PASSING (priority 4, determines confidence and passing/shooting, framerate
-    // based on
-    //    // confidence)
-    //    LEDStream shootingStream =
-    //        new LEDStream(
-    //                "shooting/passing",
-    //                4,
-    //                () -> {
-    //                  boolean isShooting = ShootingUtil.getShootingType(drive::getPose) == 0;
-    //                  boolean isConfident =
-    //                      TurretConfidenceUtil.calculateConfidence(drive)
-    //                          > Constants.CONFIDENCE_THRESHOLD;
-    //
-    //                  if (isShooting) {
-    //                    return isConfident
-    //                        ? Constants.LEDMode.SHOOTING_CONFIDENT
-    //                        : Constants.LEDMode.SHOOTING_DOUBTFUL;
-    //                  } else {
-    //                    return isConfident
-    //                        ? Constants.LEDMode.PASSING_CONFIDENT
-    //                        : Constants.LEDMode.PASSING_DOUBTFUL;
-    //                  }
-    //                },
-    //                () ->
-    //                    driverHID
-    //                        .rightTrigger()
-    //                        .or((coDriver.rightTrigger().or(coDriver.rightBumper())))
-    //                        .getAsBoolean())
-    //            .withFramerateSupplier(
-    //                () -> {
-    //                  double confidence = TurretConfidenceUtil.calculateConfidence(drive);
-    //                  return (confidence > 90.0)
-    //                      ? 10 // very high framerate for very high confidence
-    //                      : (confidence > 80.0)
-    //                          ? 9
-    //                          : (confidence > 70.0) ? 8 : (confidence > 60.0) ? 7 : 6;
-    //                });
-    //
-    //    leds.addStream(shootingStream);
-    //
-    //    // INTAKING (priority 2, flashing yellow)
-    //    //    LEDStream intakeStream =
-    //    //        new LEDStream("intake", 2, () -> Constants.LEDMode.INTAKING,
-    // intake::isIntaking);
-    //    //    leds.addStream(intakeStream);
-    //
-    //    // DISABLED
-    //    LEDStream disabledStream =
-    //        new LEDStream("disabled", 999, () -> Constants.LEDMode.DISABLED,
-    // DriverStation::isDisabled);
-    //    leds.addStream(disabledStream);
-    //
-    //    // ACTIVE/INACTIVE
-    //    LEDStream activeInactiveStream =
-    //        new LEDStream(
-    //            "active/inactive",
-    //            1,
-    //            () ->
-    //                ShiftUtil.isOurs(ShiftUtil.getShift())
-    //                    ? Constants.LEDMode.ACTIVE
-    //                    : Constants.LEDMode.INACTIVE,
-    //            () -> true);
-    //    leds.addStream(activeInactiveStream);
+    leds.setDefaultCommand(new ContinuousLEDCommand(leds, drive));
 
-    // DISABLED
-    LEDStream disabledStream =
-        new LEDStream("disabled", 999, () -> Constants.LEDMode.DISABLED, DriverStation::isDisabled);
-    leds.addStream(disabledStream);
+    // this can be either photon or limelight, it just needs to be something's default
+    visionPhoton.setDefaultCommand(
+        new ContinuousVisionStdDevCommand(drive, visionPhoton, visionLimelight));
 
-    // SHOOTING
-    //    LEDStream shootStream =
-    //        new LEDStream(
-    //            "shooting",
-    //            2,
-    //            () -> Constants.LEDMode.SHOOTING_CONFIDENT,
-    //            () ->
-    //                Math.abs(driverHID.getHID().getRightTriggerAxis()) > 0.25
-    //                    || driverHID.getHID().getRightBumperButton());
-    //    leds.addStream(shootStream);
-
-    // ACTIVE vs INACTIVE
-    LEDStream activeStream =
-        new LEDStream(
-            "active/inactive",
-            1,
-            () ->
-                ShiftUtil.isOurs(ShiftUtil.getShift())
-                    ? Constants.LEDMode.ACTIVE
-                    : Constants.LEDMode.INACTIVE,
-            () -> true);
-    leds.addStream(activeStream);
-
-    LEDStream shiftCountdown =
-        new LEDStream("shift countdown 7s", 3, () -> Constants.LEDMode.CLOSE_TO_NEXT_SHIFT);
-    leds.addStream(shiftCountdown);
-    new Trigger(ShiftUtil::withinSevenSecondsOfNextShift)
-        .onTrue(Commands.runOnce(() -> shiftCountdown.runForSeconds(5)));
-
-    LEDStream shiftCountdown2 =
-        new LEDStream(
-            "shift countdown 2s",
-            4,
-            () ->
-                ShiftUtil.isOurs(ShiftUtil.getShift())
-                    ? Constants.LEDMode.CLOSE_TO_NEXT_SHIFT_NOTUS
-                    : Constants.LEDMode.CLOSE_TO_NEXT_SHIFT_US);
-    leds.addStream(shiftCountdown2);
-    new Trigger(ShiftUtil::withinTwoSecondsOfNextShift)
-        .onTrue(Commands.runOnce(() -> shiftCountdown2.runForSeconds(2)));
-
-    LEDStream endgame =
-        new LEDStream(
-            "endgame countdown", 6, () -> Constants.LEDMode.ENDGAME, ShiftUtil::isDeepEndgame);
-    leds.addStream(endgame);
-
-    //    // BUMP (priority 5, timed 1s, cancels if leaving zone)
-    //    LEDStream bumpStream =
-    //        new LEDStream("bump", 5, () -> Constants.LEDMode.BUMP, driverHID::getYButton);
-    //    leds.addStream(bumpStream);
-    //
-    //    // BUMP trigger (timed 1s when entering bump zone)
-    //    driver.povUp().or(driver.povDown()).onTrue(Commands.runOnce(() ->
-    // bumpStream.runForSeconds(1)));
+    // updates limelight to robot pose constantly based on turret rotation
+    visionLimelight.setDefaultCommand(
+        new ContinuousLimelightPoseCommand(visionLimelight, shooter::getTurretAngle));
 
     // RUMBLE when 5s from next shift
-    new Trigger(ShiftUtil::nearNextShift)
+    new Trigger(ShiftUtil::withinFiveSecondsOfNextShift)
         .onTrue(
             Commands.runOnce(() -> driverHID.setRumble(GenericHID.RumbleType.kBothRumble, 1))
                 .andThen(new WaitCommand(1))
@@ -415,6 +298,8 @@ public class RobotContainer {
 
   /** Defines button bindings and control triggers */
   private void configureButtonBindings() {
+
+    driver.a().onTrue(Commands.runOnce(drive::stopWithX));
 
     // Default: normal drive
     drive.setDefaultCommand(
@@ -447,7 +332,8 @@ public class RobotContainer {
                 (Math.abs(driverHID.getRightTriggerAxis()) > 0.25
                         || driverHID.getRightBumperButton())
                     || (Math.abs(operatorHID.getRightTriggerAxis()) > 0.25
-                        || operatorHID.getRightBumperButton())));
+                        || operatorHID.getRightBumperButton()),
+            driverHID::getRightBumperButton));
 
     // when POV up/down pressed and in bump zone, auto rotate to left/right side
     driver
@@ -498,10 +384,6 @@ public class RobotContainer {
     zeroCmd.addRequirements(shooter);
     driver.leftStick().whileTrue(zeroCmd);
 
-    // reverse intake
-    driver.leftBumper().whileTrue(Commands.runOnce(intake::reverseIntake));
-    driver.leftBumper().onFalse(Commands.runOnce(intake::stopIntake));
-
     // closest climb align
     driver
         .x()
@@ -544,8 +426,13 @@ public class RobotContainer {
             .andThen(Commands.runOnce(hoppert::stopTower)));
 
     // left trigger toggles intake
-    driver.leftTrigger().onTrue(new ToggleIntakeCommand(intake));
-    driver.leftTrigger().onFalse(new ToggleIntakeCommand(intake));
+    //    driver.leftTrigger().onTrue(new ToggleIntakeCommand(intake));
+    //    driver.leftTrigger().onFalse(new ToggleIntakeCommand(intake));
+    intake.setDefaultCommand(
+        new IntakeCommand(
+            intake,
+            () -> (Math.abs(driverHID.getLeftTriggerAxis()) > 0.5),
+            driverHID::getLeftBumperButton));
 
     coDriver
         .back()
@@ -559,11 +446,11 @@ public class RobotContainer {
     driver
         .povRight()
         .or(coDriver.povRight())
-        .onTrue(Commands.runOnce(() -> shooter.adjustHorizontalTrim(false)));
+        .onTrue(Commands.runOnce(() -> shooter.adjustHorizontalTrim(true)));
     driver
         .povLeft()
         .or(coDriver.povLeft())
-        .onTrue(Commands.runOnce(() -> shooter.adjustHorizontalTrim(true)));
+        .onTrue(Commands.runOnce(() -> shooter.adjustHorizontalTrim(false)));
   }
 
   /**
@@ -576,15 +463,6 @@ public class RobotContainer {
             Commands.runOnce(ShiftUtil::startShiftTimer)
                 .andThen(new WaitCommand(1))
                 .andThen(Commands.runOnce(ShiftUtil::assignShifts)));
-  }
-
-  /**
-   * Creates an LEDStream that runs the auto animation 20 seconds and then is never accessed again.
-   */
-  public void runAutoLEDs() {
-    LEDStream autoStream = new LEDStream("auto", 100, () -> Constants.LEDMode.RAINBOW);
-    leds.addStream(autoStream);
-    autoStream.runForSeconds(20);
   }
 
   public String getShiftChosen() {

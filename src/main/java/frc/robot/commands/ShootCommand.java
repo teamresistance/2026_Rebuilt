@@ -15,20 +15,19 @@ public class ShootCommand extends Command {
 
   private final SwerveDriveIO drive;
   private final ShooterIO shooter;
-  private final BooleanSupplier passingSup;
+  private final BooleanSupplier forwardSup;
 
-  public ShootCommand(SwerveDriveIO _drive, ShooterIO _shooter, BooleanSupplier _passing) {
+  public ShootCommand(SwerveDriveIO _drive, ShooterIO _shooter, BooleanSupplier _fwd) {
     drive = _drive;
     shooter = _shooter;
-    passingSup = _passing;
+    forwardSup = _fwd;
   }
 
   @Override
   public void execute() {
 
     double distance =
-        ShootingUtil.getVirtualDistanceToTarget(
-            drive.getPose(), drive.getChassisSpeeds(), passingSup.getAsBoolean());
+        ShootingUtil.getVirtualDistanceToTarget(drive.getPose(), drive.getChassisSpeeds(), false);
 
     if (!Constants.TUNING_MODE) {
       shooter.runFlywheelAtRPS(ShootingConstants.getRPS(distance));

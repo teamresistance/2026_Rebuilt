@@ -137,6 +137,11 @@ public class ShooterSim implements ShooterIO {
   }
 
   @Override
+  public double getTurretAngle() {
+    return turretAngleDegs;
+  }
+
+  @Override
   public void brake() {}
 
   @Override

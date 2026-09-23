@@ -7,6 +7,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
 import frc.robot.util.ShootingUtil;
 import org.littletonrobotics.junction.Logger;
@@ -44,7 +45,7 @@ public class ShooterReal implements ShooterIO {
 
     hoodConfig =
         new TalonFXConfiguration()
-            .withSlot0(new Slot0Configs().withKP(10).withKI(0).withKD(0))
+            .withSlot0(new Slot0Configs().withKP(30).withKI(0).withKD(0))
             .withMotionMagic(
                 new MotionMagicConfigs()
                     .withMotionMagicAcceleration(300)
@@ -60,21 +61,20 @@ public class ShooterReal implements ShooterIO {
 
     turretConfig =
         new TalonFXConfiguration()
-            .withSlot0(new Slot0Configs().withKP(2).withKI(0).withKD(0).withKS(0.5))
+            .withSlot0(new Slot0Configs().withKP(50).withKI(0).withKD(0).withKS(0.5))
             .withMotionMagic(
                 new MotionMagicConfigs()
-                    .withMotionMagicAcceleration(800)
-                    .withMotionMagicCruiseVelocity(130)
-                    .withMotionMagicJerk(3000))
+                    .withMotionMagicAcceleration(2000)
+                    .withMotionMagicCruiseVelocity(150))
             .withMotorOutput(
                 new MotorOutputConfigs()
                     .withNeutralMode(NeutralModeValue.Brake)
                     .withInverted(InvertedValue.Clockwise_Positive))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
-                    .withStatorCurrentLimit(40)
+                    .withStatorCurrentLimit(60)
                     .withStatorCurrentLimitEnable(true)
-                    .withSupplyCurrentLimit(40)
+                    .withSupplyCurrentLimit(60)
                     .withSupplyCurrentLimitEnable(true))
             .withSoftwareLimitSwitch(
                 new SoftwareLimitSwitchConfigs()
@@ -90,7 +90,7 @@ public class ShooterReal implements ShooterIO {
         new TalonFXConfiguration()
             .withSlot0(
                 new Slot0Configs()
-                    .withKP(0)
+                    .withKP(0.2)
                     .withKI(0)
                     .withKD(0)
                     .withKS(0)
@@ -193,10 +193,10 @@ public class ShooterReal implements ShooterIO {
       }
       turretTargetAngle =
           turretAngle + horizontalTrim; // add horizontal trim to turret target angle
+      turretTargetAngle -= Units.radiansToDegrees(omegaRadsPerSec) * 0.2;
       turretMotor.setControl(
-          new MotionMagicVoltage(ShootingUtil.toTurretRevs(turretTargetAngle))
-              .withEnableFOC(true)
-              .withFeedForward(-omegaRadsPerSec * 5));
+          new MotionMagicVoltage(ShootingUtil.toTurretRevs(turretTargetAngle)).withEnableFOC(true));
+      //              .withFeedForward(-(Units.radiansToRotations(-omegaRadsPerSec) * 80.0) * 0.5));
     }
   }
 
@@ -239,10 +239,15 @@ public class ShooterReal implements ShooterIO {
   @Override
   public void adjustHorizontalTrim(boolean right) {
     if (right) {
-      horizontalTrim += Constants.SHOOTER_TRIM_ADJUSTMENT_INCREMENT;
-    } else {
       horizontalTrim -= Constants.SHOOTER_TRIM_ADJUSTMENT_INCREMENT;
+    } else {
+      horizontalTrim += Constants.SHOOTER_TRIM_ADJUSTMENT_INCREMENT;
     }
+  }
+
+  @Override
+  public double getTurretAngle() {
+    return ShootingUtil.toTurretDegrees(turretMotor.getPosition().getValueAsDouble());
   }
 
   @Override

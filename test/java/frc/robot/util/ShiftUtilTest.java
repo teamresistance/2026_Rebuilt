@@ -52,23 +52,23 @@ public class ShiftUtilTest {
   }
 
   @Test
-  @DisplayName("nearNextShift works as intended in 5s range")
+  @DisplayName("withinFiveSecondsOfNextShift works as intended in 5s range")
   public void testNearNextShiftWindows() {
 
     // Not near at 0s
-    assertFalse(ShiftUtil.nearNextShift());
+    assertFalse(ShiftUtil.withinFiveSecondsOfNextShift());
 
     // Near first shift (5-10s window)
     SimHooks.stepTiming(6.0);
-    assertTrue(ShiftUtil.nearNextShift());
+    assertTrue(ShiftUtil.withinFiveSecondsOfNextShift());
 
     // Not near
     SimHooks.stepTiming(10.0);
-    assertFalse(ShiftUtil.nearNextShift());
+    assertFalse(ShiftUtil.withinFiveSecondsOfNextShift());
 
     // Near second shift window (30-35s)
     SimHooks.stepTiming(15.0);
-    assertTrue(ShiftUtil.nearNextShift());
+    assertTrue(ShiftUtil.withinFiveSecondsOfNextShift());
   }
 
   @Test

@@ -31,7 +31,7 @@ public class IntakeReal implements IntakeIO {
   public void activateIntake() {
     intaking = true;
     rejecting = false;
-    intakeMotor.setControl(new DutyCycleOut(0.4));
+    intakeMotor.setControl(new DutyCycleOut(0.6));
   }
 
   @Override
@@ -57,5 +57,10 @@ public class IntakeReal implements IntakeIO {
   @Override
   public boolean isIntaking() {
     return intaking;
+  }
+
+  @Override
+  public double getIntakeCurrent() {
+    return intakeMotor.getStatorCurrent().getValueAsDouble();
   }
 }

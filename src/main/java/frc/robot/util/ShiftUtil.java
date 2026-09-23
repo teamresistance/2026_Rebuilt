@@ -177,7 +177,7 @@ public class ShiftUtil {
   }
 
   /** Returns true if within 5 seconds of the next shift */
-  public static boolean nearNextShift() {
+  public static boolean withinFiveSecondsOfNextShift() {
     double elapsed = shiftTimer.get();
     if (elapsed < 10.0 && elapsed > 5.0) {
       return true;
@@ -197,7 +197,9 @@ public class ShiftUtil {
       return true;
     } else if (elapsed < 60.0 && elapsed > 53.0) {
       return true;
-    } else return elapsed < 85.0 && elapsed > 78.0;
+    } else if (elapsed < 85.0 && elapsed > 78.0) {
+      return true;
+    } else return elapsed < 110.0 && elapsed > 103.0;
   }
 
   /** Returns true if within 2 seconds of the next shift */
@@ -209,12 +211,19 @@ public class ShiftUtil {
       return true;
     } else if (elapsed < 60.0 && elapsed > 58.0) {
       return true;
-    } else return elapsed < 85.0 && elapsed > 83.0;
+    } else if (elapsed < 85.0 && elapsed > 83.0) {
+      return true;
+    } else return elapsed < 110.0 && elapsed > 108.0;
   }
 
-  /** Returns true if we are currently in the endgame phase (after 85 seconds + 20s) */
+  /** Returns true if last 10s of match */
   public static boolean isDeepEndgame() {
-    return shiftTimer.get() >= 85.0 + 20;
+    return shiftTimer.get() >= 110 + 20;
+  }
+
+  /** Returns true if last 4s of match */
+  public static boolean isVeryDeepEndgame() {
+    return shiftTimer.get() >= 110 + 26;
   }
 
   public static String getAutoWinnerColor() {

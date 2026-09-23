@@ -2,11 +2,9 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
-import com.ctre.phoenix6.controls.*;
-import com.ctre.phoenix6.signals.RGBWColor;
+import com.ctre.phoenix6.CANBus;
 import com.pathplanner.lib.path.PathConstraints;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.generated.TunerConstants;
@@ -51,94 +49,47 @@ public final class Constants {
   public static final double SHOOTER_RPS_TOLERANCE = 0.5;
 
   public static final double SHOOTER_HOOD_MAX_PITCH = 43;
-  public static final double SHOOTER_HOOD_MIN_PITCH = 17.5;
+  public static final double SHOOTER_HOOD_MIN_PITCH = 20;
   public static final double SHOOTER_TURRET_MAX_YAW = 129;
   public static final double SHOOTER_TURRET_MIN_YAW = -129;
   public static final double SHOOTER_TRIM_ADJUSTMENT_INCREMENT = 3;
 
+  // evil workaround... tbd
+  public static boolean tooClose = false;
+  public static final double MIN_DISTANCE_METERS = 1.2; // TODO: refine
+  public static final double ACCELERATION_SOTM_SCALAR = 0; // TODO
+
   public static final Transform2d ROBOT_TO_TURRET =
-      new Transform2d(Units.inchesToMeters(1.38), Units.inchesToMeters(3.8), Rotation2d.kZero);
+      new Transform2d(Units.inchesToMeters(3.5), Units.inchesToMeters(0.75), Rotation2d.kZero);
 
-  public static final int CANDLE_ID = 40;
+  // z = 0 because it gets overridden by limelight height
+  public static final double LIMELIGHT_HEIGHT = Units.inchesToMeters(22); // TODO
+  public static final Transform3d TURRET_TO_LIMELIGHT =
+      new Transform3d(
+          new Translation3d(Units.inchesToMeters(-1.215), Units.inchesToMeters(-6.248), 0.0),
+          new Rotation3d(0, Units.degreesToRadians(25.0), 0));
 
-  public enum LEDMode {
-    RAINBOW,
-    SHOOTING_CONFIDENT,
-    SHOOTING_DOUBTFUL,
-    PASSING_CONFIDENT,
-    PASSING_DOUBTFUL,
-    INTAKING,
+  public static final Translation2d CENTER_OF_ROTATION =
+      new Translation2d(ROBOT_TO_TURRET.getX(), ROBOT_TO_TURRET.getY());
+
+  public static final int LED_CANDLE_ID = 40;
+  public static final CANBus LED_CANDLE_BUS = new CANBus("drive");
+
+  public enum LED_MODE {
     ACTIVE,
     INACTIVE,
-    BUMP,
+    SHIFT_WARNING,
+    SHIFT_SWITCHING_RED,
+    SHIFT_SWITCHING_GREEN,
+    ENDGAME_WARNING,
+    CLIMB_WARNING,
     AUTO,
-    DISABLED,
-    CLOSE_TO_NEXT_SHIFT,
-    CLOSE_TO_NEXT_SHIFT_US,
-    CLOSE_TO_NEXT_SHIFT_NOTUS,
-    ENDGAME
+    DISABLED_DIM,
+    TOO_CLOSE
   }
 
   public static final int LED_START_INDEX = 0;
   public static final int LED_END_INDEX = 161;
-
-  public static final RainbowAnimation LED_ANIMATION_RAINBOW =
-      new RainbowAnimation(LED_START_INDEX, LED_END_INDEX).withFrameRate(60);
-  public static final StrobeAnimation LED_ANIMATION_SHOOTING_CONFIDENT =
-      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX).withColor(new RGBWColor(0, 200, 0));
-  public static final StrobeAnimation LED_ANIMATION_SHOOTING_DOUBTFUL =
-      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX).withColor(new RGBWColor(200, 0, 0));
-  public static final StrobeAnimation LED_ANIMATION_PASSING_CONFIDENT =
-      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX).withColor(new RGBWColor(50, 50, 255));
-  public static final StrobeAnimation LED_ANIMATION_PASSING_DOUBTFUL =
-      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX).withColor(new RGBWColor(200, 50, 50));
-  public static final StrobeAnimation LED_ANIMATION_INTAKING =
-      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
-          .withColor(new RGBWColor(255, 200, 0))
-          .withFrameRate(5);
-  public static final SolidColor LED_ANIMATION_ACTIVE =
-      new SolidColor(LED_START_INDEX, LED_END_INDEX).withColor(new RGBWColor(0, 255, 0));
-  public static final SolidColor LED_ANIMATION_INACTIVE =
-      new SolidColor(LED_START_INDEX, LED_END_INDEX).withColor(new RGBWColor(255, 0, 0));
-  public static final StrobeAnimation LED_ANIMATION_BUMP =
-      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
-          .withFrameRate(10)
-          .withColor(new RGBWColor(0, 255, 255));
-  //  public static final LarsonAnimation LED_ANIMATION_AUTO =
-  //      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
-  //          .withFrameRate(20)
-  //          .withColor(new RGBWColor(255, 150, 0))
-  //          .withSize(20);
-  public static final EmptyAnimation LED_ANIMATION_DISABLED_GOOD = new EmptyAnimation(0);
-  public static final EmptyAnimation LED_ANIMATION_DISABLED_FINE = new EmptyAnimation(0);
-  //  public static final StrobeAnimation LED_ANIMATION_DISABLED_GOOD =
-  //      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
-  //          .withColor(new RGBWColor(0, 15, 0))
-  //          .withFrameRate(1);
-  //  public static final StrobeAnimation LED_ANIMATION_DISABLED_FINE =
-  //      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
-  //          .withColor(new RGBWColor(15, 3, 0))
-  //          .withFrameRate(1);
-  public static final StrobeAnimation LED_ANIMATION_DISABLED_BAD =
-      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
-          .withColor(new RGBWColor(15, 0, 0))
-          .withFrameRate(1);
-  public static final StrobeAnimation LED_ANIMATION_CLOSE_TO_NEXT_SHIFT =
-      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
-          .withColor(new RGBWColor(255, 40, 0))
-          .withFrameRate(4);
-  public static final StrobeAnimation LED_ANIMATION_CLOSE_TO_NEXT_SHIFT_US =
-      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
-          .withColor(new RGBWColor(0, 255, 0))
-          .withFrameRate(6);
-  public static final StrobeAnimation LED_ANIMATION_CLOSE_TO_NEXT_SHIFT_NOTUS =
-      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
-          .withColor(new RGBWColor(255, 0, 0))
-          .withFrameRate(6);
-  public static final StrobeAnimation LED_ANIMATION_ENDGAME =
-      new StrobeAnimation(LED_START_INDEX, LED_END_INDEX)
-          .withColor(new RGBWColor(255, 255, 0))
-          .withFrameRate(4);
 
   // at what confidence is it considered "confident" instead of "doubtful" TODO: me
   public static final double CONFIDENCE_THRESHOLD = 0.5;

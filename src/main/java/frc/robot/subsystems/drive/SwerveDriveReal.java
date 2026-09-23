@@ -16,6 +16,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -29,6 +30,11 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class SwerveDriveReal implements SwerveDriveIO {
+
+  // accel calculation things
+  private ChassisSpeeds lastFieldRelativeSpeeds = new ChassisSpeeds();
+  private double lastAccelerationTimestamp = Timer.getFPGATimestamp();
+  private ChassisSpeeds acceleration = new ChassisSpeeds();
 
   private final SysIdRoutine sysId;
   private final GyroIO gyroIO;
@@ -94,11 +100,31 @@ public class SwerveDriveReal implements SwerveDriveIO {
   public void periodic() {
     ODOMETRY_LOCK.lock(); // Prevents odometry updates while reading data
     gyroIO.updateInputs(gyroInputs);
-    // Logger.processInputs("Drive/Gyro", gyroInputs);
+    Logger.processInputs("Drive/Gyro", gyroInputs);
     for (var module : modules) {
       module.periodic();
     }
     ODOMETRY_LOCK.unlock();
+
+    double now = Timer.getFPGATimestamp();
+    double dt = now - lastAccelerationTimestamp;
+    if (dt > 0.0) { // just in case because divide by zero will kill code
+      ChassisSpeeds currentFieldRelative = getChassisSpeedsFieldRelative();
+
+      double ax =
+          (currentFieldRelative.vxMetersPerSecond - lastFieldRelativeSpeeds.vxMetersPerSecond) / dt;
+      double ay =
+          (currentFieldRelative.vyMetersPerSecond - lastFieldRelativeSpeeds.vyMetersPerSecond) / dt;
+      double omegaRPS =
+          (currentFieldRelative.omegaRadiansPerSecond
+                  - lastFieldRelativeSpeeds.omegaRadiansPerSecond)
+              / dt;
+
+      acceleration = new ChassisSpeeds(ax, ay, omegaRPS);
+
+      lastFieldRelativeSpeeds = currentFieldRelative;
+      lastAccelerationTimestamp = now;
+    }
 
     // Stop moving when disabled
     if (DriverStation.isDisabled()) {
@@ -112,8 +138,8 @@ public class SwerveDriveReal implements SwerveDriveIO {
 
     // Log empty setpoint states when disabled
     if (DriverStation.isDisabled()) {
-      //      Logger.recordOutput("SwerveStates/Setpoints", new SwerveModuleState[] {});
-      //      Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleState[] {});
+      Logger.recordOutput("SwerveStates/Setpoints", new SwerveModuleState[] {});
+      Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleState[] {});
     }
 
     // Update odometry
@@ -160,12 +186,13 @@ public class SwerveDriveReal implements SwerveDriveIO {
   public void runVelocity(ChassisSpeeds speeds) {
     // Calculate module setpoints
     ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
-    SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
+    SwerveModuleState[] setpointStates =
+        kinematics.toSwerveModuleStates(discreteSpeeds, Constants.CENTER_OF_ROTATION);
     SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, TunerConstants.kSpeedAt12Volts);
 
     // Log unoptimized setpoints and setpoint speeds
-    //    Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
-    //    Logger.recordOutput("SwerveChassisSpeeds/Setpoints", discreteSpeeds);
+    Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
+    Logger.recordOutput("SwerveChassisSpeeds/Setpoints", discreteSpeeds);
 
     if (!Constants.TEST_MODE) {
       // Send setpoints to modules
@@ -175,7 +202,7 @@ public class SwerveDriveReal implements SwerveDriveIO {
     }
 
     // Log optimized setpoints (runSetpoint mutates each state)
-    //    Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
+    Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
   }
 
   /** Runs the drive in a straight line with the specified drive output. */
@@ -298,5 +325,11 @@ public class SwerveDriveReal implements SwerveDriveIO {
     for (TimestampedVisionUpdate autoUpdate : timestampedVisionUpdates) {
       this.addVisionMeasurement(autoUpdate.pose(), autoUpdate.timestamp(), autoUpdate.stdDevs());
     }
+  }
+
+  // TODO: 2027 will add a ChassisAccelerations object... use it
+  @Override
+  public ChassisSpeeds getAcceleration() {
+    return acceleration;
   }
 }
