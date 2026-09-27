@@ -431,8 +431,10 @@ public class RobotContainer {
     intake.setDefaultCommand(
         new IntakeCommand(
             intake,
-            () -> (Math.abs(driverHID.getLeftTriggerAxis()) > 0.5),
-            driverHID::getLeftBumperButton));
+            () ->
+                (Math.abs(driverHID.getLeftTriggerAxis()) > 0.5
+                    || Math.abs(coDriver.getLeftTriggerAxis()) > 0.5),
+            () -> (driverHID.getLeftBumperButton() || coDriver.getHID().getLeftBumperButton())));
 
     coDriver
         .back()
