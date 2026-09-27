@@ -52,7 +52,7 @@ public class IdleShooterCommand extends Command {
     }
 
     //     will only aim turret when needed, so when (almost) active or when commanding to shoot
-    if (ShiftUtil.withinTwoSecondsOfNextShift()
+    if (ShiftUtil.withinFiveSecondsOfNextShift()
         || ShiftUtil.isOurs(ShiftUtil.getShift())
         || shooter.isShooting()) {
       shooter.setTurretTarget(turretAngle, drive.getChassisSpeeds().omegaRadiansPerSecond);
